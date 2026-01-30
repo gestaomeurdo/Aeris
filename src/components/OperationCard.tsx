@@ -16,61 +16,69 @@ const OperationCard = ({ code, title, status, progress }: OperationCardProps) =>
   const isLocked = status === 'locked';
 
   return (
-    <div className="relative bg-zinc-900/40 backdrop-blur-xl border-l border-zinc-800/50 p-6 flex flex-col gap-6 group overflow-hidden min-h-[320px]">
-      {/* Lesson Cover Background layer */}
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      className="group relative bg-[#0C0C0C] border border-white/[0.03] rounded-sm p-8 flex flex-col gap-8 transition-all duration-500 hover:border-[#D4AF37]/40 hover:shadow-[0_0_30px_rgba(212,175,55,0.05)] overflow-hidden"
+    >
+      {/* Background Cover Image with Glassmorphism */}
       <div 
-        className="absolute inset-0 bg-[url('https://i.ibb.co/mrPSkq5v/1.png')] bg-cover bg-center opacity-10 grayscale group-hover:grayscale-0 group-hover:opacity-20 transition-all duration-700"
+        className="absolute inset-0 bg-[url('https://i.ibb.co/mrPSkq5v/1.png')] bg-cover bg-center opacity-[0.03] group-hover:opacity-[0.07] transition-opacity duration-700"
       />
-      <div className="absolute inset-0 bg-gradient-to-br from-black via-transparent to-black/80" />
-
-      {/* Linha de acento em Ouro Envelhecido */}
-      <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-amber-900/50 via-amber-600/50 to-amber-900/50 opacity-50 group-hover:opacity-100 transition-opacity" />
       
-      {/* Grid Pattern Sutil */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(180,120,50,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(180,120,50,0.03)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none" />
+      {/* Premium 1px Gold Top Border Highlight */}
+      <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#D4AF37]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
       <div className="flex justify-between items-start relative z-10">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-mono text-amber-700 font-bold uppercase tracking-[0.2em]">OP-{code}</span>
-            <div className="h-[1px] w-8 bg-amber-900/30" />
+        <div className="space-y-2">
+          <div className="flex items-center gap-3">
+            <span className="text-[10px] font-mono text-[#D4AF37] font-bold uppercase tracking-[0.3em]">MODULE {code}</span>
+            <div className="h-[1px] w-6 bg-[#D4AF37]/20" />
           </div>
-          <h3 className="text-xl font-bold text-zinc-200 uppercase tracking-tighter group-hover:text-amber-400 transition-colors">
+          <h3 className="text-xl font-bold text-white uppercase tracking-tight group-hover:text-[#D4AF37] transition-colors duration-300">
             {title}
           </h3>
         </div>
-        {status === 'complete' && <ShieldCheck className="w-5 h-5 text-amber-600" />}
+        {status === 'complete' ? (
+          <div className="p-2 bg-[#D4AF37]/10 rounded-full">
+            <ShieldCheck className="w-5 h-5 text-[#D4AF37]" />
+          </div>
+        ) : !isLocked && (
+          <div className="w-2 h-2 rounded-full bg-[#D4AF37] animate-pulse shadow-[0_0_8px_#D4AF37]" />
+        )}
       </div>
 
-      <div className="space-y-2 relative z-10">
-        <div className="flex justify-between text-[9px] font-mono text-zinc-500 uppercase tracking-widest">
-          <span>Deployment Status</span>
-          <span className="text-amber-700">{progress}%</span>
+      <div className="space-y-3 relative z-10">
+        <div className="flex justify-between text-[10px] font-mono text-zinc-500 uppercase tracking-widest font-bold">
+          <span>Completion Rate</span>
+          <span className="text-[#D4AF37]">{progress}%</span>
         </div>
-        <div className="h-1 bg-black border border-zinc-800/50 rounded-sm overflow-hidden">
+        <div className="h-[2px] bg-zinc-900 overflow-hidden">
           <motion.div 
             initial={{ width: 0 }}
-            animate={{ width: `${progress}%` }}
-            className="h-full bg-gradient-to-r from-amber-950 via-amber-600 to-amber-950 shadow-[0_0_10px_rgba(217,119,6,0.3)]"
+            whileInView={{ width: `${progress}%` }}
+            transition={{ duration: 1, ease: "easeOut" }}
+            className="h-full bg-[#D4AF37] shadow-[0_0_10px_#D4AF37]"
           />
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-3 relative z-10 mt-auto">
+      <div className="grid grid-cols-3 gap-4 relative z-10 mt-2">
         {isLocked ? (
-          <div className="col-span-3 flex items-center justify-center gap-2 p-8 border border-dashed border-zinc-800/50 rounded-md bg-black/60 backdrop-blur-sm">
-            <Lock className="w-4 h-4 text-zinc-800" />
-            <span className="text-[10px] font-mono text-zinc-800 uppercase tracking-widest font-bold">Access Restricted</span>
+          <div className="col-span-3 flex flex-col items-center justify-center gap-3 p-10 border border-dashed border-zinc-800/50 rounded-sm bg-black/40 backdrop-blur-sm">
+            <Lock className="w-5 h-5 text-zinc-800" />
+            <span className="text-[10px] font-mono text-zinc-700 uppercase tracking-[0.2em] font-bold">Access Restricted</span>
           </div>
         ) : (
           <>
             <TacticalButton icon={FileText} label="PDF" />
-            <TacticalButton icon={Headphones} label="Audio" />
-            <TacticalButton icon={Podcast} label="Cast" />
+            <TacticalButton icon={Headphones} label="AUDIO" />
+            <TacticalButton icon={Podcast} label="PODCAST" />
           </>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };
 
