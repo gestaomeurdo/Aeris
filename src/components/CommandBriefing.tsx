@@ -12,8 +12,9 @@ const CommandBriefing = () => {
       <div className="absolute -bottom-2 -left-2 w-1.5 h-1.5 rounded-full bg-zinc-600 border border-black shadow-inner" />
       <div className="absolute -bottom-2 -right-2 w-1.5 h-1.5 rounded-full bg-zinc-600 border border-black shadow-inner" />
 
-      <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center grayscale-[0.4] contrast-[1.2]">
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/60" />
+      {/* Video / Cover Image */}
+      <div className="absolute inset-0 bg-[url('https://i.ibb.co/mrPSkq5v/1.png')] bg-cover bg-center grayscale-[0.2] contrast-[1.1]">
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/40" />
         <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.2)_50%)] bg-[length:100%_4px]" />
       </div>
 
