@@ -4,7 +4,8 @@ import React from 'react';
 import AerisLogo from '@/components/AerisLogo';
 import CommandBriefing from '@/components/CommandBriefing';
 import OperationCard from '@/components/OperationCard';
-import { Menu, Terminal, Target, Shield, Bell, Cpu, Grid3X3 } from 'lucide-react';
+import { Terminal, Target, Shield, Bell, Cpu, LayoutGrid, User } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const operations = [
   { code: "01", title: "Core Fundamentals", status: 'complete' as const, progress: 100 },
@@ -15,76 +16,84 @@ const operations = [
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-[#020B1A] text-[#B0BEC5] font-sans selection:bg-[#00E5FF] selection:text-black overflow-x-hidden">
-      {/* Cyber Space Overlay */}
-      <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(0,229,255,0.05),transparent_50%)] pointer-events-none" />
+    <div className="min-h-screen bg-[#020B1A] text-[#B0BEC5] font-sans selection:bg-[#00E5FF] selection:text-black overflow-x-hidden pb-20">
+      {/* Background Decorativo Moderno */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#00E5FF]/5 blur-[120px] rounded-full" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#6366F1]/5 blur-[120px] rounded-full" />
+      </div>
       
-      {/* Sidebar Navigation - Space Command Style */}
-      <nav className="fixed left-0 top-0 bottom-0 w-20 bg-[#020B1A] border-r border-[#00E5FF]/10 flex flex-col items-center py-10 gap-10 z-50">
-        <button className="p-3 text-[#00E5FF] hover:bg-[#00E5FF]/5 transition-all duration-300 border-b border-transparent hover:border-[#00E5FF]/30">
-          <Grid3X3 className="w-6 h-6" />
+      {/* Navegação Flutuante Lateral */}
+      <nav className="fixed left-6 top-1/2 -translate-y-1/2 w-16 bg-white/[0.02] backdrop-blur-2xl border border-white/5 rounded-2xl flex flex-col items-center py-8 gap-8 z-50 shadow-2xl">
+        <button className="group relative p-3 text-[#00E5FF] transition-all duration-300">
+          <LayoutGrid className="w-5 h-5 group-hover:scale-110" />
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 bg-[#00E5FF] rounded-r-full shadow-[0_0_10px_#00E5FF]" />
         </button>
-        <button className="p-3 text-[#B0BEC5]/40 hover:text-[#00E5FF] transition-all duration-300">
-          <Target className="w-6 h-6" />
+        <button className="group p-3 text-white/20 hover:text-white transition-all">
+          <Target className="w-5 h-5 group-hover:scale-110" />
         </button>
-        <button className="p-3 text-[#B0BEC5]/40 hover:text-[#00E5FF] transition-all duration-300">
-          <Terminal className="w-6 h-6" />
+        <button className="group p-3 text-white/20 hover:text-white transition-all">
+          <Terminal className="w-5 h-5 group-hover:scale-110" />
         </button>
-        <button className="p-3 text-[#B0BEC5]/40 hover:text-[#00E5FF] transition-all duration-300 mt-auto">
-          <Menu className="w-6 h-6" />
+        <div className="w-6 h-[1px] bg-white/5" />
+        <button className="group p-3 text-white/20 hover:text-white transition-all mt-auto">
+          <User className="w-5 h-5 group-hover:scale-110" />
         </button>
       </nav>
 
-      {/* Main Content Area */}
-      <div className="pl-20">
-        <header className="pt-16 pb-12 flex flex-col items-center relative">
-          <AerisLogo />
+      <div className="pl-32 pr-12">
+        <header className="pt-20 pb-16 flex flex-col items-center">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, ease: "circOut" }}
+          >
+            <AerisLogo />
+          </motion.div>
           
-          {/* Status Bar */}
-          <div className="mt-10 flex items-center gap-10 text-[10px] font-mono text-[#B0BEC5]/40 uppercase tracking-[0.4em] font-medium">
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#00E5FF] shadow-[0_0_8px_#00E5FF]" />
-              NEURAL LINK: ACTIVE
+          <div className="mt-12 flex items-center gap-12 text-[9px] font-mono text-white/30 uppercase tracking-[0.5em] font-black">
+            <div className="flex items-center gap-3">
+              <div className="w-1.5 h-1.5 rounded-full bg-[#00E5FF] shadow-[0_0_12px_#00E5FF]" />
+              NEURAL_LINK: OPTIMAL
             </div>
-            <div className="w-[1px] h-3 bg-[#B0BEC5]/10" />
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#0A192F]" />
-              CADET NODE: ALPHA-7
+            <div className="w-1.5 h-1.5 rounded-full bg-white/10" />
+            <div className="flex items-center gap-3">
+              RANK: CYBER_ELITE
             </div>
           </div>
         </header>
 
-        <main className="max-w-6xl mx-auto px-8 pb-24 space-y-24">
+        <main className="max-w-7xl mx-auto space-y-32">
           {/* Main Briefing Section */}
-          <section className="space-y-8">
-            <div className="flex justify-between items-end border-b border-[#00E5FF]/10 pb-6">
-              <div className="space-y-1">
-                <span className="text-[11px] font-mono text-[#00E5FF] uppercase tracking-[0.3em] font-bold">Cyber Intelligence</span>
-                <h2 className="text-3xl font-light text-white tracking-tight uppercase">MISSION <span className="font-bold">BRIEFING</span></h2>
+          <section className="space-y-10">
+            <div className="flex justify-between items-end">
+              <div className="space-y-3">
+                <span className="text-[10px] font-mono text-[#00E5FF] uppercase tracking-[0.4em] font-black pl-1">INTELLIGENCE NODE</span>
+                <h2 className="text-5xl font-bold text-white tracking-tighter uppercase">MISSION BRIEFING</h2>
               </div>
-              <div className="flex items-center gap-4 bg-[#0A192F] p-3 border border-[#00E5FF]/20 rounded-sm">
-                <Cpu className="w-5 h-5 text-[#00E5FF]" />
-                <span className="text-[10px] font-mono font-bold text-[#B0BEC5]">UPLINK STABLE</span>
+              <div className="flex items-center gap-4 bg-white/[0.03] backdrop-blur-xl px-6 py-3 border border-white/5 rounded-full shadow-lg">
+                <Cpu className="w-4 h-4 text-[#00E5FF]" />
+                <span className="text-[10px] font-mono font-black text-white/80 uppercase tracking-widest">UPLINK_STABLE_V7.2</span>
               </div>
             </div>
             <CommandBriefing />
           </section>
 
           {/* Operations Grid */}
-          <section className="space-y-10">
+          <section className="space-y-12">
             <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <h3 className="text-2xl font-light text-white tracking-tight uppercase">Neural <span className="font-bold">Modules</span></h3>
-                <p className="text-[10px] font-mono text-[#B0BEC5]/40 uppercase tracking-widest">Select module for synchronization</p>
+              <div className="space-y-3">
+                <h3 className="text-3xl font-bold text-white tracking-tighter uppercase">NEURAL MODULES</h3>
+                <p className="text-[10px] font-mono text-white/20 uppercase tracking-[0.3em] font-black">ACTIVE SYNCHRONIZATION THREADS</p>
               </div>
-              <div className="flex items-center gap-4 px-5 py-3 bg-[#0A192F] border border-[#00E5FF]/10">
+              <div className="flex items-center gap-4 px-6 py-3 bg-white/[0.03] border border-white/5 rounded-xl">
                 <Shield className="w-4 h-4 text-[#00E5FF]" />
-                <span className="text-xs font-bold text-[#B0BEC5] tracking-widest uppercase">Rank: Cyber Elite</span>
+                <span className="text-[10px] font-black text-white/40 tracking-[0.2em] uppercase">Security Level: Omega</span>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {operations.map((op) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+              {operations.map((op, idx) => (
                 <OperationCard 
                   key={op.code}
                   code={op.code}
@@ -96,22 +105,17 @@ const Index = () => {
             </div>
           </section>
 
-          <footer className="pt-20 border-t border-[#00E5FF]/10 flex flex-col items-center gap-6 opacity-40 hover:opacity-100 transition-all duration-500">
-            <div className="flex gap-16 text-[9px] font-mono text-[#B0BEC5] uppercase tracking-[0.5em] font-bold">
-              <span>AERIS ACADEMY</span>
-              <span className="text-[#00E5FF]/30">|</span>
-              <span>CYBER DIVISION</span>
-              <span className="text-[#00E5FF]/30">|</span>
-              <span>v4.0.2</span>
+          <footer className="pt-24 border-t border-white/5 flex flex-col items-center gap-8 opacity-20 hover:opacity-100 transition-opacity duration-700">
+            <div className="flex gap-20 text-[9px] font-mono text-white/40 uppercase tracking-[0.6em] font-black">
+              <span>AERIS_ACADEMY_v4.2</span>
+              <span className="text-[#00E5FF]/20">/ /</span>
+              <span>CYBER_COMMAND</span>
+              <span className="text-[#00E5FF]/20">/ /</span>
+              <span>2024</span>
             </div>
+            <Bell className="w-4 h-4 text-[#00E5FF]/40 animate-pulse" />
           </footer>
         </main>
-      </div>
-
-      {/* Aesthetic Space HUD Elements */}
-      <div className="fixed top-10 right-10 flex flex-col gap-6 pointer-events-none opacity-20">
-        <Bell className="w-4 h-4 text-[#00E5FF]" />
-        <div className="h-40 w-[1px] bg-gradient-to-b from-[#00E5FF] to-transparent" />
       </div>
     </div>
   );
