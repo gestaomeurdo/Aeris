@@ -4,7 +4,7 @@ import React from 'react';
 import AerisLogo from '@/components/AerisLogo';
 import CommandBriefing from '@/components/CommandBriefing';
 import OperationCard from '@/components/OperationCard';
-import { Menu, Terminal, Target, Shield, Bell, Cpu, Grid3X3, Github } from 'lucide-react';
+import { Menu, Terminal, Target, Shield, Bell, Cpu, Grid3X3 } from 'lucide-react';
 
 const operations = [
   { code: "01", title: "Core Fundamentals", status: 'complete' as const, progress: 100 },
@@ -30,15 +30,6 @@ const Index = () => {
         <button className="p-3 text-[#B0BEC5]/40 hover:text-[#00E5FF] transition-all duration-300">
           <Terminal className="w-6 h-6" />
         </button>
-        {/* GitHub Link Added */}
-        <a 
-          href="https://github.com" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="p-3 text-[#B0BEC5]/40 hover:text-[#00E5FF] transition-all duration-300"
-        >
-          <Github className="w-6 h-6" />
-        </a>
         <button className="p-3 text-[#B0BEC5]/40 hover:text-[#00E5FF] transition-all duration-300 mt-auto">
           <Menu className="w-6 h-6" />
         </button>
