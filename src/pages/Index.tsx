@@ -15,22 +15,22 @@ const operations = [
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-[#000000] text-zinc-100 font-sans selection:bg-amber-500 selection:text-black overflow-x-hidden">
-      {/* Tactical Grid Background */}
-      <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(245,158,11,0.02),transparent)] pointer-events-none" />
+    <div className="min-h-screen bg-[#000000] text-zinc-200 font-sans selection:bg-amber-800 selection:text-amber-100 overflow-x-hidden">
+      {/* Tactical Grid Background (Ouro Envelhecido) */}
+      <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(146,64,14,0.03),transparent)] pointer-events-none" />
       
       {/* Sidebar Navigation */}
-      <nav className="fixed left-0 top-0 bottom-0 w-20 bg-zinc-950 border-r border-zinc-900 flex flex-col items-center py-8 gap-8 z-50">
-        <button className="p-3 text-amber-500 hover:bg-amber-500/5 rounded-none border-l-2 border-amber-500">
+      <nav className="fixed left-0 top-0 bottom-0 w-20 bg-black border-r border-zinc-900 flex flex-col items-center py-8 gap-8 z-50">
+        <button className="p-3 text-amber-700 hover:bg-amber-950/20 rounded-none border-l-2 border-amber-600 shadow-[0_0_10px_rgba(180,120,50,0.1)]">
           <Grid className="w-6 h-6" />
         </button>
-        <button className="p-3 text-zinc-600 hover:text-amber-500 transition-colors">
+        <button className="p-3 text-zinc-700 hover:text-amber-600 transition-colors">
           <Target className="w-6 h-6" />
         </button>
-        <button className="p-3 text-zinc-600 hover:text-amber-500 transition-colors">
+        <button className="p-3 text-zinc-700 hover:text-amber-600 transition-colors">
           <Terminal className="w-6 h-6" />
         </button>
-        <button className="p-3 text-zinc-600 hover:text-amber-500 transition-colors mt-auto">
+        <button className="p-3 text-zinc-700 hover:text-amber-600 transition-colors mt-auto">
           <Menu className="w-6 h-6" />
         </button>
       </nav>
@@ -38,40 +38,40 @@ const Index = () => {
       {/* Main Container */}
       <div className="pl-20">
         {/* Header Section */}
-        <header className="pt-12 pb-8 flex flex-col items-center">
+        <header className="pt-16 pb-12 flex flex-col items-center">
           <AerisLogo />
-          <div className="mt-8 flex items-center gap-12 text-[10px] font-mono text-zinc-600 uppercase tracking-[0.3em]">
+          <div className="mt-8 flex items-center gap-12 text-[9px] font-mono text-zinc-700 uppercase tracking-[0.4em] font-bold">
             <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
-              SYSTEM: ONLINE
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-900 shadow-[0_0_5px_rgba(120,53,15,0.5)]" />
+              AUTH: COMMANDER
             </div>
             <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-              NETWORK: SECURE
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-600 animate-pulse shadow-[0_0_8px_rgba(217,119,6,0.4)]" />
+              STATUS: ENCRYPTED
             </div>
             <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-              REGION: US-EAST
+              <span className="w-1.5 h-1.5 rounded-full bg-zinc-800" />
+              SECTOR: 7-ALPHA
             </div>
           </div>
         </header>
 
         {/* Tactical Content */}
-        <main className="max-w-7xl mx-auto px-12 py-8 space-y-16">
+        <main className="max-w-7xl mx-auto px-12 py-8 space-y-20">
           {/* Briefing Module */}
-          <section className="space-y-6">
-            <div className="flex justify-between items-end border-b border-zinc-900 pb-4">
+          <section className="space-y-8">
+            <div className="flex justify-between items-end border-b border-zinc-900/50 pb-6">
               <div className="space-y-1">
-                <span className="text-[10px] font-mono text-amber-600 uppercase tracking-widest font-bold">Priority Delta</span>
-                <h3 className="text-2xl font-bold uppercase tracking-tight text-white">Active Intelligence Brief</h3>
+                <span className="text-[10px] font-mono text-amber-900 uppercase tracking-[0.4em] font-black">Strategic Objective</span>
+                <h3 className="text-3xl font-black uppercase tracking-tighter text-zinc-100">COMMAND BRIEFING</h3>
               </div>
-              <div className="flex items-center gap-6">
+              <div className="flex items-center gap-8">
                 <div className="text-right">
-                  <p className="text-[9px] font-mono text-zinc-500 uppercase">Authorization</p>
-                  <p className="text-sm font-bold text-zinc-300">Level 05 Alpha</p>
+                  <p className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest font-bold">Protocol</p>
+                  <p className="text-sm font-black text-amber-700">SIGMA-IV</p>
                 </div>
-                <div className="p-3 bg-zinc-900 border border-zinc-800">
-                  <Cpu className="w-5 h-5 text-amber-500" />
+                <div className="p-4 bg-zinc-950 border border-zinc-900 shadow-inner">
+                  <Cpu className="w-6 h-6 text-amber-800" />
                 </div>
               </div>
             </div>
@@ -79,31 +79,30 @@ const Index = () => {
           </section>
 
           {/* Operations Grid */}
-          <section className="space-y-8">
+          <section className="space-y-10">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 flex items-center justify-center bg-amber-500/10 border border-amber-500/20">
-                  <Target className="w-5 h-5 text-amber-500" />
+              <div className="flex items-center gap-6">
+                <div className="w-12 h-12 flex items-center justify-center bg-amber-950/10 border border-amber-900/20 shadow-xl">
+                  <Target className="w-6 h-6 text-amber-700" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold uppercase tracking-tighter text-white">Training Operations</h3>
-                  <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-[0.2em]">Deployment Schedule: Cycle 04</p>
+                  <h3 className="text-2xl font-black uppercase tracking-tighter text-zinc-100">Training Operations</h3>
+                  <p className="text-[10px] font-mono text-zinc-600 uppercase tracking-[0.3em] font-bold">Current Cycle: 04.1 // Beta Unit</p>
                 </div>
               </div>
-              <div className="flex items-center gap-4">
+              
+              <div className="flex items-center gap-6 bg-zinc-950/50 p-4 border border-zinc-900 shadow-2xl">
                 <div className="text-right">
-                  <p className="text-[9px] font-mono text-zinc-500 uppercase">Unit Status</p>
-                  <p className="text-sm font-bold text-amber-500">RANK: CADET ELITE</p>
+                  <p className="text-[9px] font-mono text-zinc-700 uppercase tracking-widest font-bold">Access Rank</p>
+                  <p className="text-sm font-black text-amber-600">CADET ELITE</p>
                 </div>
-                <div className="w-12 h-12 rounded-full border-2 border-amber-500/20 p-1">
-                  <div className="w-full h-full rounded-full bg-zinc-900 flex items-center justify-center border border-amber-500/40 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
-                    <Shield className="w-5 h-5 text-amber-500" />
-                  </div>
+                <div className="w-10 h-10 rounded-none bg-black flex items-center justify-center border border-amber-900/30 shadow-[0_0_15px_rgba(180,120,50,0.1)]">
+                  <Shield className="w-5 h-5 text-amber-800" />
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
               {operations.map((op) => (
                 <OperationCard 
                   key={op.code}
@@ -116,28 +115,30 @@ const Index = () => {
             </div>
           </section>
 
-          <footer className="pt-20 pb-12 flex flex-col items-center gap-6 opacity-40 hover:opacity-100 transition-opacity">
-            <div className="h-[1px] w-32 bg-gradient-to-r from-transparent via-zinc-800 to-transparent" />
-            <div className="flex gap-12 text-[9px] font-mono text-zinc-600 uppercase tracking-[0.4em]">
-              <span>Protocol v2.4</span>
-              <span>Encrypted Session</span>
-              <span>Terminal 0x1A4</span>
+          <footer className="pt-24 pb-16 flex flex-col items-center gap-8 opacity-30 hover:opacity-100 transition-opacity duration-700">
+            <div className="h-[1px] w-48 bg-gradient-to-r from-transparent via-amber-900/40 to-transparent" />
+            <div className="flex gap-16 text-[9px] font-mono text-zinc-700 uppercase tracking-[0.5em] font-bold">
+              <span>AERIS ACADEMY</span>
+              <span className="text-amber-900/50">///</span>
+              <span>EST. MCMLXXXIV</span>
+              <span className="text-amber-900/50">///</span>
+              <span>SECURE SESSION</span>
             </div>
           </footer>
         </main>
       </div>
 
       {/* OS Decor Elements */}
-      <div className="fixed top-0 right-0 p-8 flex flex-col gap-4 pointer-events-none">
-        <Bell className="w-4 h-4 text-zinc-800" />
-        <div className="h-32 w-[1px] bg-zinc-900" />
+      <div className="fixed top-0 right-0 p-10 flex flex-col gap-6 pointer-events-none">
+        <Bell className="w-4 h-4 text-zinc-900" />
+        <div className="h-48 w-[1px] bg-gradient-to-b from-amber-900/20 via-zinc-900 to-transparent" />
       </div>
       
-      <div className="fixed bottom-8 left-24 pointer-events-none">
-        <div className="text-[8px] font-mono text-zinc-800 uppercase space-y-1">
-          <p>System Boot: SUCCESS</p>
-          <p>Kernel: AERIS-X64-CMD</p>
-          <p>User: AUTHENTICATED</p>
+      <div className="fixed bottom-10 left-28 pointer-events-none">
+        <div className="text-[8px] font-mono text-zinc-800 uppercase space-y-2 font-bold tracking-widest">
+          <p>SYS.UPLINK: STABLE</p>
+          <p>ENCRYPTION: 4096-BIT</p>
+          <p>LOCATION: CLASSIFIED</p>
         </div>
       </div>
     </div>
