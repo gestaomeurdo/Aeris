@@ -5,7 +5,6 @@ import AerisLogo from '@/components/AerisLogo';
 import CommandBriefing from '@/components/CommandBriefing';
 import OperationCard from '@/components/OperationCard';
 import { Menu, Terminal, Target, Shield, Bell, Cpu, Grid } from 'lucide-react';
-import { MadeWithDyad } from "@/components/made-with-dyad";
 
 const operations = [
   { code: "01", title: "Core Fundamentals", status: 'complete' as const, progress: 100 },
@@ -124,7 +123,6 @@ const Index = () => {
               <span>Encrypted Session</span>
               <span>Terminal 0x1A4</span>
             </div>
-            <MadeWithDyad />
           </footer>
         </main>
       </div>
