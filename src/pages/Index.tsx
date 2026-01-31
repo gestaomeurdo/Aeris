@@ -9,6 +9,7 @@ import AudioLibrary from '@/components/AudioLibrary';
 import DocGallery from '@/components/DocGallery';
 import SecurityProtocol from '@/components/SecurityProtocol';
 import OperationalStats from '@/components/OperationalStats';
+import AuthTerminal from '@/components/AuthTerminal';
 import EditorSidebar from '@/components/EditorSidebar';
 import { Bell, Wifi } from 'lucide-react';
 import { PortalData } from '@/types/portal';
@@ -31,9 +32,9 @@ const INITIAL_DATA: PortalData = {
 
 const Index = () => {
   const [data, setData] = useState<PortalData>(INITIAL_DATA);
-  const [isLoaded, setIsLoaded] = useState(false);
   const [activeView, setActiveView] = useState('dashboard');
   const [isMaster, setIsMaster] = useState(false);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem('aeris_data_v2');
@@ -44,25 +45,15 @@ const Index = () => {
         console.error("Matrix corrupt: resetting to initial parameters");
       }
     }
-    setIsLoaded(true);
   }, []);
 
-  const handleUserAuth = () => {
+  const handleUserClick = () => {
     if (isMaster) {
       if (confirm("Deseja encerrar a sessão do Operador Mike?")) {
         setIsMaster(false);
       }
-      return;
-    }
-
-    const user = prompt("IDENTIFICAÇÃO DO OPERADOR:");
-    const pass = prompt("CHAVE DE ACESSO:");
-    
-    if (user === "mike" && pass === "@mike2026") {
-      setIsMaster(true);
-      alert("ACESSO CONCEDIDO: Bem-vindo, Operador Mike.");
     } else {
-      alert("ACESSO NEGADO: Credenciais de segurança inválidas.");
+      setIsAuthOpen(true);
     }
   };
 
@@ -74,6 +65,12 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-[#020202] text-[#B0BEC5] font-sans selection:bg-[#00E5FF] selection:text-black overflow-x-hidden">
       <EditorSidebar data={data} onUpdate={setData} />
+      
+      <AuthTerminal 
+        isOpen={isAuthOpen} 
+        onClose={() => setIsAuthOpen(false)} 
+        onSuccess={() => setIsMaster(true)} 
+      />
 
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-0 left-1/4 w-[50%] h-[50%] bg-[#00E5FF]/5 blur-[120px] rounded-full opacity-30" />
@@ -84,7 +81,7 @@ const Index = () => {
         activeView={activeView} 
         onViewChange={setActiveView} 
         isMaster={isMaster}
-        onUserClick={handleUserAuth}
+        onUserClick={handleUserClick}
       />
 
       <div className="pl-32 pr-12 relative z-10">
