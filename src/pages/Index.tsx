@@ -8,7 +8,7 @@ import OperationsCenter from '@/components/OperationsCenter';
 import AudioLibrary from '@/components/AudioLibrary';
 import DocGallery from '@/components/DocGallery';
 import SecurityProtocol from '@/components/SecurityProtocol';
-import OperationalStats from '@/components/OperationalStats';
+import FutureVisionPortal from '@/components/FutureVisionPortal';
 import AuthTerminal from '@/components/AuthTerminal';
 import EditModuleModal from '@/components/EditModuleModal';
 import { Bell, Wifi, Plus, Edit3 } from 'lucide-react';
@@ -242,7 +242,7 @@ const Index = () => {
 
             {activeView === 'stats' && (
               <motion.div key="stats" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <OperationalStats />
+                <FutureVisionPortal />
               </motion.div>
             )}
 
