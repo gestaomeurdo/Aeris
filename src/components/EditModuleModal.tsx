@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { X, Save, Type, Headphones, FileText, BarChart, Upload, Image } from 'lucide-react';
+import { X, Save, Type, Headphones, FileText, BarChart, Upload, Image, AlignLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrainingModule } from '@/types/portal';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 
 interface EditModuleModalProps {
   isOpen: boolean;
@@ -18,7 +19,7 @@ const EditModuleModal = ({ isOpen, onClose, module, onSave }: EditModuleModalPro
   const [formData, setFormData] = useState<TrainingModule | null>(null);
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [docFile, setDocFile] = useState<File | null>(null);
-  const [coverFile, setCoverFile] = useState<File | null>(null); // Novo estado para a capa
+  const [coverFile, setCoverFile] = useState<File | null>(null);
 
   useEffect(() => {
     if (module) {
@@ -36,7 +37,7 @@ const EditModuleModal = ({ isOpen, onClose, module, onSave }: EditModuleModalPro
     onSave(formData, { 
       audio: audioFile || undefined, 
       doc: docFile || undefined,
-      cover: coverFile || undefined // Passando o arquivo de capa
+      cover: coverFile || undefined
     });
     onClose();
   };
@@ -74,27 +75,36 @@ const EditModuleModal = ({ isOpen, onClose, module, onSave }: EditModuleModalPro
                   <Input value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className="bg-white/[0.03] border-white/10 rounded-2xl py-4 text-white" />
                 </div>
 
+                {/* Novo campo de descrição para o módulo */}
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2 text-[9px] font-mono font-black text-white/40 uppercase tracking-[0.2em] pl-1">
+                    <AlignLeft className="w-3 h-3 text-[#00E5FF]" /> Module Description
+                  </Label>
+                  <Textarea 
+                    value={formData.desc} 
+                    onChange={(e) => setFormData({ ...formData, desc: e.target.value })} 
+                    className="bg-white/[0.03] border-white/10 rounded-2xl py-4 text-white h-24 resize-none" 
+                  />
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-6 bg-white/[0.02] border border-white/5 rounded-3xl">
                   <div className="space-y-2">
                     <Label className="flex items-center gap-2 text-[9px] font-mono font-black text-[#00E5FF] uppercase tracking-[0.2em]">
                       <Image className="w-3 h-3" /> Cover (.jpg/.png)
                     </Label>
                     <Input type="file" accept=".jpg, .jpeg, .png" onChange={(e) => setCoverFile(e.target.files?.[0] || null)} className="bg-white/[0.03] border-white/10 text-white/60 text-xs file:bg-[#00E5FF]/20" />
-                    {formData.coverUrl && <p className="text-[8px] text-white/40 truncate">Current: {formData.coverUrl.substring(0, 30)}...</p>}
                   </div>
                   <div className="space-y-2">
                     <Label className="flex items-center gap-2 text-[9px] font-mono font-black text-[#00E5FF] uppercase tracking-[0.2em]">
                       <Headphones className="w-3 h-3" /> Audio (.mp3)
                     </Label>
                     <Input type="file" accept=".mp3" onChange={(e) => setAudioFile(e.target.files?.[0] || null)} className="bg-white/[0.03] border-white/10 text-white/60 text-xs file:bg-[#00E5FF]/20" />
-                    {formData.audioUrl && <p className="text-[8px] text-white/40 truncate">Current: {formData.audioUrl.substring(0, 30)}...</p>}
                   </div>
                   <div className="space-y-2">
                     <Label className="flex items-center gap-2 text-[9px] font-mono font-black text-[#00E5FF] uppercase tracking-[0.2em]">
                       <FileText className="w-3 h-3" /> Manual (.pdf)
                     </Label>
                     <Input type="file" accept=".pdf" onChange={(e) => setDocFile(e.target.files?.[0] || null)} className="bg-white/[0.03] border-white/10 text-white/60 text-xs file:bg-[#00E5FF]/20" />
-                    {formData.docUrl && <p className="text-[8px] text-white/40 truncate">Current: {formData.docUrl.substring(0, 30)}...</p>}
                   </div>
                 </div>
 
