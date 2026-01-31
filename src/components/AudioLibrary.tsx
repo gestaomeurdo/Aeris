@@ -20,7 +20,7 @@ interface LocalAudioMap {
 }
 
 const AudioLibrary = ({ modules, isMaster, onEdit, onDelete, onToggleLock }: AudioLibraryProps) => {
-  // Filtra módulos que têm URL de áudio ou que o Master pode querer testar
+  // Filtra módulos que têm URL de áudio ou que o Master pode querer testar/editar
   const audioModules = modules.filter(m => m.audioUrl || isMaster);
   
   const [playingId, setPlayingId] = useState<string | null>(null);
@@ -54,7 +54,7 @@ const AudioLibrary = ({ modules, isMaster, onEdit, onDelete, onToggleLock }: Aud
       
       // Se estiver tocando o módulo, reinicia com o novo arquivo
       if (playingId === moduleId) {
-        setPlayingId(null); // Força a troca de faixa
+        // Força a reprodução do novo arquivo
         setTimeout(() => handlePlayPause(moduleId, url), 50);
       }
       
@@ -71,15 +71,26 @@ const AudioLibrary = ({ modules, isMaster, onEdit, onDelete, onToggleLock }: Aud
         audioRef.current.pause();
         setIsPlaying(false);
       } else {
-        audioRef.current.play();
-        setIsPlaying(true);
+        // Tenta tocar
+        audioRef.current.play().catch(error => {
+          console.error("Playback failed:", error);
+          // Se falhar (ex: autoplay bloqueado), apenas define o estado
+          setIsPlaying(true);
+        });
       }
     } else {
       // Switching track
       setPlayingId(id);
       audioRef.current.src = url;
       audioRef.current.load();
-      audioRef.current.play();
+      
+      audioRef.current.oncanplaythrough = () => {
+        audioRef.current?.play().catch(error => {
+          console.error("Playback failed on track switch:", error);
+          setIsPlaying(true); // Define como playing mesmo se o play falhar
+        });
+        audioRef.current.oncanplaythrough = null; // Remove listener
+      };
       setIsPlaying(true);
     }
   };
@@ -92,7 +103,7 @@ const AudioLibrary = ({ modules, isMaster, onEdit, onDelete, onToggleLock }: Aud
   };
 
   const formatTime = (seconds: number) => {
-    if (isNaN(seconds)) return "0:00";
+    if (isNaN(seconds) || seconds === Infinity) return "0:00";
     const minutes = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${minutes}:${secs.toString().padStart(2, '0')}`;
@@ -186,6 +197,7 @@ const AudioLibrary = ({ modules, isMaster, onEdit, onDelete, onToggleLock }: Aud
             const isActive = playingId === mod.id;
             const isLocked = mod.locked && !isMaster;
             const isLocal = !!localAudioMap[mod.id];
+            const hasAudio = !!url;
 
             if (!mod.audioUrl && !isMaster && !isLocal) return null; // Hide modules without audio if not Master
 
@@ -206,13 +218,13 @@ const AudioLibrary = ({ modules, isMaster, onEdit, onDelete, onToggleLock }: Aud
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-4">
                     <button 
-                      onClick={() => !isLocked && handlePlayPause(mod.id, url)}
-                      disabled={isLocked || !url}
+                      onClick={() => !isLocked && hasAudio && handlePlayPause(mod.id, url)}
+                      disabled={isLocked || !hasAudio}
                       className={`p-3 rounded-full transition-colors ${
-                        isActive 
+                        isActive && isPlaying
                           ? 'bg-[#00E5FF] text-black' 
                           : 'bg-white/10 text-[#00E5FF] hover:bg-white/20'
-                      } ${isLocked || !url ? 'opacity-30 cursor-not-allowed' : ''}`}
+                      } ${isLocked || !hasAudio ? 'opacity-30 cursor-not-allowed' : ''}`}
                     >
                       {isActive && isPlaying ? <Pause size={18} fill="black" /> : <Play size={18} fill="#00E5FF" className="ml-1" />}
                     </button>
