@@ -5,6 +5,8 @@ import { motion } from 'framer-motion';
 import { Headset, Lock, Edit3, Trash2, Play, Pause, Radio, Volume2, Clock, Activity, Settings2 } from 'lucide-react';
 import { TrainingModule } from '@/types/portal';
 import WaveformVisualizer from './WaveformVisualizer';
+import AudioFeaturedCarousel from './AudioFeaturedCarousel';
+import AudioGridCard from './AudioGridCard';
 
 interface AudioLibraryProps {
   modules: TrainingModule[];
@@ -15,14 +17,14 @@ interface AudioLibraryProps {
 }
 
 const AudioLibrary = ({ modules, isMaster, onEdit, onDelete, onToggleLock }: AudioLibraryProps) => {
-  const audioModules = modules.filter(m => m.category === 'podcast'); // Filtrando apenas podcasts
+  const audioModules = modules.filter(m => m.category === 'podcast');
   
   const [playingDbId, setPlayingDbId] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(0.8); // New state for volume
+  const [volume, setVolume] = useState(0.8);
 
   useEffect(() => {
     if (audioRef.current) {
@@ -84,6 +86,10 @@ const AudioLibrary = ({ modules, isMaster, onEdit, onDelete, onToggleLock }: Aud
   const currentModule = audioModules.find(m => m.dbId === playingDbId);
   const currentUrl = currentModule?.audioUrl || '';
 
+  // Separação dos módulos: 4 em destaque, o restante na biblioteca
+  const featuredModules = audioModules.slice(0, 4);
+  const tacticalLibraryModules = audioModules.slice(4);
+
   return (
     <div className="space-y-12">
       <audio 
@@ -100,7 +106,16 @@ const AudioLibrary = ({ modules, isMaster, onEdit, onDelete, onToggleLock }: Aud
         <h2 className="text-4xl font-black text-white uppercase tracking-tighter">AURAL <span className="font-light text-white/20">INTELLIGENCE</span></h2>
       </div>
 
-      {/* COMMAND CONSOLE (Player Principal) */}
+      {/* 1. FEATURED TRANSMISSIONS (Carrossel) */}
+      {featuredModules.length > 0 && (
+        <AudioFeaturedCarousel 
+          modules={featuredModules} 
+          onPlay={handlePlayPause} 
+          currentPlayingId={playingDbId}
+        />
+      )}
+
+      {/* 2. COMMAND CONSOLE (Player Principal) */}
       {playingDbId && currentModule ? (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -186,83 +201,40 @@ const AudioLibrary = ({ modules, isMaster, onEdit, onDelete, onToggleLock }: Aud
         </div>
       )}
 
-      {/* Lista de Módulos (Frequency Strips) */}
-      <div className="grid grid-cols-1 gap-3">
-        {audioModules.map((mod, i) => {
-          const isActive = playingDbId === mod.dbId;
-          const isLocked = mod.locked && !isMaster;
-          
-          return (
-            <motion.div
+      {/* 3. TACTICAL LIBRARY (Grid) */}
+      <div className="space-y-6 pt-12">
+        <h3 className="text-2xl font-black text-white uppercase tracking-tighter">TACTICAL <span className="font-light text-white/40">LIBRARY</span></h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {tacticalLibraryModules.map((mod, i) => (
+            <AudioGridCard 
               key={mod.dbId}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.05 }}
-              className={`relative w-full flex overflow-hidden group transition-all duration-500 ${
-                isLocked 
-                    ? 'bg-red-900/10 border border-red-500/20 opacity-50 cursor-default' 
-                    : 'bg-[#0A192F]/80 border border-[#00E5FF]/20 hover:border-[#00E5FF]/60 hover:shadow-[0_0_30px_rgba(0,229,255,0.1)] cursor-pointer'
-              } rounded-xl`}
-            >
-              {/* 1. Vertical Status Strip */}
-              <div className={`w-2 transition-all duration-500 ${
-                  isLocked ? 'bg-red-500' : isActive ? 'bg-[#00E5FF] shadow-[0_0_15px_#00E5FF]' : 'bg-white/10 group-hover:bg-[#00E5FF]/40'
-              }`} />
-
-              {/* 2. Hover Grid Overlay */}
-              <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-[0.05] transition-opacity duration-500 bg-grid-pattern" />
-
-              <div className="flex-1 p-6 flex justify-between items-center relative z-10">
-                {/* Left/Center Content */}
-                <div className="flex items-center gap-8">
-                  {/* Play/Status Indicator (Target Reticle style) */}
-                  <button 
-                      onClick={() => !isLocked && handlePlayPause(mod.dbId, mod.audioUrl)} 
-                      disabled={isLocked} 
-                      className={`relative w-12 h-12 rounded-full transition-all flex items-center justify-center ${
-                          isLocked ? 'bg-red-500/10 text-red-500' : isActive && isPlaying ? 'bg-[#00E5FF] text-black shadow-[0_0_15px_#00E5FF]' : 'bg-white/5 text-[#00E5FF] hover:bg-[#00E5FF] hover:text-black'
-                      }`}
-                  >
-                      {/* Target Reticle Effect */}
-                      <div className={`absolute inset-0 border-2 rounded-full transition-all duration-300 ${
-                          isActive ? 'border-[#00E5FF]/60 scale-100' : 'border-white/10 scale-125 group-hover:scale-100 group-hover:border-[#00E5FF]/40'
-                      }`} />
-                      {isLocked ? <Lock size={18} /> : isActive && isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" className="ml-1" />}
-                  </button>
-                  
-                  <div className="space-y-1">
-                    <h3 className={`text-xl font-black uppercase tracking-tighter leading-none transition-colors ${isActive ? 'text-[#00E5FF]' : 'text-white'}`}>{mod.title}</h3>
-                    <div className="flex items-center gap-4">
-                        {/* Tactical Labels */}
-                        <span className="text-[10px] font-mono font-black text-white/40 uppercase tracking-widest">
-                            FREQ: 104.5 // {mod.type.toUpperCase()}
-                        </span>
-                        <span className="text-[10px] font-mono font-black text-[#00E5FF]/60 uppercase tracking-widest">
-                            SECURE_CH
-                        </span>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Right Side: Metadata and Controls */}
-                <div className="flex items-center gap-6">
-                    <div className="text-right space-y-1 hidden sm:block">
-                        <span className="block text-[8px] font-mono text-white/20 uppercase tracking-widest">V.O.X. ID</span>
-                        <span className="block text-xs font-mono text-white/60">{mod.id}</span>
-                    </div>
-                    
-                    {isMaster && (
-                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button onClick={(e) => { e.stopPropagation(); onEdit(mod); }} className="p-2 bg-black/40 border border-white/10 rounded-lg text-white/40 hover:text-[#00E5FF]"><Settings2 size={14} /></button>
-                            <button onClick={(e) => { e.stopPropagation(); onDelete(mod.id); }} className="p-2 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500"><Trash2 size={14} /></button>
-                        </div>
-                    )}
+              mod={mod}
+              index={i}
+              onPlay={handlePlayPause}
+              isActive={playingDbId === mod.dbId}
+              isPlaying={isPlaying}
+            />
+          ))}
+        </div>
+      </div>
+      
+      {/* Master Controls for the main list (if needed, currently removed from grid card for simplicity) */}
+      {isMaster && (
+        <div className="pt-12 border-t border-white/5">
+          <h4 className="text-xl font-bold text-white/60 mb-4">Master Controls (Full List)</h4>
+          <div className="grid grid-cols-1 gap-3">
+            {audioModules.map((mod) => (
+              <div key={mod.dbId} className="flex items-center justify-between p-4 bg-black/40 rounded-xl border border-white/10">
+                <span className="text-sm text-white/80">{mod.title}</span>
+                <div className="flex gap-2">
+                  <button onClick={() => onEdit(mod)} className="p-2 bg-white/5 rounded-lg text-white/60 hover:text-[#00E5FF]"><Settings2 size={14} /></button>
+                  <button onClick={() => onDelete(mod.id)} className="p-2 bg-red-500/10 rounded-lg text-red-500"><Trash2 size={14} /></button>
                 </div>
               </div>
-            </motion.div>
-          );
-        })}
-      </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
