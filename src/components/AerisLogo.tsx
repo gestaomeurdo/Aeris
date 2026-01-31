@@ -7,7 +7,7 @@ interface AerisLogoProps {
   size?: number;
 }
 
-const AerisLogo = ({ size = 44 }: AerisLogoProps) => {
+const AerisLogo = ({ size = 64 }: AerisLogoProps) => {
   const logoSrc = "https://i.ibb.co/BKdX0Nzn/1.png"; // Usando URL externa para garantir o carregamento
 
   return (
