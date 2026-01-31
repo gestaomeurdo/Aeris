@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import AerisLogo from '@/components/AerisLogo';
 import MissionBriefing from '@/components/MissionBriefing';
-import DigitalDoctrine from '@/components/DigitalDoctrine';
+import OperationsCenter from '@/components/OperationsCenter';
 import EditorSidebar from '@/components/EditorSidebar';
 import { Terminal, Target, Shield, Bell, LayoutGrid, User, Wifi } from 'lucide-react';
 import { PortalData } from '@/types/portal';
@@ -16,7 +16,7 @@ const INITIAL_DATA: PortalData = {
     { 
       id: "MOD-01", 
       title: "Mastering Air Force Leadership", 
-      desc: "Focus on The NCO Core values and leadership strategies for modern aviation environments.", 
+      desc: "Comprehensive development of leadership core values for modern aviation environments and strategic command.", 
       audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
       docUrl: "https://www.africau.edu/images/default/sample.pdf", 
       progress: 85, 
@@ -25,7 +25,7 @@ const INITIAL_DATA: PortalData = {
     { 
       id: "MOD-02", 
       title: "Modernizing Military Learning", 
-      desc: "Transitioning from legacy PDF structures to dynamic, audio-visual tactical interfaces.", 
+      desc: "Transformation of legacy document structures into dynamic, high-fidelity digital tactical interfaces.", 
       audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
       docUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf", 
       progress: 30, 
@@ -34,7 +34,7 @@ const INITIAL_DATA: PortalData = {
     { 
       id: "MOD-03", 
       title: "The Air Force SNCOs", 
-      desc: "Detailed study on 'Leaders of Leaders' and the strategic tier of enlisted command.", 
+      desc: "Strategic analysis of 'Leaders of Leaders' and the implementation of advanced enlisted command protocols.", 
       audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
       docUrl: "https://pdfobject.com/pdf/sample.pdf", 
       progress: 0, 
@@ -43,7 +43,7 @@ const INITIAL_DATA: PortalData = {
     { 
       id: "MOD-04", 
       title: "Enlisted Ranks & Structure", 
-      desc: "Complete visual guide to the Air Force enlisted rank hierarchy and responsibilities.", 
+      desc: "Technical mapping of the global Air Force rank hierarchy and operational responsibilities.", 
       audioUrl: "",
       docUrl: "", 
       progress: 0, 
@@ -116,7 +116,7 @@ const Index = () => {
             description={data.missionDescription} 
           />
           
-          <DigitalDoctrine modules={data.modules} />
+          <OperationsCenter modules={data.modules} />
 
           <footer className="pt-20 flex flex-col items-center gap-10 opacity-30 text-[9px] font-mono font-black text-white/20 tracking-[1em] uppercase">
             // END OF LINE // SYSTEM SECURE //
