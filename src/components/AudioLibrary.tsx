@@ -14,46 +14,57 @@ interface AudioLibraryProps {
   onToggleLock: (id: string) => void;
 }
 
+// Estado para armazenar URLs de objetos locais temporários por ID de módulo
+interface LocalAudioMap {
+  [moduleId: string]: { url: string, name: string };
+}
+
 const AudioLibrary = ({ modules, isMaster, onEdit, onDelete, onToggleLock }: AudioLibraryProps) => {
-  const audioModules = modules.filter(m => m.audioUrl || m.id === 'TEST-00');
+  // Filtra módulos que têm URL de áudio ou que o Master pode querer testar
+  const audioModules = modules.filter(m => m.audioUrl || isMaster);
   
   const [playingId, setPlayingId] = useState<string | null>(null);
-  const [localAudio, setLocalAudio] = useState<{ url: string, name: string } | null>(null);
+  const [localAudioMap, setLocalAudioMap] = useState<LocalAudioMap>({});
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
 
-  // Cleanup local audio URL when component unmounts or localAudio changes
+  // Limpeza de URLs de objetos quando o componente desmonta ou o mapa muda
   useEffect(() => {
     return () => {
-      if (localAudio) {
-        URL.revokeObjectURL(localAudio.url);
-      }
+      Object.values(localAudioMap).forEach(audio => URL.revokeObjectURL(audio.url));
     };
-  }, [localAudio]);
+  }, [localAudioMap]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, moduleId: string) => {
     const file = e.target.files?.[0];
     if (file && file.type === 'audio/mp3') {
-      if (localAudio) URL.revokeObjectURL(localAudio.url);
+      // Revoga URL antiga se existir
+      if (localAudioMap[moduleId]) {
+        URL.revokeObjectURL(localAudioMap[moduleId].url);
+      }
       
       const url = URL.createObjectURL(file);
-      setLocalAudio({ url, name: file.name });
-      setPlayingId('TEST-00');
-      setIsPlaying(false);
-      setCurrentTime(0);
-      setDuration(0);
       
-      if (audioRef.current) {
-        audioRef.current.src = url;
-        audioRef.current.load();
+      setLocalAudioMap(prev => ({
+        ...prev,
+        [moduleId]: { url, name: file.name }
+      }));
+      
+      // Se estiver tocando o módulo, reinicia com o novo arquivo
+      if (playingId === moduleId) {
+        setPlayingId(null); // Força a troca de faixa
+        setTimeout(() => handlePlayPause(moduleId, url), 50);
       }
+      
+      // Limpa o input para permitir o upload do mesmo arquivo novamente
+      e.target.value = '';
     }
   };
 
   const handlePlayPause = (id: string, url: string) => {
-    if (!audioRef.current) return;
+    if (!audioRef.current || !url) return;
 
     if (playingId === id) {
       if (isPlaying) {
@@ -88,11 +99,16 @@ const AudioLibrary = ({ modules, isMaster, onEdit, onDelete, onToggleLock }: Aud
   };
 
   const currentModule = audioModules.find(m => m.id === playingId);
-  const currentUrl = currentModule 
-    ? (currentModule.id === 'TEST-00' && localAudio) 
-      ? localAudio.url 
-      : currentModule.audioUrl 
-    : '';
+  
+  // Determina a URL atual: localAudioMap > module.audioUrl
+  const getModuleUrl = (mod: TrainingModule) => {
+    return localAudioMap[mod.id]?.url || mod.audioUrl;
+  };
+  
+  const currentUrl = currentModule ? getModuleUrl(currentModule) : '';
+  const currentAudioName = currentModule 
+    ? localAudioMap[currentModule.id]?.name || currentModule.title 
+    : 'Unknown Asset';
 
   return (
     <div className="space-y-12">
@@ -115,26 +131,10 @@ const AudioLibrary = ({ modules, isMaster, onEdit, onDelete, onToggleLock }: Aud
           <Headset className="w-6 h-6 text-[#00E5FF]" />
           <h2 className="text-4xl font-black text-white uppercase tracking-tighter">TACTICAL <span className="font-light text-white/20">AUDIO HUB</span></h2>
         </div>
-        
-        {isMaster && (
-          <div className="relative">
-            <label htmlFor="audio-upload" className="flex items-center gap-3 px-6 py-3 bg-[#00E5FF]/10 border border-[#00E5FF]/30 rounded-xl text-[9px] font-black text-[#00E5FF] uppercase tracking-widest cursor-pointer hover:bg-[#00E5FF]/20 transition-all">
-              <Upload className="w-3 h-3" />
-              Upload Local MP3
-            </label>
-            <input 
-              id="audio-upload" 
-              type="file" 
-              accept=".mp3" 
-              onChange={handleFileChange} 
-              className="hidden" 
-            />
-          </div>
-        )}
       </div>
 
       {/* Global Player Card (Visible when a track is selected) */}
-      {playingId && (
+      {playingId && currentModule && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -148,7 +148,7 @@ const AudioLibrary = ({ modules, isMaster, onEdit, onDelete, onToggleLock }: Aud
               <div className="space-y-1">
                 <span className="text-[10px] font-mono font-black text-[#00E5FF] uppercase tracking-widest">Now Playing</span>
                 <h3 className="text-xl font-bold text-white uppercase tracking-tighter">
-                  {currentModule?.title || localAudio?.name || 'Unknown Asset'}
+                  {currentAudioName.toUpperCase()}
                 </h3>
               </div>
             </div>
@@ -182,12 +182,12 @@ const AudioLibrary = ({ modules, isMaster, onEdit, onDelete, onToggleLock }: Aud
           <p className="text-white/50 italic">No audio assets available in the current database.</p>
         ) : (
           audioModules.map((mod, i) => {
-            const isLocalTest = mod.id === 'TEST-00';
-            const url = isLocalTest ? localAudio?.url || '' : mod.audioUrl;
+            const url = getModuleUrl(mod);
             const isActive = playingId === mod.id;
             const isLocked = mod.locked && !isMaster;
+            const isLocal = !!localAudioMap[mod.id];
 
-            if (isLocalTest && !localAudio) return null; // Hide local test slot if no file is loaded
+            if (!mod.audioUrl && !isMaster && !isLocal) return null; // Hide modules without audio if not Master
 
             return (
               <motion.div
@@ -214,30 +214,65 @@ const AudioLibrary = ({ modules, isMaster, onEdit, onDelete, onToggleLock }: Aud
                           : 'bg-white/10 text-[#00E5FF] hover:bg-white/20'
                       } ${isLocked || !url ? 'opacity-30 cursor-not-allowed' : ''}`}
                     >
-                      {isActive && isPlaying ? <Pause size={18} fill="black" /> : <Play size={18} fill="#00E5FF" />}
+                      {isActive && isPlaying ? <Pause size={18} fill="black" /> : <Play size={18} fill="#00E5FF" className="ml-1" />}
                     </button>
                     <div className="space-y-1">
                       <h3 className="text-xl font-black text-white uppercase tracking-tighter">
-                        {isLocalTest ? localAudio?.name.toUpperCase() : mod.title}
+                        {isLocal ? localAudioMap[mod.id].name.toUpperCase() : mod.title}
                       </h3>
                       <p className="text-xs font-mono text-white/50">
-                        {isLocalTest ? 'LOCAL UPLINK // TEST ASSET' : mod.desc}
+                        {isLocal ? 'LOCAL UPLINK OVERRIDE' : mod.desc}
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-3">
+                    {isLocal && (
+                       <span className="text-[9px] font-mono font-black px-3 py-1 rounded-full bg-amber-900/30 text-amber-400">
+                         LOCAL
+                       </span>
+                    )}
                     <span className={`text-[9px] font-mono font-black px-3 py-1 rounded-full ${mod.locked ? 'bg-red-900/30 text-red-400' : 'bg-green-900/30 text-green-400'}`}>
                       {mod.locked ? 'LOCKED' : 'ACTIVE'}
                     </span>
                     
                     {isMaster && (
                       <>
-                        {isLocalTest ? (
-                          <button onClick={() => { setLocalAudio(null); setPlayingId(null); }} className="p-2 text-red-400 hover:bg-red-500/10 transition-colors rounded-lg">
+                        {/* Botão de Upload/Substituição */}
+                        <div className="relative">
+                          <label htmlFor={`upload-${mod.id}`} className="p-2 text-white/50 hover:text-[#00E5FF] transition-colors cursor-pointer rounded-lg">
+                            <Upload size={16} />
+                          </label>
+                          <input 
+                            id={`upload-${mod.id}`} 
+                            type="file" 
+                            accept=".mp3" 
+                            onChange={(e) => handleFileChange(e, mod.id)} 
+                            className="hidden" 
+                          />
+                        </div>
+                        
+                        {isLocal && (
+                          <button 
+                            onClick={() => { 
+                              setLocalAudioMap(prev => {
+                                const newState = { ...prev };
+                                delete newState[mod.id];
+                                return newState;
+                              });
+                              if (playingId === mod.id) {
+                                setPlayingId(null);
+                                setIsPlaying(false);
+                                if (audioRef.current) audioRef.current.pause();
+                              }
+                            }} 
+                            className="p-2 text-red-400 hover:bg-red-500/10 transition-colors rounded-lg"
+                          >
                             <X size={16} />
                           </button>
-                        ) : (
+                        )}
+                        
+                        {!isLocal && (
                           <>
                             <button onClick={() => onEdit(mod)} className="p-2 text-white/50 hover:text-[#00E5FF] transition-colors">
                               <Edit3 size={16} />
