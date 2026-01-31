@@ -12,7 +12,7 @@ import OperationalStats from '@/components/OperationalStats';
 import AddModuleModal from '@/components/AddModuleModal';
 import EditMainBriefingModal from '@/components/EditMainBriefingModal';
 import AuthTerminal from '@/components/AuthTerminal';
-import { Database, Loader2, Settings2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { PortalData, TrainingModule } from '@/types/portal';
 import { AnimatePresence, motion } from 'framer-motion';
 import { supabase } from "@/integrations/supabase/client";
@@ -94,87 +94,48 @@ const Index = () => {
   };
 
   const handleSaveNewModule = async (newModuleData: Omit<TrainingModule, 'id' | 'dbId' | 'progress' | 'coverUrl'>, files: { audio?: File, doc?: File, cover?: File }) => {
-    if (!isMaster) {
-      toast.error("Acesso negado.");
-      return;
-    }
-    
+    if (!isMaster) return;
     const nextId = `ASSET-${(data.modules.length + 1).toString().padStart(2, '0')}`;
     const toastId = toast.loading("Implantando assets...");
-    
     try {
       let audioUrl = '';
       let docUrl = '';
       let coverUrl = '';
-
       if (files.audio) audioUrl = await uploadFile(files.audio, 'audio');
       if (files.doc) docUrl = await uploadFile(files.doc, 'docs');
       if (files.cover) coverUrl = await uploadFile(files.cover, 'covers'); 
-
-      const { error } = await supabase
-        .from('training_modules')
-        .insert([{
-          module_id: nextId,
-          title: newModuleData.title,
-          desc_text: newModuleData.desc,
-          type: newModuleData.type,
-          category: newModuleData.category,
-          audio_url: audioUrl,
-          doc_url: docUrl,
-          cover_url: coverUrl, 
-          progress: 0,
-          locked: false
-        }]);
-
+      const { error } = await supabase.from('training_modules').insert([{
+          module_id: nextId, title: newModuleData.title, desc_text: newModuleData.desc, type: newModuleData.type, category: newModuleData.category,
+          audio_url: audioUrl, doc_url: docUrl, cover_url: coverUrl, progress: 0, locked: false
+      }]);
       if (error) throw error;
       toast.success("Asset implantado com sucesso", { id: toastId });
       fetchModules();
     } catch (err: any) {
-      toast.error(`Falha na missão: ${err.message}`, { id: toastId });
+      toast.error(`Falha: ${err.message}`, { id: toastId });
     }
   };
 
   const handleUpdateModule = async (updated: TrainingModule, files: { audio?: File, doc?: File, cover?: File }) => {
-    if (!isMaster) {
-      toast.error("Acesso negado.");
-      return;
-    }
-    
-    if (!updated.dbId) {
-      toast.error("Erro: ID de referência ausente.");
-      return;
-    }
-
-    const toastId = toast.loading("Atualizando assets...");
+    if (!isMaster || !updated.dbId) return;
+    const toastId = toast.loading("Atualizando...");
     try {
       let audioUrl = updated.audioUrl;
       let docUrl = updated.docUrl;
       let coverUrl = updated.coverUrl; 
-
       if (files.audio) audioUrl = await uploadFile(files.audio, 'audio');
       if (files.doc) docUrl = await uploadFile(files.doc, 'docs');
       if (files.cover) coverUrl = await uploadFile(files.cover, 'covers'); 
-
-      const { error } = await supabase
-        .from('training_modules')
-        .update({
-          title: updated.title,
-          desc_text: updated.desc,
-          progress: updated.progress,
-          locked: updated.locked,
-          audio_url: audioUrl,
-          doc_url: docUrl,
-          cover_url: coverUrl 
-        })
-        .eq('id', updated.dbId); // USANDO O UUID DO BANCO DE DADOS
-      
+      const { error } = await supabase.from('training_modules').update({
+          title: updated.title, desc_text: updated.desc, progress: updated.progress, locked: updated.locked,
+          audio_url: audioUrl, doc_url: docUrl, cover_url: coverUrl 
+      }).eq('id', updated.dbId);
       if (error) throw error;
-      
-      setEditingModule(null); // Limpar estado de edição
-      toast.success("Asset atualizado", { id: toastId });
+      setEditingModule(null);
+      toast.success("Atualizado", { id: toastId });
       fetchModules();
     } catch (err: any) {
-      toast.error(`Falha na atualização: ${err.message}`, { id: toastId });
+      toast.error(`Falha: ${err.message}`, { id: toastId });
     }
   };
 
@@ -182,27 +143,17 @@ const Index = () => {
     if (!isMaster) return;
     const mod = data.modules.find(m => m.id === id);
     if (!mod) return;
-
-    const { error } = await supabase
-      .from('training_modules')
-      .delete()
-      .eq('id', mod.dbId); 
-
+    const { error } = await supabase.from('training_modules').delete().eq('id', mod.dbId); 
     if (error) toast.error("Erro ao deletar");
-    else { toast.success("Removido com sucesso"); fetchModules(); }
+    else { toast.success("Removido"); fetchModules(); }
   };
 
   const handleToggleLock = async (id: string) => {
     if (!isMaster) return;
     const mod = data.modules.find(m => m.id === id);
     if (!mod) return;
-
-    const { error } = await supabase
-      .from('training_modules')
-      .update({ locked: !mod.locked })
-      .eq('id', mod.dbId);
-
-    if (error) toast.error("Erro ao alterar trava");
+    const { error } = await supabase.from('training_modules').update({ locked: !mod.locked }).eq('id', mod.dbId);
+    if (error) toast.error("Erro");
     else fetchModules();
   };
   
@@ -215,56 +166,27 @@ const Index = () => {
   const podcastModules = data.modules.filter(m => m.category === 'podcast');
 
   if (isAuthLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#020202]">
-        <Loader2 className="w-12 h-12 text-[#00E5FF] animate-spin" />
-      </div>
-    );
+    return <div className="min-h-screen flex items-center justify-center bg-[#020202]"><Loader2 className="w-12 h-12 text-[#00E5FF] animate-spin" /></div>;
   }
 
   return (
     <div className="min-h-screen bg-[#020202] text-[#B0BEC5] font-sans overflow-x-hidden">
       <EditModuleModal isOpen={!!editingModule} onClose={() => setEditingModule(null)} module={editingModule} onSave={handleUpdateModule} />
       <AddModuleModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} onSave={handleSaveNewModule} nextId={`ASSET-${(data.modules.length + 1).toString().padStart(2, '0')}`} />
-      
-      <EditMainBriefingModal 
-        isOpen={isEditMainModalOpen} 
-        onClose={() => setIsEditMainModalOpen(false)} 
-        currentData={{
-          title: data.missionTitle,
-          video: data.mainVideo,
-          description: data.missionDescription
-        }}
-        onSave={(newData) => {
-          if (!isMaster) return;
-          setData(prev => ({ ...prev, missionTitle: newData.title, mainVideo: newData.video, missionDescription: newData.description }));
-          localStorage.setItem('aeris_main_briefing', JSON.stringify(newData));
-          toast.success("Briefing atualizado");
-        }}
-      />
-      
-      <AuthTerminal 
-        isOpen={isAuthTerminalOpen} 
-        onClose={() => setIsAuthTerminalOpen(false)} 
-        onSuccess={() => {}} 
-      />
+      <EditMainBriefingModal isOpen={isEditMainModalOpen} onClose={() => setIsEditMainModalOpen(false)} currentData={{ title: data.missionTitle, video: data.mainVideo, description: data.missionDescription }} onSave={(newData) => { if (!isMaster) return; setData(prev => ({ ...prev, missionTitle: newData.title, mainVideo: newData.video, missionDescription: newData.description })); localStorage.setItem('aeris_main_briefing', JSON.stringify(newData)); toast.success("Briefing atualizado"); }} />
+      <AuthTerminal isOpen={isAuthTerminalOpen} onClose={() => setIsAuthTerminalOpen(false)} onSuccess={() => {}} />
 
       <div className="fixed inset-0 pointer-events-none z-0"><div className="absolute inset-0 bg-grid-pattern opacity-5" /></div>
-      <TacticalSidebar 
-        activeView={activeView} 
-        onViewChange={setActiveView} 
-        isMaster={isMaster} 
-        onUserClick={isMaster ? handleLogout : () => setIsAuthTerminalOpen(true)} 
-      />
+      <TacticalSidebar activeView={activeView} onViewChange={setActiveView} isMaster={isMaster} onUserClick={isMaster ? handleLogout : () => setIsAuthTerminalOpen(true)} />
       
-      <div className="pl-36 pr-12 relative z-10">
-        <header className="pt-12 pb-12 flex justify-between items-center border-b border-white/5 mb-8">
+      <div className="px-6 md:pl-36 md:pr-12 relative z-10">
+        <header className="pt-8 pb-8 md:pt-12 md:pb-12 flex justify-between items-center border-b border-white/5 mb-8">
           <div className="space-y-1">
-            <h1 className="text-3xl font-black text-white uppercase">AERIS <span className="text-[#00E5FF]">ACADEMY</span></h1>
-            <div className="flex items-center gap-2"><div className={`w-1.5 h-1.5 rounded-full ${isLoading ? 'bg-amber-500 animate-pulse' : 'bg-[#00E5FF]'}`} /></div>
+            <h1 className="text-xl md:text-3xl font-black text-white uppercase">AERIS <span className="text-[#00E5FF]">ACADEMY</span></h1>
+            <div className={`w-1.5 h-1.5 rounded-full ${isLoading ? 'bg-amber-500 animate-pulse' : 'bg-[#00E5FF]'}`} />
           </div>
           {isMaster && (
-            <button onClick={() => setIsAddModalOpen(true)} className="bg-[#00E5FF] text-black px-8 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest hover:scale-105">+ Deploy Asset</button>
+            <button onClick={() => setIsAddModalOpen(true)} className="bg-[#00E5FF] text-black px-4 md:px-8 py-2 md:py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest hover:scale-105">+ Deploy</button>
           )}
         </header>
 
@@ -275,13 +197,8 @@ const Index = () => {
             <AnimatePresence mode="wait">
               <motion.div key={activeView} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                 {activeView === 'dashboard' && (
-                  <div className="space-y-32">
-                    <MissionBriefing 
-                      title={data.missionTitle} 
-                      videoUrl={data.mainVideo} 
-                      description={data.missionDescription} 
-                      onEdit={isMaster ? () => setIsEditMainModalOpen(true) : undefined} 
-                    />
+                  <div className="space-y-20 md:space-y-32">
+                    <MissionBriefing title={data.missionTitle} videoUrl={data.mainVideo} description={data.missionDescription} onEdit={isMaster ? () => setIsEditMainModalOpen(true) : undefined} />
                     <OperationsCenter modules={manualModules} isMaster={isMaster} onDelete={handleDeleteModule} onToggleLock={handleToggleLock} onEdit={setEditingModule} />
                     <OperationalStats />
                   </div>
