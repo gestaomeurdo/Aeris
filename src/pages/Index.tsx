@@ -35,39 +35,40 @@ const DEFAULT_DATA: PortalData = {
 };
 
 const Index = () => {
-  // Lógica Exata de Inicialização
+  // Inicialização Estrita do Estado
   const [data, setData] = useState<PortalData>(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     
-    // CENÁRIO A: Dados Existem (mesmo que seja [] ou objeto vazio de módulos)
+    // Se existe QUALQUER coisa salva, usamos o que está lá (mesmo que seja lista vazia)
     if (saved !== null) {
       try {
         return JSON.parse(saved);
       } catch (e) {
-        console.error("Critical error parsing local data:", e);
+        console.error("Erro crítico ao ler dados locais:", e);
         return DEFAULT_DATA;
       }
     }
     
-    // CENÁRIO B: Primeira Visita (saved === null)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_DATA));
+    // Apenas se for NULL (primeira vez absoluta), carregamos os defaults
     return DEFAULT_DATA;
   });
 
+  // Modo Desenvolvedor: isMaster agora é TRUE por padrão
+  const [isMaster, setIsMaster] = useState(true); 
   const [activeView, setActiveView] = useState('dashboard');
-  const [isMaster, setIsMaster] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [editingModule, setEditingModule] = useState<TrainingModule | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  // Sincronização de Veracidade Absoluta: Sempre salva o estado atual
+  // Sincronização de Veracidade Absoluta
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   }, [data]);
 
   const handleUserClick = () => {
+    // Agora o clique apenas alterna ou confirma a saída, já que iniciamos logados
     if (isMaster) {
-      if (confirm("Deseja encerrar a sessão do Operador Mike?")) {
+      if (confirm("Deseja sair do Modo Administrador (Mike)?")) {
         setIsMaster(false);
       }
     } else {
@@ -76,7 +77,7 @@ const Index = () => {
   };
 
   const handleUpdateVideo = () => {
-    const url = prompt("Insira a nova URL do vídeo:", data.mainVideo);
+    const url = prompt("Nova URL do vídeo:", data.mainVideo);
     if (url) setData(prev => ({ ...prev, mainVideo: url }));
   };
 
@@ -85,6 +86,7 @@ const Index = () => {
   };
 
   const getNextModuleId = (modules: TrainingModule[]) => {
+    if (modules.length === 0) return "MOD-01";
     const maxIdNumber = modules.reduce((max, mod) => {
       const parts = mod.id.split('-');
       if (parts.length < 2) return max;
@@ -123,15 +125,11 @@ const Index = () => {
   };
 
   const handleDeleteModule = (id: string) => {
-    if (confirm(`Deseja remover o módulo ${id} permanentemente?`)) {
-      setData(prev => {
-        const newData = { 
-          ...prev, 
-          modules: prev.modules.filter(m => m.id !== id) 
-        };
-        // O useEffect tratará de salvar newData (mesmo com modules: []) no localStorage
-        return newData;
-      });
+    if (confirm(`Remover módulo ${id} permanentemente?`)) {
+      setData(prev => ({
+        ...prev,
+        modules: prev.modules.filter(m => m.id !== id)
+      }));
     }
   };
 
@@ -153,6 +151,7 @@ const Index = () => {
     setActiveView('dashboard');
   };
 
+  // Os módulos exibidos respeitam o estado isMaster (Admin vê tudo aberto)
   const modulesToDisplay = data.modules.map(mod => ({
     ...mod,
     locked: isMaster ? false : mod.locked
@@ -210,7 +209,7 @@ const Index = () => {
               </div>
               <div className="h-8 w-[1px] bg-white/10 hidden md:block" />
               <span className="text-[10px] font-mono text-[#00E5FF] uppercase tracking-widest font-black hidden md:block">
-                {isMaster ? 'MASTER_NODE' : 'PUBLIC_ACCESS'}
+                {isMaster ? 'DEV_MODE_ACTIVE' : 'PUBLIC_ACCESS'}
               </span>
             </div>
 
@@ -223,24 +222,24 @@ const Index = () => {
                 />
               </div>
 
-              {isMaster && (
-                <div className="flex gap-4">
-                  <button 
-                    onClick={handleUpdateVideo}
-                    className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all"
-                  >
-                    <Edit3 className="w-3 h-3 text-[#00E5FF]" />
-                    Update Video
-                  </button>
-                  <button 
-                    onClick={handleAddModule}
-                    className="flex items-center gap-2 bg-[#00E5FF]/10 hover:bg-[#00E5FF]/20 border border-[#00E5FF]/30 px-4 py-2.5 rounded-xl text-[9px] font-black text-[#00E5FF] uppercase tracking-widest transition-all"
-                  >
-                    <Plus className="w-3 h-3" />
-                    Add Module
-                  </button>
-                </div>
-              )}
+              {/* Controles Admin agora visíveis por padrão (isMaster=true) */}
+              <div className="flex gap-4">
+                <button 
+                  onClick={handleUpdateVideo}
+                  className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all"
+                >
+                  <Edit3 className="w-3 h-3 text-[#00E5FF]" />
+                  Update Video
+                </button>
+                <button 
+                  onClick={handleAddModule}
+                  className="flex items-center gap-2 bg-[#00E5FF]/10 hover:bg-[#00E5FF]/20 border border-[#00E5FF]/30 px-4 py-2.5 rounded-xl text-[9px] font-black text-[#00E5FF] uppercase tracking-widest transition-all"
+                >
+                  <Plus className="w-3 h-3" />
+                  Add Module
+                </button>
+              </div>
+              
               <div className="hidden md:flex items-center gap-6 px-6 py-3 bg-white/[0.03] rounded-2xl border border-white/5">
                 <Wifi className="w-4 h-4 text-[#00E5FF]" />
                 <span className="text-[10px] font-mono font-black text-white/60 tracking-widest uppercase">Uplink: Synchronized</span>
