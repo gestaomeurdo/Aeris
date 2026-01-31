@@ -1,185 +1,152 @@
 "use client";
 
 import React from 'react';
-import { motion } from 'framer-motion';
-import { Terminal, Globe, Shield, Activity, Radio, FileText, Cpu, Zap, Headphones, ChevronRight, Share2, MessageSquare, Lock, Play } from 'lucide-react';
+import { Play, Headset, FileText, Lock, Shield, Radio, Globe, Zap, Activity, Cpu, Terminal, ChevronRight, Info } from 'lucide-react';
 
-const FutureVisionPortal = () => {
-  const newsFeed = [
-    "NEW DOCTRINE: Adaptive Neural Learning v2.4 authorized.",
-    "INTEL: Pacific Fleet synchronization complete.",
-    "ALERT: Cyber-threat level downgraded to Blue.",
-    "UPDATE: Lunar base communication established."
-  ];
+interface FutureVisionPortalProps {
+  onExit: () => void;
+}
 
-  const futureModules = [
-    { title: "Advanced Flight Tactics", status: "LOCKED", icon: Zap, color: "text-red-500" },
-    { title: "Neural Leadership", status: "BETA", icon: Cpu, color: "text-yellow-500" },
-    { title: "Global Logistics", status: "LOCKED", icon: Globe, color: "text-red-500" },
-    { title: "Cyber Defense v4", status: "ACTIVE", icon: Shield, color: "text-[#00E5FF]" },
-    { title: "Satellite Uplink Mgmt", status: "LOCKED", icon: Radio, color: "text-red-500" },
-    { title: "AI Command Integration", status: "BETA", icon: Terminal, color: "text-yellow-500" },
-    { title: "Quantum Cryptography", status: "LOCKED", icon: Lock, color: "text-red-500" },
-    { title: "Orbital Mechanics", status: "ACTIVE", icon: Activity, color: "text-[#00E5FF]" },
-  ];
+const FutureVisionPortal = ({ onExit }: FutureVisionPortalProps) => {
+  const LOGO_URL = "https://i.ibb.co/BKdX0Nzn/1.png"; //
 
-  const featuredModule = {
-    title: "NEURAL LEADERSHIP: AI Command Integration",
-    description: "Integrating advanced AI models into strategic decision-making processes for optimized command efficiency and reduced human error in high-stress environments. Access requires Level 5 clearance.",
-    status: "BETA ACCESS",
-    image: "https://i.ibb.co/mrPSkq5v/1.png" // Reusing the briefing image for a high-tech look
-  };
+  // Ativos Futuros baseados nas suas imagens
+  const upcomingAssets = [
+    { title: "ADVANCED FLIGHT TACTICS", status: "LOCKED", type: "TACTICAL" },
+    { title: "NEURAL LEADERSHIP", status: "BETA", type: "STRATEGY" },
+    { title: "GLOBAL LOGISTICS", status: "LOCKED", type: "OPS" },
+    { title: "CYBER DEFENSE V4", status: "ACTIVE", type: "SECURITY" },
+    { title: "SATELLITE UPLINK MGMT", status: "LOCKED", type: "COMM" },
+    { title: "AI COMMAND INTEGRATION", status: "BETA", type: "INTELLIGENCE" },
+    { title: "QUANTUM CRYPTOGRAPHY", status: "LOCKED", type: "SECURITY" },
+    { title: "ORBITAL MECHANICS", status: "ACTIVE", type: "SPACE" }
+  ]; //
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="relative min-h-[80vh] rounded-[40px] border border-white/5 bg-[#010816] overflow-hidden flex flex-col shadow-[0_0_50px_rgba(0,229,255,0.1)]"
-    >
-      {/* Header de Status Simplificado */}
-      <div className="p-6 border-b border-[#00E5FF]/20 flex justify-between items-center bg-black/40">
+    <div className="h-screen bg-[#020202] text-white flex flex-col overflow-hidden font-mono animate-in fade-in duration-1000">
+      
+      {/* HEADER TÁTICO - */}
+      <header className="h-16 border-b border-cyan-500/20 bg-black/80 backdrop-blur-md flex items-center justify-between px-8 z-50">
         <div className="flex items-center gap-4">
-          <span className="text-[10px] font-mono text-[#00E5FF] tracking-[0.4em] animate-pulse font-black">GLOBAL OPERATIONAL READINESS // PHASE 4 ACTIVE</span>
+          <img src={LOGO_URL} className="h-8 w-8 object-contain" alt="Aeris Logo" />
+          <div className="h-4 w-[1px] bg-cyan-900 mx-2"></div>
+          <span className="text-[9px] tracking-[0.5em] text-cyan-500 animate-pulse uppercase">
+            GLOBAL OPERATIONAL READINESS // PHASE 4 ACTIVE
+          </span>
         </div>
-        <div className="flex items-center gap-4">
-           <Activity className="w-4 h-4 text-[#00E5FF]" />
-           <span className="text-[10px] font-black text-white/80 uppercase tracking-widest italic">Global Proficiency Level: 94.8%</span>
+        <div className="flex items-center gap-6">
+          <span className="text-[9px] text-cyan-700 uppercase font-black tracking-widest flex items-center gap-2">
+            <Activity size={12} /> GLOBAL PROFICIENCY LEVEL: 94.8%
+          </span>
+          <button 
+            onClick={onExit}
+            className="text-[9px] border border-cyan-500/30 px-6 py-2 rounded-full hover:bg-cyan-500/10 text-cyan-400 font-black transition-all"
+          >
+            EXIT SIMULATION
+          </button>
         </div>
-      </div>
+      </header>
 
-      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
-        
-        {/* Lado Esquerdo: Feed de Dados (Sidebar) */}
-        <div className="w-full lg:w-80 border-r border-white/5 p-8 space-y-8 bg-black/20 flex-shrink-0">
-          <div className="space-y-2">
-            <h4 className="text-[10px] font-black text-white/40 uppercase tracking-[0.4em]">Live Intelligence Feed</h4>
-            <div className="space-y-4 pt-4">
-              {newsFeed.map((news, i) => (
-                <div key={i} className="text-[9px] font-mono text-[#00E5FF]/80 leading-tight border-l border-[#00E5FF]/30 pl-3">
-                  [SEC_ALERT] {news} <br/>
-                  <span className="text-white/20">TIMESTAMP: 2026.01.31 // 11:37:00</span>
+      <div className="flex-1 flex overflow-hidden relative">
+        {/* Background Grid Pattern - */}
+        <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none"></div>
+
+        {/* SIDEBAR: LIVE INTELLIGENCE FEED - */}
+        <aside className="w-80 border-r border-white/5 p-6 space-y-8 bg-black/40 relative z-10 overflow-y-auto custom-scrollbar">
+          <div className="space-y-6">
+            <h5 className="text-[10px] text-cyan-500 font-black tracking-widest uppercase flex items-center gap-2 italic">
+              <Terminal size={14} /> Live Intelligence Feed
+            </h5>
+            <div className="space-y-6">
+              {[1, 2, 3, 4].map(i => (
+                <div key={i} className="text-[9px] border-l border-cyan-900/50 pl-4 py-1 space-y-1">
+                  <p className="text-cyan-400/80 leading-relaxed uppercase">
+                    [SEC_ALERT] {i === 1 ? 'Adaptive Neural Learning V2.4 Authorized.' : i === 2 ? 'Satellite Uplink Synchronization complete.' : 'Cyber-Threat Level downgraded to Blue.'}
+                  </p>
+                  <span className="text-zinc-700 font-mono tracking-tighter">TIMESTAMP: 2026.01.31 // 11:52:00</span>
                 </div>
               ))}
             </div>
           </div>
-          
-          <div className="mt-auto space-y-4 pt-8">
-             <div className="p-6 bg-[#00E5FF]/5 border border-[#00E5FF]/10 rounded-3xl space-y-4">
-                <div className="flex items-center gap-3">
-                  <Zap className="w-4 h-4 text-[#00E5FF]" />
-                  <span className="text-[10px] font-mono font-black text-white uppercase tracking-widest">Neural Link Sync</span>
-                </div>
-                <div className="h-1 bg-white/5 rounded-full overflow-hidden">
-                   <motion.div 
-                     animate={{ width: ['0%', '82%', '78%', '85%'] }}
-                     transition={{ duration: 5, repeat: Infinity }}
-                     className="h-full bg-[#00E5FF] shadow-[0_0_10px_#00E5FF]"
-                   />
-                </div>
-             </div>
-          </div>
-        </div>
 
-        {/* Centro: Conteúdo Principal (Featured + Gallery) */}
-        <div className="flex-1 p-12 space-y-12 overflow-y-auto custom-scrollbar">
+          <div className="p-5 bg-cyan-500/5 border border-cyan-500/10 rounded-2xl">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="p-2 bg-cyan-500/10 rounded-lg text-cyan-400">
+                <Radio size={16} className="animate-pulse" />
+              </div>
+              <span className="text-[10px] font-black text-cyan-500 uppercase">Neural Link Sync</span>
+            </div>
+            <div className="h-1 bg-zinc-800 rounded-full overflow-hidden">
+              <div className="h-full bg-cyan-500 w-[78%]"></div>
+            </div>
+          </div>
+        </aside>
+
+        {/* MAIN CONTENT AREA */}
+        <main className="flex-1 p-10 overflow-y-auto relative z-10 custom-scrollbar space-y-12">
           
-          {/* Featured Module (Estilo Netflix Banner) */}
-          <div className="relative w-full aspect-[16/6] rounded-3xl overflow-hidden shadow-2xl group">
-            <img 
-              src={featuredModule.image} 
-              alt="Featured Module" 
-              className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-opacity duration-700 grayscale-[0.5]"
-            />
-            
-            <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent p-12 flex flex-col justify-center space-y-6">
-              <span className="text-[10px] font-mono font-black text-[#00E5FF] uppercase tracking-[0.4em]">{featuredModule.status}</span>
-              <h2 className="text-5xl font-black text-white uppercase tracking-tighter max-w-xl leading-tight">
-                {featuredModule.title}
+          {/* FEATURED MODULE: NEURAL LEADERSHIP - */}
+          <section className="relative group overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-zinc-900 to-black border border-cyan-500/20 p-12 min-h-[400px] flex items-center">
+            <div className="max-w-xl space-y-6 relative z-10">
+              <h2 className="text-5xl font-black italic tracking-tighter uppercase leading-tight">
+                NEURAL LEADERSHIP: <br/> 
+                <span className="text-cyan-500 not-italic">AI COMMAND INTEGRATION</span>
               </h2>
-              <p className="text-white/70 max-w-lg text-sm">{featuredModule.description}</p>
-              
+              <p className="text-zinc-400 text-sm leading-relaxed font-light">
+                Integrating advanced AI models into strategic decision-making processes for optimized command efficiency and reduced human error in high-stress environments. Access requires Level 5 clearance.
+              </p>
               <div className="flex gap-4 pt-4">
-                <button className="flex items-center gap-3 px-8 py-4 bg-[#00E5FF] text-black font-black uppercase text-xs rounded-xl hover:scale-[1.05] transition-transform shadow-[0_0_30px_rgba(0,229,255,0.4)]">
-                  <Play className="w-4 h-4 fill-black" />
-                  Access Preview
+                <button className="bg-cyan-600 text-black px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-cyan-500 transition-all">
+                  Access Briefing
                 </button>
-                <button className="flex items-center gap-3 px-8 py-4 bg-white/10 text-white font-black uppercase text-xs rounded-xl hover:bg-white/20 transition-colors">
-                  <Share2 className="w-4 h-4" />
-                  Share Link
-                </button>
+                <div className="h-10 w-[1px] bg-white/10 mx-2"></div>
+                <div className="flex flex-col justify-center">
+                  <span className="text-[8px] text-zinc-500 uppercase">Encryption</span>
+                  <span className="text-[10px] text-cyan-400 font-bold">AES-256 BIT</span>
+                </div>
               </div>
             </div>
-          </div>
+            {/* Imagem de Fundo Estilizada - */}
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1/2 opacity-20 group-hover:opacity-40 transition-opacity">
+              <Zap size={300} className="text-cyan-500 rotate-12" />
+            </div>
+          </section>
 
-          {/* Future Modules Gallery */}
-          <div className="space-y-6 pt-8">
-            <h3 className="text-2xl font-black text-white uppercase tracking-tighter">
-              UPCOMING <span className="font-light text-white/40">ASSETS</span>
-            </h3>
-            
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-6">
-              {futureModules.map((mod, i) => {
-                const Icon = mod.icon;
-                return (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.05 }}
-                    className="relative aspect-[4/3] bg-black/40 border border-white/5 rounded-2xl p-5 flex flex-col justify-between group hover:border-[#00E5FF]/30 transition-all overflow-hidden"
-                  >
-                    <div className="absolute inset-0 bg-grid-pattern opacity-5" />
-                    
-                    <div className="flex justify-between items-start relative z-10">
-                      <div className={`p-2 rounded-lg bg-white/5 border border-white/10 ${mod.color}/20`}>
-                        <Icon className={`w-5 h-5 ${mod.color}`} />
-                      </div>
-                      <span className={`text-[8px] font-mono font-black uppercase tracking-widest px-2 py-1 rounded-full ${mod.status === 'ACTIVE' ? 'bg-[#00E5FF]/10 text-[#00E5FF]' : mod.status === 'BETA' ? 'bg-yellow-500/10 text-yellow-500' : 'bg-red-500/10 text-red-500'}`}>
-                        {mod.status}
-                      </span>
-                    </div>
-                    
-                    <div className="relative z-10 space-y-1">
-                      <h4 className="text-sm font-bold text-white uppercase leading-tight">{mod.title}</h4>
-                      <div className="flex items-center gap-2 text-[9px] font-mono text-white/40">
-                        <Lock className="w-3 h-3" />
-                        <span>Access Tier 5</span>
-                      </div>
-                    </div>
-                    
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                       <button className="px-4 py-2 bg-[#00E5FF] text-black text-[10px] font-black uppercase rounded-lg">
-                          View Details
-                       </button>
-                    </div>
-                  </motion.div>
-                );
-              })}
+          {/* UPCOMING ASSETS GRID - */}
+          <section className="space-y-6">
+            <h4 className="text-xs font-black text-zinc-500 uppercase tracking-[0.3em] border-l-2 border-cyan-500 pl-4">Upcoming Assets</h4>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {upcomingAssets.map((asset, i) => (
+                <div key={i} className="bg-zinc-900/30 border border-white/5 p-6 rounded-2xl hover:border-cyan-500/40 transition-all cursor-not-allowed group relative overflow-hidden">
+                   <div className="flex justify-between items-start mb-6">
+                     <div className={`p-2 rounded-lg border ${asset.status === 'ACTIVE' ? 'bg-cyan-500/10 border-cyan-500/20' : 'bg-zinc-800 border-white/5 opacity-50'}`}>
+                        {i % 2 === 0 ? <Shield size={16} /> : <Cpu size={16} />}
+                     </div>
+                     <span className={`text-[8px] font-black px-2 py-0.5 rounded ${asset.status === 'ACTIVE' ? 'bg-cyan-600 text-black' : 'bg-red-900/20 text-red-500'}`}>
+                       {asset.status}
+                     </span>
+                   </div>
+                   <h5 className="text-[11px] font-black uppercase italic tracking-tighter leading-tight mb-2 group-hover:text-cyan-400 transition-colors">
+                     {asset.title}
+                   </h5>
+                   <div className="text-[8px] text-zinc-600 font-mono tracking-widest">ACCESS LEVEL: 0{i+1}</div>
+                </div>
+              ))}
             </div>
-          </div>
-        </div>
+          </section>
+        </main>
       </div>
-      
-      {/* Barra Inferior de Status */}
-      <div className="h-16 bg-black/80 border-t border-[#00E5FF]/10 flex items-center justify-between px-10 flex-shrink-0">
-         <div className="flex items-center gap-6">
-            <Activity size={20} className="text-[#00E5FF]" />
-            <span className="text-[10px] font-black text-white/80 uppercase tracking-widest italic">Global Proficiency Level: 94.8%</span>
-         </div>
-         <div className="flex gap-4 items-center">
-            <div className="w-32 h-2 bg-white/10 rounded-full overflow-hidden">
-              <motion.div 
-                initial={{ width: '0%' }}
-                animate={{ width: '75%' }}
-                transition={{ duration: 1.5 }}
-                className="h-full bg-[#00E5FF]"
-              />
-            </div>
-            <Cpu size={20} className="text-[#00E5FF]" />
-         </div>
-      </div>
-    </motion.div>
+
+      <style>{`
+        .bg-grid-pattern { 
+          background-image: radial-gradient(#0891b2 1px, transparent 1px); 
+          background-size: 50px 50px; 
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #083344; border-radius: 10px; }
+      `}</style>
+    </div>
   );
 };
 

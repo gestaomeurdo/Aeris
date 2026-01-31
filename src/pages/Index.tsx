@@ -104,6 +104,10 @@ const Index = () => {
       modules: prev.modules.map(m => m.id === updated.id ? updated : m)
     }));
   };
+  
+  const handleExitFutureVision = () => {
+    setActiveView('dashboard');
+  };
 
   const modulesToDisplay = data.modules.map(mod => ({
     ...mod,
@@ -137,139 +141,143 @@ const Index = () => {
         onUserClick={handleUserClick}
       />
 
-      <div className="pl-36 pr-12 relative z-10">
-        <header className="pt-12 pb-12 flex justify-between items-center border-b border-white/5 mb-8">
-          <div className="flex items-center gap-8">
-            <div className="space-y-1">
-              <h1 className="text-3xl font-black text-white tracking-tighter uppercase">AERIS <span className="text-[#00E5FF]">ACADEMY</span></h1>
-              <p className="text-[10px] font-mono font-black text-[#00E5FF]/40 uppercase tracking-[0.5em]">System Status: Optimal</p>
-            </div>
-            <div className="h-8 w-[1px] bg-white/10 hidden md:block" />
-            <span className="text-[10px] font-mono text-[#00E5FF] uppercase tracking-widest font-black hidden md:block">
-              {isMaster ? 'MASTER_NODE' : 'PUBLIC_ACCESS'}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-6">
-            <div className="relative group hidden lg:block">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-hover:text-[#00E5FF] transition-colors" size={14} />
-              <input 
-                className="bg-white/[0.03] border border-white/5 rounded-full py-2.5 pl-12 pr-6 text-xs w-64 focus:outline-none focus:border-[#00E5FF]/30 transition-all placeholder:text-white/10" 
-                placeholder="Search tactical assets..." 
-              />
-            </div>
-
-            {isMaster && (
-              <div className="flex gap-4">
-                <button 
-                  onClick={handleUpdateVideo}
-                  className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all"
-                >
-                  <Edit3 className="w-3 h-3 text-[#00E5FF]" />
-                  Update Video
-                </button>
-                <button 
-                  onClick={handleAddModule}
-                  className="flex items-center gap-2 bg-[#00E5FF]/10 hover:bg-[#00E5FF]/20 border border-[#00E5FF]/30 px-4 py-2.5 rounded-xl text-[9px] font-black text-[#00E5FF] uppercase tracking-widest transition-all"
-                >
-                  <Plus className="w-3 h-3" />
-                  Add Module
-                </button>
-              </div>
-            )}
-            <div className="hidden md:flex items-center gap-6 px-6 py-3 bg-white/[0.03] rounded-2xl border border-white/5">
-              <Wifi className="w-4 h-4 text-[#00E5FF]" />
-              <span className="text-[10px] font-mono font-black text-white/60 tracking-widest uppercase">Uplink: Synchronized</span>
-            </div>
-          </div>
-        </header>
-
-        <Breadcrumbs view={activeView} />
-
-        <main className="max-w-7xl mx-auto pb-32">
+      {activeView === 'future' ? (
+        <div className="pl-36 relative z-10 min-h-screen">
           <AnimatePresence mode="wait">
-            {activeView === 'dashboard' && (
-              <motion.div
-                key="dashboard"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.5 }}
-                className="space-y-32"
-              >
-                <MissionBriefing 
-                  title={data.missionTitle} 
-                  videoUrl={data.mainVideo} 
-                  description={data.missionDescription} 
-                />
-                <OperationsCenter 
-                  modules={modulesToDisplay} 
-                  isMaster={isMaster}
-                  onDelete={handleDeleteModule}
-                  onToggleLock={handleToggleLock}
-                  onEdit={setEditingModule}
-                />
-              </motion.div>
-            )}
-
-            {activeView === 'missions' && (
-              <motion.div key="missions" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <OperationsCenter 
-                  modules={modulesToDisplay} 
-                  isMaster={isMaster}
-                  onDelete={handleDeleteModule}
-                  onToggleLock={handleToggleLock}
-                  onEdit={setEditingModule}
-                />
-              </motion.div>
-            )}
-
-            {activeView === 'audio' && (
-              <motion.div key="audio" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <AudioLibrary 
-                  modules={modulesToDisplay} 
-                  isMaster={isMaster}
-                  onEdit={setEditingModule}
-                  onToggleLock={handleToggleLock}
-                  onDelete={handleDeleteModule}
-                />
-              </motion.div>
-            )}
-
-            {activeView === 'docs' && (
-              <motion.div key="docs" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <DocGallery 
-                  modules={modulesToDisplay} 
-                  isMaster={isMaster}
-                  onEdit={setEditingModule}
-                  onToggleLock={handleToggleLock}
-                  onDelete={handleDeleteModule}
-                />
-              </motion.div>
-            )}
-
-            {activeView === 'future' && (
-              <motion.div key="future" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <FutureVisionPortal />
-              </motion.div>
-            )}
-
-            {activeView === 'security' && (
-              <motion.div key="security" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <SecurityProtocol isMaster={isMaster} onLogin={setIsMaster} />
-              </motion.div>
-            )}
+            <motion.div key="future-portal" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <FutureVisionPortal onExit={handleExitFutureVision} />
+            </motion.div>
           </AnimatePresence>
-        </main>
+        </div>
+      ) : (
+        <div className="pl-36 pr-12 relative z-10">
+          <header className="pt-12 pb-12 flex justify-between items-center border-b border-white/5 mb-8">
+            <div className="flex items-center gap-8">
+              <div className="space-y-1">
+                <h1 className="text-3xl font-black text-white tracking-tighter uppercase">AERIS <span className="text-[#00E5FF]">ACADEMY</span></h1>
+                <p className="text-[10px] font-mono font-black text-[#00E5FF]/40 uppercase tracking-[0.5em]">System Status: Optimal</p>
+              </div>
+              <div className="h-8 w-[1px] bg-white/10 hidden md:block" />
+              <span className="text-[10px] font-mono text-[#00E5FF] uppercase tracking-widest font-black hidden md:block">
+                {isMaster ? 'MASTER_NODE' : 'PUBLIC_ACCESS'}
+              </span>
+            </div>
 
-        <footer className="pt-20 flex flex-col items-center gap-10 opacity-30 text-[9px] font-mono font-black text-white/20 tracking-[1em] uppercase">
-          <div className="flex gap-12">
-            <span>ENCRYPTION: AES-256</span>
-            <span>LOCAL_SYNC: ACTIVE</span>
-          </div>
-          // END OF LINE // OPERATIONAL_HUB_v2.0 //
-        </footer>
-      </div>
+            <div className="flex items-center gap-6">
+              <div className="relative group hidden lg:block">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-hover:text-[#00E5FF] transition-colors" size={14} />
+                <input 
+                  className="bg-white/[0.03] border border-white/5 rounded-full py-2.5 pl-12 pr-6 text-xs w-64 focus:outline-none focus:border-[#00E5FF]/30 transition-all placeholder:text-white/10" 
+                  placeholder="Search tactical assets..." 
+                />
+              </div>
+
+              {isMaster && (
+                <div className="flex gap-4">
+                  <button 
+                    onClick={handleUpdateVideo}
+                    className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all"
+                  >
+                    <Edit3 className="w-3 h-3 text-[#00E5FF]" />
+                    Update Video
+                  </button>
+                  <button 
+                    onClick={handleAddModule}
+                    className="flex items-center gap-2 bg-[#00E5FF]/10 hover:bg-[#00E5FF]/20 border border-[#00E5FF]/30 px-4 py-2.5 rounded-xl text-[9px] font-black text-[#00E5FF] uppercase tracking-widest transition-all"
+                  >
+                    <Plus className="w-3 h-3" />
+                    Add Module
+                  </button>
+                </div>
+              )}
+              <div className="hidden md:flex items-center gap-6 px-6 py-3 bg-white/[0.03] rounded-2xl border border-white/5">
+                <Wifi className="w-4 h-4 text-[#00E5FF]" />
+                <span className="text-[10px] font-mono font-black text-white/60 tracking-widest uppercase">Uplink: Synchronized</span>
+              </div>
+            </div>
+          </header>
+
+          <Breadcrumbs view={activeView} />
+
+          <main className="max-w-7xl mx-auto pb-32">
+            <AnimatePresence mode="wait">
+              {activeView === 'dashboard' && (
+                <motion.div
+                  key="dashboard"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.5 }}
+                  className="space-y-32"
+                >
+                  <MissionBriefing 
+                    title={data.missionTitle} 
+                    videoUrl={data.mainVideo} 
+                    description={data.missionDescription} 
+                  />
+                  <OperationsCenter 
+                    modules={modulesToDisplay} 
+                    isMaster={isMaster}
+                    onDelete={handleDeleteModule}
+                    onToggleLock={handleToggleLock}
+                    onEdit={setEditingModule}
+                  />
+                </motion.div>
+              )}
+
+              {activeView === 'missions' && (
+                <motion.div key="missions" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <OperationsCenter 
+                    modules={modulesToDisplay} 
+                    isMaster={isMaster}
+                    onDelete={handleDeleteModule}
+                    onToggleLock={handleToggleLock}
+                    onEdit={setEditingModule}
+                  />
+                </motion.div>
+              )}
+
+              {activeView === 'audio' && (
+                <motion.div key="audio" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <AudioLibrary 
+                    modules={modulesToDisplay} 
+                    isMaster={isMaster}
+                    onEdit={setEditingModule}
+                    onToggleLock={handleToggleLock}
+                    onDelete={handleDeleteModule}
+                  />
+                </motion.div>
+              )}
+
+              {activeView === 'docs' && (
+                <motion.div key="docs" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <DocGallery 
+                    modules={modulesToDisplay} 
+                    isMaster={isMaster}
+                    onEdit={setEditingModule}
+                    onToggleLock={handleToggleLock}
+                    onDelete={handleDeleteModule}
+                  />
+                </motion.div>
+              )}
+
+              {activeView === 'security' && (
+                <motion.div key="security" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <SecurityProtocol isMaster={isMaster} onLogin={setIsMaster} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </main>
+
+          <footer className="pt-20 flex flex-col items-center gap-10 opacity-30 text-[9px] font-mono font-black text-white/20 tracking-[1em] uppercase">
+            <div className="flex gap-12">
+              <span>ENCRYPTION: AES-256</span>
+              <span>LOCAL_SYNC: ACTIVE</span>
+            </div>
+            // END OF LINE // OPERATIONAL_HUB_v2.0 //
+          </footer>
+        </div>
+      )}
     </div>
   );
 };
