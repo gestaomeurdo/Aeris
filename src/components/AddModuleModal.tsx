@@ -16,7 +16,6 @@ interface AddModuleModalProps {
   nextId: string;
 }
 
-// Mapping user-friendly types to existing TrainingModule types
 const moduleTypes: { label: string, value: TrainingModule['type'] }[] = [
   { label: "Leadership Doctrine", value: "Leadership" },
   { label: "Strategic Planning", value: "Strategy" },
@@ -44,7 +43,7 @@ const AddModuleModal = ({ isOpen, onClose, onSave, nextId }: AddModuleModalProps
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !description || !file) {
-      alert("Por favor, preencha todos os campos obrigatórios e selecione um arquivo.");
+      alert("Por favor, preencha todos os campos obrigatórios.");
       return;
     }
 
@@ -52,8 +51,8 @@ const AddModuleModal = ({ isOpen, onClose, onSave, nextId }: AddModuleModalProps
       title,
       desc: description,
       type,
-      audioUrl: fileType === 'audio' ? 'LOCAL_PENDING' : '', 
-      docUrl: fileType === 'doc' ? 'LOCAL_PENDING' : '', 
+      audioUrl: fileType === 'audio' ? 'PENDING' : '', 
+      docUrl: fileType === 'doc' ? 'PENDING' : '', 
       progress: 0,
       locked: false,
     };
@@ -68,13 +67,12 @@ const AddModuleModal = ({ isOpen, onClose, onSave, nextId }: AddModuleModalProps
     
     if (selectedFile) {
       const mimeType = selectedFile.type;
-      
       if (mimeType === 'application/pdf') {
         setFileType('doc');
-      } else if (mimeType === 'audio/mp3' || mimeType === 'audio/mpeg') {
+      } else if (mimeType.startsWith('audio/')) {
         setFileType('audio');
       } else {
-        alert("Tipo de arquivo não suportado. Por favor, selecione .mp3 ou .pdf.");
+        alert("Apenas arquivos .mp3 ou .pdf são suportados.");
         setFile(null);
         setFileType(null);
       }
@@ -102,8 +100,8 @@ const AddModuleModal = ({ isOpen, onClose, onSave, nextId }: AddModuleModalProps
                   <Save className="w-5 h-5 text-[#00E5FF]" />
                 </div>
                 <div className="space-y-1">
-                  <span className="text-[10px] font-mono font-black text-[#00E5FF] uppercase tracking-widest">NEW ASSET DEPLOYMENT</span>
-                  <h3 className="text-xl font-black text-white uppercase tracking-tighter">Create Module: {nextId}</h3>
+                  <span className="text-[10px] font-mono font-black text-[#00E5FF] uppercase tracking-widest">DEPLOYMENT_CENTER</span>
+                  <h3 className="text-xl font-black text-white uppercase tracking-tighter">New Asset: {nextId}</h3>
                 </div>
               </div>
               <button onClick={onClose} className="p-3 hover:bg-white/5 rounded-xl transition-colors">
@@ -113,78 +111,64 @@ const AddModuleModal = ({ isOpen, onClose, onSave, nextId }: AddModuleModalProps
 
             <form onSubmit={handleSubmit} className="p-10 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
               <div className="grid grid-cols-1 gap-6">
-                
-                {/* Title */}
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2 text-[9px] font-mono font-black text-white/40 uppercase tracking-[0.2em] pl-1">
-                    <Type className="w-3 h-3 text-[#00E5FF]" /> Module Title
+                    Asset Title
                   </Label>
                   <Input
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    placeholder="e.g., Advanced Cyber Warfare"
+                    placeholder="E.g., Flight Dynamics V3"
                     className="bg-white/[0.03] border border-white/10 rounded-2xl py-4 px-6 text-sm text-white focus:border-[#00E5FF]/40 outline-none transition-all"
                   />
                 </div>
 
-                {/* Description */}
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2 text-[9px] font-mono font-black text-white/40 uppercase tracking-[0.2em] pl-1">
-                    <FileText className="w-3 h-3 text-[#00E5FF]" /> Tactical Description
+                    Tactical Briefing
                   </Label>
                   <Textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Brief summary of the module's objective..."
+                    placeholder="Brief description of the content..."
                     className="bg-white/[0.03] border border-white/10 rounded-2xl py-4 px-6 text-sm text-white h-24 resize-none focus:border-[#00E5FF]/40 outline-none transition-all"
                   />
                 </div>
 
-                {/* Type Dropdown */}
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2 text-[9px] font-mono font-black text-white/40 uppercase tracking-[0.2em] pl-1">
-                    <ChevronDown className="w-3 h-3 text-[#00E5FF]" /> Content Type
+                    Content Category
                   </Label>
                   <Select value={type} onValueChange={(value: TrainingModule['type']) => setType(value)}>
-                    <SelectTrigger className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-4 px-6 text-sm text-white focus:ring-0 focus:ring-offset-0 focus:border-[#00E5FF]/40 h-auto">
-                      <SelectValue placeholder="Select Module Type" />
+                    <SelectTrigger className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-4 px-6 text-sm text-white h-auto">
+                      <SelectValue placeholder="Select Category" />
                     </SelectTrigger>
                     <SelectContent className="bg-[#020617] border-[#00E5FF]/30 text-white">
                       {moduleTypes.map(item => (
-                        <SelectItem key={item.value} value={item.value} className="hover:bg-[#00E5FF]/10">
-                          {item.label}
-                        </SelectItem>
+                        <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
 
-                {/* File Upload */}
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2 text-[9px] font-mono font-black text-white/40 uppercase tracking-[0.2em] pl-1">
-                    <Headphones className="w-3 h-3 text-[#00E5FF]" /> Asset File (.mp3 or .pdf)
+                    Upload Asset (.pdf or .mp3)
                   </Label>
-                  <div className="relative">
-                    <Input
-                      type="file"
-                      accept="audio/mpeg, audio/mp3, application/pdf"
-                      onChange={handleFileChange}
-                      className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-4 px-6 text-sm text-white focus:border-[#00E5FF]/40 outline-none transition-all file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#00E5FF]/10 file:text-[#00E5FF] hover:file:bg-[#00E5FF]/20"
-                    />
-                    {file && (
-                      <div className="absolute top-1/2 right-4 -translate-y-1/2 text-[10px] font-mono text-white/60 uppercase tracking-widest">
-                        {file.name} ({fileType === 'audio' ? 'VOX' : 'DOC'})
-                      </div>
-                    )}
-                  </div>
+                  <Input
+                    type="file"
+                    accept=".pdf,.mp3,audio/mpeg,audio/mp3,application/pdf"
+                    onChange={handleFileChange}
+                    className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-4 px-6 text-sm text-white file:bg-[#00E5FF]/10 file:text-[#00E5FF] file:rounded-full file:border-0 file:px-4 file:py-1 file:mr-4"
+                  />
                 </div>
               </div>
 
               <div className="pt-8">
                 <button
                   type="submit"
-                  disabled={!title || !description || !file}
-                  className="w-full py-5 bg-[#00E5FF] text-black font-black uppercase text-xs rounded-2xl shadow-[0_0_30px_rgba(0,229,255,0.2)] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={!title || !file}
+                  className="w-full py-5 bg-[#00E5FF] text-black font-black uppercase text-xs rounded-2xl shadow-[0_0_30px_rgba(0,229,255,0.2)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
                 >
                   Confirm Deployment
                 </button>
