@@ -39,7 +39,6 @@ const TacticalCard = ({
 
   const handleClick = () => {
     if (isLocked) return;
-    // Agora sempre abre no modal interno para evitar popups
     onSelect(mod);
   };
 

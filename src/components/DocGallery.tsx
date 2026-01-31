@@ -74,7 +74,7 @@ const DocGallery = ({ modules, isMaster, onEdit, onToggleLock, onDelete }: DocGa
                   </div>
                 ) : hasDoc ? (
                   <button 
-                    className="w-full py-4 bg-[#00E5FF] text-black rounded-2xl flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_30px_rgba(0,229,255,0.2)]"
+                    className="w-full py-4 bg-[#00E5FF] text-black rounded-2xl flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest hover:scale-[1.02] active:scale-98 transition-all shadow-[0_0_30px_rgba(0,229,255,0.2)]"
                   >
                     <FileText size={14} />
                     Open Document
