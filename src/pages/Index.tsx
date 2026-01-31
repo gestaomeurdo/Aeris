@@ -32,16 +32,17 @@ const INITIAL_DATA: PortalData = {
   ]
 };
 
-// Chave de persistência atualizada conforme solicitado
-const LOCAL_STORAGE_KEY = 'aeris_modules_v1';
+// Chave de persistência
+const PERSISTENCE_KEY = 'aeris_modules_v1';
 
-// Helper function to load initial state from localStorage
+// Helper function to load initial state from sessionStorage
 const loadInitialData = (): PortalData => {
-  const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+  // Usando sessionStorage como workaround para o ambiente que limpa localStorage
+  const saved = sessionStorage.getItem(PERSISTENCE_KEY);
   
   // REGRA ESTREITA: Se a chave for estritamente null, é o primeiro acesso.
   if (saved === null) {
-    console.log("PERSISTENCE LOG: Key not found (first run). Loading default modules.");
+    console.log("PERSISTENCE LOG (SessionStorage): Key not found (first run). Loading default modules.");
     return INITIAL_DATA;
   }
   
@@ -50,9 +51,9 @@ const loadInitialData = (): PortalData => {
     const parsedData: PortalData = JSON.parse(saved);
     
     if (parsedData.modules && parsedData.modules.length === 0) {
-        console.log("PERSISTENCE LOG: Loaded empty module list from storage. State respected.");
+        console.log("PERSISTENCE LOG (SessionStorage): Loaded empty module list from storage. State respected.");
     } else {
-        console.log(`PERSISTENCE LOG: Loaded ${parsedData.modules?.length || 0} modules from storage.`);
+        console.log(`PERSISTENCE LOG (SessionStorage): Loaded ${parsedData.modules?.length || 0} modules from storage.`);
     }
     
     return parsedData;
@@ -75,7 +76,7 @@ const getNextModuleId = (modules: TrainingModule[]) => {
 };
 
 const Index = () => {
-  // Initialize state using the function to load from localStorage immediately
+  // Initialize state using the function to load from sessionStorage immediately
   const [data, setData] = useState<PortalData>(loadInitialData);
   const [activeView, setActiveView] = useState('dashboard');
   const [isMaster, setIsMaster] = useState(false);
@@ -85,8 +86,8 @@ const Index = () => {
 
   // Effect to save data whenever it changes
   useEffect(() => {
-    // Salva o objeto completo no localStorage
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
+    // Salva o objeto completo no sessionStorage
+    sessionStorage.setItem(PERSISTENCE_KEY, JSON.stringify(data));
   }, [data]); // Dependência [data] garante que qualquer alteração (incluindo deleção) salve o novo estado.
 
   const handleUserClick = () => {
