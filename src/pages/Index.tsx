@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import TacticalSidebar from '@/components/TacticalSidebar';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import MissionBriefing from '@/components/MissionBriefing';
@@ -11,72 +11,171 @@ import FutureVisionPortal from '@/components/FutureVisionPortal';
 import EditModuleModal from '@/components/EditModuleModal';
 import OperationalStats from '@/components/OperationalStats';
 import AddModuleModal from '@/components/AddModuleModal';
-import { Database, Trash2, RefreshCw } from 'lucide-react';
+import { Database, Trash2, Loader2 } from 'lucide-react';
 import { PortalData, TrainingModule } from '@/types/portal';
 import { AnimatePresence, motion } from 'framer-motion';
-
-const STORAGE_KEY = 'aeris_final_storage_v5';
-
-// AGORA O PADRÃO É VAZIO. NÃO TEM MAIS NADA ESCRITO AQUI.
-const EMPTY_PORTAL_DATA: PortalData = {
-  mainVideo: "https://youtu.be/mQayAWnJQOE",
-  missionTitle: "AERIS ACADEMY",
-  missionDescription: "Configure seu centro de comando adicionando novos módulos táticos.",
-  modules: [] // VAZIO NO CÓDIGO-FONTE
-};
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const Index = () => {
-  const [data, setData] = useState<PortalData>(() => {
-    if (typeof window === 'undefined') return EMPTY_PORTAL_DATA;
-    const saved = localStorage.getItem(STORAGE_KEY);
-    try {
-      return saved ? JSON.parse(saved) : EMPTY_PORTAL_DATA;
-    } catch (e) {
-      return EMPTY_PORTAL_DATA;
-    }
+  const [data, setData] = useState<PortalData>({
+    mainVideo: "https://youtu.be/mQayAWnJQOE",
+    missionTitle: "AERIS ACADEMY",
+    missionDescription: "Configure seu centro de comando adicionando novos módulos táticos.",
+    modules: []
   });
 
+  const [isLoading, setIsLoading] = useState(true);
   const [isMaster, setIsMaster] = useState(true); 
   const [activeView, setActiveView] = useState('dashboard');
   const [editingModule, setEditingModule] = useState<TrainingModule | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
+  // Carregar dados do Supabase ao iniciar
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  }, [data]);
+    fetchModules();
+  }, []);
 
-  const handlePurgeAll = () => {
-    if (confirm("Apagar tudo?")) {
-      setData(EMPTY_PORTAL_DATA);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(EMPTY_PORTAL_DATA));
+  const fetchModules = async () => {
+    setIsLoading(true);
+    const { data: modules, error } = await supabase
+      .from('training_modules')
+      .select('*')
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      toast.error("Erro ao carregar módulos");
+    } else {
+      const mappedModules: TrainingModule[] = (modules || []).map(m => ({
+        id: m.module_id,
+        dbId: m.id, // ID real do banco
+        title: m.title,
+        desc: m.desc_text,
+        type: m.type as any,
+        audioUrl: m.audio_url || '',
+        docUrl: m.doc_url || '',
+        progress: m.progress,
+        locked: m.locked
+      }));
+      setData(prev => ({ ...prev, modules: mappedModules }));
+    }
+    setIsLoading(false);
+  };
+
+  const handlePurgeAll = async () => {
+    if (confirm("Apagar todos os módulos do banco de dados?")) {
+      const { error } = await supabase
+        .from('training_modules')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000'); // Deleta tudo
+
+      if (error) toast.error("Erro ao limpar banco");
+      else {
+        setData(prev => ({ ...prev, modules: [] }));
+        toast.success("Banco de dados limpo");
+      }
     }
   };
 
-  const handleSaveNewModule = (newModuleData: Omit<TrainingModule, 'id'>, file: File | null) => {
+  const handleSaveNewModule = async (newModuleData: Omit<TrainingModule, 'id'>, file: File | null) => {
     const nextId = `MOD-${(data.modules.length + 1).toString().padStart(2, '0')}`;
-    let audioUrl = newModuleData.audioUrl;
-    let docUrl = newModuleData.docUrl;
+    let audioUrl = '';
+    let docUrl = '';
     
+    const toastId = toast.loading("Enviando asset...");
+
+    // Upload de arquivo se existir
     if (file) {
-      const url = URL.createObjectURL(file);
-      if (file.type.startsWith('audio/')) { audioUrl = url; docUrl = ''; }
-      else if (file.type === 'application/pdf') { docUrl = url; audioUrl = ''; }
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError, data: uploadData } = await supabase.storage
+        .from('assets')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        toast.error("Erro no upload do arquivo", { id: toastId });
+        return;
+      }
+
+      const { data: { publicUrl } } = supabase.storage.from('assets').getPublicUrl(filePath);
+      
+      if (file.type.startsWith('audio/')) audioUrl = publicUrl;
+      else if (file.type === 'application/pdf') docUrl = publicUrl;
     }
 
-    const newModule: TrainingModule = { ...newModuleData, id: nextId, audioUrl, docUrl, progress: 0, locked: false };
-    setData(prev => ({ ...prev, modules: [...prev.modules, newModule] }));
+    // Salvar no Banco
+    const { data: inserted, error } = await supabase
+      .from('training_modules')
+      .insert([{
+        module_id: nextId,
+        title: newModuleData.title,
+        desc_text: newModuleData.desc,
+        type: newModuleData.type,
+        audio_url: audioUrl,
+        doc_url: docUrl,
+        progress: 0,
+        locked: false
+      }])
+      .select()
+      .single();
+
+    if (error) {
+      toast.error("Erro ao salvar módulo", { id: toastId });
+    } else {
+      toast.success("Módulo implantado com sucesso", { id: toastId });
+      fetchModules(); // Recarregar para garantir sincronia
+    }
   };
 
-  const handleDeleteModule = (id: string) => {
-    setData(prev => ({ ...prev, modules: prev.modules.filter(m => m.id !== id) }));
+  const handleDeleteModule = async (id: string) => {
+    const moduleToDelete = data.modules.find(m => m.id === id);
+    if (!moduleToDelete) return;
+
+    const { error } = await supabase
+      .from('training_modules')
+      .delete()
+      .eq('module_id', id);
+
+    if (error) toast.error("Erro ao deletar");
+    else {
+      toast.success("Módulo removido");
+      setData(prev => ({ ...prev, modules: prev.modules.filter(m => m.id !== id) }));
+    }
   };
 
-  const handleUpdateModule = (updated: TrainingModule) => {
-    setData(prev => ({ ...prev, modules: prev.modules.map(m => m.id === updated.id ? updated : m) }));
+  const handleUpdateModule = async (updated: TrainingModule) => {
+    const { error } = await supabase
+      .from('training_modules')
+      .update({
+        title: updated.title,
+        desc_text: updated.desc,
+        progress: updated.progress,
+        locked: updated.locked,
+        audio_url: updated.audioUrl,
+        doc_url: updated.docUrl
+      })
+      .eq('module_id', updated.id);
+
+    if (error) toast.error("Erro ao atualizar");
+    else {
+      toast.success("Módulo atualizado");
+      fetchModules();
+    }
   };
 
-  const handleToggleLock = (id: string) => {
-    setData(prev => ({ ...prev, modules: prev.modules.map(m => m.id === id ? { ...m, locked: !m.locked } : m) }));
+  const handleToggleLock = async (id: string) => {
+    const mod = data.modules.find(m => m.id === id);
+    if (!mod) return;
+
+    const { error } = await supabase
+      .from('training_modules')
+      .update({ locked: !mod.locked })
+      .eq('module_id', id);
+
+    if (error) toast.error("Erro ao alterar trava");
+    else fetchModules();
   };
 
   return (
@@ -95,7 +194,10 @@ const Index = () => {
         <header className="pt-12 pb-12 flex justify-between items-center border-b border-white/5 mb-8">
           <div className="space-y-1">
             <h1 className="text-3xl font-black text-white tracking-tighter uppercase">AERIS <span className="text-[#00E5FF]">ACADEMY</span></h1>
-            <p className="text-[10px] font-mono text-[#00E5FF]/40 uppercase tracking-[0.5em]">Status: Ready</p>
+            <div className="flex items-center gap-2">
+              <div className={`w-1.5 h-1.5 rounded-full ${isLoading ? 'bg-amber-500 animate-pulse' : 'bg-[#00E5FF]'}`} />
+              <p className="text-[10px] font-mono text-[#00E5FF]/40 uppercase tracking-[0.5em]">{isLoading ? 'Syncing...' : 'Database Connected'}</p>
+            </div>
           </div>
 
           <div className="flex items-center gap-4">
@@ -115,7 +217,12 @@ const Index = () => {
         <Breadcrumbs view={activeView} />
 
         <main className="max-w-7xl mx-auto pb-32">
-          {activeView === 'future' ? (
+          {isLoading ? (
+            <div className="h-[40vh] flex flex-col items-center justify-center gap-4">
+              <Loader2 className="w-12 h-12 text-[#00E5FF] animate-spin" />
+              <span className="text-[10px] font-mono text-white/20 uppercase tracking-[0.5em]">Retrieving Data...</span>
+            </div>
+          ) : activeView === 'future' ? (
              <FutureVisionPortal onExit={() => setActiveView('dashboard')} />
           ) : (
             <AnimatePresence mode="wait">
