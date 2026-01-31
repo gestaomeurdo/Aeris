@@ -22,9 +22,9 @@ const TacticalSidebar = ({ activeView, onViewChange, isMaster, onUserClick }: Ta
   ];
 
   return (
-    <nav className="fixed left-6 top-1/2 -translate-y-1/2 w-20 bg-black/60 backdrop-blur-3xl border border-white/5 rounded-[32px] flex flex-col items-center py-10 gap-10 z-50 shadow-2xl">
-      <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#00E5FF] to-[#6366F1] flex items-center justify-center p-2.5">
-        <AerisLogo />
+    <nav className="fixed left-6 top-1/2 -translate-y-1/2 w-24 bg-black/60 backdrop-blur-3xl border border-white/5 rounded-[32px] flex flex-col items-center py-10 gap-10 z-50 shadow-2xl">
+      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#00E5FF] to-[#6366F1] flex items-center justify-center p-2.5">
+        <AerisLogo size={64} />
       </div>
       
       <div className="flex flex-col gap-6">

@@ -137,7 +137,7 @@ const Index = () => {
         onUserClick={handleUserClick}
       />
 
-      <div className="pl-32 pr-12 relative z-10">
+      <div className="pl-36 pr-12 relative z-10">
         <header className="pt-12 pb-12 flex justify-between items-center border-b border-white/5 mb-8">
           <div className="flex items-center gap-8">
             <div className="space-y-1">
