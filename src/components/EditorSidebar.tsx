@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Settings, Save, RotateCcw, Plus, Trash2, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Settings, Save, ChevronRight, X, Play, FileText, Headphones } from 'lucide-react';
 import { PortalData } from '@/types/portal';
 
 interface EditorSidebarProps {
@@ -12,98 +12,80 @@ interface EditorSidebarProps {
 const EditorSidebar = ({ data, onUpdate }: EditorSidebarProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleChange = (path: string, value: any) => {
-    const newData = { ...data };
-    const keys = path.split('.');
-    let current: any = newData;
-    for (let i = 0; i < keys.length - 1; i++) {
-      current = current[keys[i]];
-    }
-    current[keys[keys.length - 1]] = value;
-    onUpdate(newData);
+  const updateGlobal = (key: keyof PortalData, value: any) => {
+    onUpdate({ ...data, [key]: value });
+  };
+
+  const updateModule = (idx: number, field: string, value: any) => {
+    const newModules = [...data.modules];
+    (newModules[idx] as any)[field] = value;
+    onUpdate({ ...data, modules: newModules });
   };
 
   return (
     <>
-      {/* Toggle Button */}
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed right-0 top-1/2 -translate-y-1/2 z-[60] bg-[#00E5FF] text-black p-3 rounded-l-2xl shadow-[0_0_20px_rgba(0,229,255,0.4)] hover:pr-6 transition-all"
+        className="fixed right-0 top-1/2 -translate-y-1/2 z-[100] bg-[#00E5FF] text-black p-4 rounded-l-3xl shadow-[0_0_40px_rgba(0,229,255,0.4)] hover:pr-8 transition-all group"
       >
-        {isOpen ? <ChevronRight className="w-5 h-5" /> : <Settings className="w-5 h-5 animate-spin-slow" />}
+        {isOpen ? <X className="w-6 h-6" /> : <Settings className="w-6 h-6 animate-spin-slow" />}
       </button>
 
-      {/* Sidebar Panel */}
-      <div className={`fixed right-0 top-0 h-full w-80 md:w-96 bg-[#020617] border-l border-white/10 z-[55] transition-transform duration-500 transform ${isOpen ? 'translate-x-0' : 'translate-x-full'} overflow-y-auto custom-scrollbar`}>
-        <div className="p-8 space-y-10">
+      <div className={`fixed right-0 top-0 h-full w-96 bg-[#020617]/95 backdrop-blur-2xl border-l border-[#00E5FF]/10 z-[90] transition-transform duration-500 transform ${isOpen ? 'translate-x-0' : 'translate-x-full'} overflow-y-auto custom-scrollbar shadow-2xl`}>
+        <div className="p-10 space-y-12">
           <div className="space-y-2">
-            <h3 className="text-xl font-black text-white uppercase tracking-tighter">Command Override</h3>
-            <p className="text-[10px] font-mono text-white/30 uppercase tracking-widest">Master Editor Mode</p>
+            <h3 className="text-2xl font-black text-white uppercase tracking-tighter">Command Center</h3>
+            <p className="text-[10px] font-mono text-[#00E5FF] uppercase tracking-[0.4em]">Master Override Mode</p>
           </div>
 
-          {/* Mission Settings */}
-          <div className="space-y-6">
-            <div className="flex items-center gap-3">
-              <div className="w-1 h-4 bg-[#00E5FF]" />
-              <h4 className="text-[11px] font-bold text-white/60 uppercase tracking-widest">Mission Config</h4>
-            </div>
-            
+          <div className="space-y-8">
             <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-[9px] font-mono text-white/20 uppercase font-black">Video URL (YouTube Embed)</label>
-                <input 
-                  type="text" 
-                  value={data.videoUrl}
-                  onChange={(e) => handleChange('videoUrl', e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-xs text-white focus:border-[#00E5FF]/40 outline-none"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-[9px] font-mono text-white/20 uppercase font-black">Mission Title</label>
-                <input 
-                  type="text" 
-                  value={data.missionTitle}
-                  onChange={(e) => handleChange('missionTitle', e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-xs text-white focus:border-[#00E5FF]/40 outline-none"
-                />
-              </div>
+              <label className="text-[9px] font-mono text-white/40 uppercase font-black tracking-widest">Main Operation Video</label>
+              <input 
+                value={data.mainVideo}
+                onChange={(e) => updateGlobal('mainVideo', e.target.value)}
+                placeholder="URL do Vídeo (mp4/youtube)"
+                className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-xs text-white focus:border-[#00E5FF] outline-none transition-colors"
+              />
             </div>
-          </div>
 
-          {/* Audio Tracks */}
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-1 h-4 bg-[#6366F1]" />
-                <h4 className="text-[11px] font-bold text-white/60 uppercase tracking-widest">Audio Hub</h4>
-              </div>
-            </div>
-            
-            <div className="space-y-4">
-              {data.audioTracks.map((track, idx) => (
-                <div key={track.id} className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl space-y-3">
+            <hr className="border-white/5" />
+
+            <div className="space-y-6">
+              <h4 className="text-[10px] font-black text-[#00E5FF] uppercase tracking-[0.4em]">Tactical Modules</h4>
+              {data.modules.map((mod, idx) => (
+                <div key={mod.id} className="p-6 bg-white/[0.02] border border-white/5 rounded-3xl space-y-4 hover:border-white/10 transition-colors">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-mono font-black text-white/20">{mod.id}</span>
+                  </div>
                   <input 
-                    type="text" 
-                    value={track.title}
-                    onChange={(e) => {
-                      const newTracks = [...data.audioTracks];
-                      newTracks[idx].title = e.target.value;
-                      handleChange('audioTracks', newTracks);
-                    }}
-                    className="w-full bg-transparent text-xs text-white font-bold outline-none"
-                    placeholder="Track Title"
+                    value={mod.title}
+                    onChange={(e) => updateModule(idx, 'title', e.target.value)}
+                    placeholder="Título da Missão"
+                    className="w-full bg-transparent text-sm font-bold text-white outline-none focus:text-[#00E5FF] transition-colors"
                   />
-                  <input 
-                    type="text" 
-                    value={track.url}
-                    onChange={(e) => {
-                      const newTracks = [...data.audioTracks];
-                      newTracks[idx].url = e.target.value;
-                      handleChange('audioTracks', newTracks);
-                    }}
-                    className="w-full bg-black/20 text-[9px] text-[#00E5FF] p-2 rounded-lg outline-none"
-                    placeholder="MP3/Audio URL"
-                  />
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-[9px] text-white/30 uppercase font-black">
+                      <Headphones className="w-3 h-3" /> Audio URL
+                    </div>
+                    <input 
+                      value={mod.audioUrl}
+                      onChange={(e) => updateModule(idx, 'audioUrl', e.target.value)}
+                      placeholder="Link do .mp3"
+                      className="w-full bg-black/40 border border-white/5 rounded-xl p-3 text-[10px] text-white outline-none focus:border-[#00E5FF]/40"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-[9px] text-white/30 uppercase font-black">
+                      <FileText className="w-3 h-3" /> Document URL
+                    </div>
+                    <input 
+                      value={mod.docUrl}
+                      onChange={(e) => updateModule(idx, 'docUrl', e.target.value)}
+                      placeholder="Link do PDF/Doc"
+                      className="w-full bg-black/40 border border-white/5 rounded-xl p-3 text-[10px] text-white outline-none focus:border-[#00E5FF]/40"
+                    />
+                  </div>
                 </div>
               ))}
             </div>
@@ -111,13 +93,13 @@ const EditorSidebar = ({ data, onUpdate }: EditorSidebarProps) => {
 
           <button 
             onClick={() => {
-              localStorage.setItem('aeris_portal_data', JSON.stringify(data));
-              alert('Configurações salvas no sistema local!');
+              localStorage.setItem('aeris_data', JSON.stringify(data));
+              alert('COMMITTED: Mission parameters updated in local matrix.');
             }}
-            className="w-full py-4 bg-[#00E5FF] text-black font-black uppercase text-[11px] rounded-2xl flex items-center justify-center gap-3 hover:shadow-[0_0_30px_rgba(0,229,255,0.3)] transition-all"
+            className="w-full py-5 bg-[#00E5FF] text-black font-black uppercase text-xs rounded-2xl shadow-[0_0_30px_rgba(0,229,255,0.2)] hover:scale-[1.02] transition-all flex items-center justify-center gap-3"
           >
             <Save className="w-4 h-4" />
-            Commit Changes
+            Save Configuration
           </button>
         </div>
       </div>

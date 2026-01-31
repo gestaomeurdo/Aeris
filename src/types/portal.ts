@@ -1,24 +1,16 @@
-export interface AudioTrack {
-  id: string;
-  title: string;
-  host: string;
-  url: string;
-  duration: string;
-}
-
 export interface TrainingModule {
   id: string;
   title: string;
   desc: string;
+  audioUrl: string;
   docUrl: string;
   progress: number;
   locked: boolean;
 }
 
 export interface PortalData {
+  mainVideo: string;
   missionTitle: string;
-  videoUrl: string;
   missionDescription: string;
-  audioTracks: AudioTrack[];
   modules: TrainingModule[];
 }
