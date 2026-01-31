@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { Play, Maximize2, Settings, Info, Activity } from 'lucide-react';
+import { Play, Activity } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface MissionBriefingProps {
@@ -11,6 +11,27 @@ interface MissionBriefingProps {
 }
 
 const MissionBriefing = ({ title, videoUrl, description }: MissionBriefingProps) => {
+  // Função para converter links normais do YouTube em links de EMBED
+  const getEmbedUrl = (url: string) => {
+    if (!url) return "";
+    
+    // Trata links curtos (youtu.be/ID)
+    if (url.includes('youtu.be/')) {
+      const id = url.split('youtu.be/')[1].split(/[?#]/)[0];
+      return `https://www.youtube.com/embed/${id}?autoplay=0&rel=0`;
+    }
+    
+    // Trata links longos (youtube.com/watch?v=ID)
+    if (url.includes('watch?v=')) {
+      const id = url.split('v=')[1].split(/[&?#]/)[0];
+      return `https://www.youtube.com/embed/${id}?autoplay=0&rel=0`;
+    }
+
+    return url;
+  };
+
+  const embedUrl = getEmbedUrl(videoUrl);
+
   return (
     <section className="relative space-y-6">
       <div className="flex justify-between items-end px-2">
@@ -30,39 +51,27 @@ const MissionBriefing = ({ title, videoUrl, description }: MissionBriefingProps)
       </div>
 
       <div className="relative aspect-video rounded-3xl overflow-hidden border border-white/10 shadow-2xl group bg-black">
-        {videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be') ? (
+        {embedUrl ? (
           <iframe 
-            src={videoUrl.replace('watch?v=', 'embed/')} 
+            src={embedUrl} 
             className="w-full h-full border-none"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
             allowFullScreen
           />
         ) : (
-          <>
-            <img 
-              src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=2070" 
-              alt="Briefing Visual" 
-              className="absolute inset-0 w-full h-full object-cover grayscale-[0.5] opacity-40"
-            />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <motion.button 
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                className="relative w-24 h-24 bg-[#00E5FF] rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(0,229,255,0.4)]"
-              >
-                <Play className="w-8 h-8 text-black fill-black ml-1" />
-              </motion.button>
-            </div>
-          </>
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-white/10">
+            <Play className="w-20 h-20" />
+            <p className="text-[10px] font-mono font-black uppercase tracking-[0.5em]">Waiting for Uplink...</p>
+          </div>
         )}
         
-        {/* HUD Elements Overlay (quando não tem vídeo ou em hover) */}
+        {/* HUD Elements Overlay (Hover) */}
         <div className="absolute inset-0 pointer-events-none p-8 flex flex-col justify-between z-10 bg-gradient-to-t from-black via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
           <div className="flex justify-between items-start">
              <div className="bg-black/40 backdrop-blur-md border border-white/10 p-4 rounded-2xl flex gap-6">
               <div className="space-y-1">
-                <p className="text-[8px] font-black text-white/40 uppercase tracking-widest">Operation Code</p>
-                <p className="text-xs font-mono text-[#00E5FF]">VORTEX-ZERO-9</p>
+                <p className="text-[8px] font-black text-white/40 uppercase tracking-widest">Operation Status</p>
+                <p className="text-xs font-mono text-[#00E5FF]">ACTIVE_STREAM</p>
               </div>
             </div>
           </div>

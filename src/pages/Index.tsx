@@ -9,7 +9,7 @@ import { Terminal, Target, Shield, Bell, LayoutGrid, User, Wifi } from 'lucide-r
 import { PortalData } from '@/types/portal';
 
 const INITIAL_DATA: PortalData = {
-  mainVideo: "https://www.w3schools.com/html/mov_bbb.mp4",
+  mainVideo: "https://youtu.be/mQayAWnJQOE",
   missionTitle: "AERIS LEARNING INITIATIVE",
   missionDescription: "Mastering Air Force Leadership and modernizing military tactical learning through digital immersive doctrines.",
   modules: [
