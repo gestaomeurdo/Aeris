@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { LayoutGrid, Target, Headphones, FileText, Shield, User, BarChart3 } from 'lucide-react';
+import { LayoutGrid, Target, Headphones, FileText, Shield, User, Zap } from 'lucide-react';
 import AerisLogo from './AerisLogo';
 
 interface TacticalSidebarProps {
@@ -17,7 +17,7 @@ const TacticalSidebar = ({ activeView, onViewChange, isMaster, onUserClick }: Ta
     { id: 'missions', icon: Target, label: 'MISSIONS' },
     { id: 'audio', icon: Headphones, label: 'AUDIO HUB' },
     { id: 'docs', icon: FileText, label: 'RESOURCES' },
-    { id: 'future', icon: BarChart3, label: 'FUTURE' },
+    { id: 'future', icon: Zap, label: 'FUTURE' },
     { id: 'security', icon: Shield, label: 'PROTOCOL' },
   ];
 
