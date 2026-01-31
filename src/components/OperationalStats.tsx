@@ -3,6 +3,7 @@
 import React from 'react';
 import { BarChart3, Activity, Zap, Users } from 'lucide-react';
 import { motion } from 'framer-motion';
+import GlobalReadinessHUD from './GlobalReadinessHUD';
 
 const OperationalStats = () => {
   const stats = [
@@ -44,21 +45,7 @@ const OperationalStats = () => {
         ))}
       </div>
 
-      <div className="bg-white/[0.02] border border-white/5 rounded-[40px] p-12 aspect-[21/9] flex items-center justify-center overflow-hidden relative">
-         <div className="absolute inset-0 bg-grid-pattern opacity-20" />
-         <div className="flex items-end gap-3 h-48">
-            {[...Array(24)].map((_, i) => (
-              <motion.div
-                key={i}
-                initial={{ height: 0 }}
-                animate={{ height: `${Math.random() * 100}%` }}
-                transition={{ duration: 2, repeat: Infinity, repeatType: 'reverse', delay: i * 0.05 }}
-                className="w-4 bg-gradient-to-t from-[#00E5FF]/0 to-[#00E5FF]/40 rounded-t-lg"
-              />
-            ))}
-         </div>
-         <p className="absolute bottom-8 text-[10px] font-mono text-white/20 uppercase tracking-[1em]">Tactical Data Feed // REALTIME</p>
-      </div>
+      <GlobalReadinessHUD />
     </div>
   );
 };

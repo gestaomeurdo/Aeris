@@ -11,6 +11,7 @@ import SecurityProtocol from '@/components/SecurityProtocol';
 import FutureVisionPortal from '@/components/FutureVisionPortal';
 import AuthTerminal from '@/components/AuthTerminal';
 import EditModuleModal from '@/components/EditModuleModal';
+import OperationalStats from '@/components/OperationalStats';
 import { Bell, Wifi, Plus, Edit3, Search } from 'lucide-react';
 import { PortalData, TrainingModule } from '@/types/portal';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -222,6 +223,7 @@ const Index = () => {
                     onToggleLock={handleToggleLock}
                     onEdit={setEditingModule}
                   />
+                  <OperationalStats />
                 </motion.div>
               )}
 
