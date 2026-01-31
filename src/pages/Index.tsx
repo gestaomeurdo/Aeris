@@ -161,7 +161,8 @@ const Index = () => {
           doc_url: docUrl,
           cover_url: coverUrl 
         })
-        .eq('module_id', updated.id);
+        .eq('id', updated.dbId); // USANDO O UUID DO BANCO DE DADOS
+      
       if (error) throw error;
       toast.success("Asset atualizado", { id: toastId });
       fetchModules();
@@ -171,8 +172,16 @@ const Index = () => {
   };
 
   const handleDeleteModule = async (id: string) => {
+    // Aqui o 'id' passado pelos componentes era o module_id, vamos buscar o dbId
     if (!isMaster) return;
-    const { error } = await supabase.from('training_modules').delete().eq('module_id', id);
+    const mod = data.modules.find(m => m.id === id);
+    if (!mod) return;
+
+    const { error } = await supabase
+      .from('training_modules')
+      .delete()
+      .eq('id', mod.dbId); // USANDO O UUID DO BANCO DE DADOS
+
     if (error) toast.error("Erro ao deletar");
     else { toast.success("Removido com sucesso"); fetchModules(); }
   };
@@ -181,14 +190,19 @@ const Index = () => {
     if (!isMaster) return;
     const mod = data.modules.find(m => m.id === id);
     if (!mod) return;
-    const { error } = await supabase.from('training_modules').update({ locked: !mod.locked }).eq('module_id', id);
+
+    const { error } = await supabase
+      .from('training_modules')
+      .update({ locked: !mod.locked })
+      .eq('id', mod.dbId); // USANDO O UUID DO BANCO DE DADOS
+
     if (error) toast.error("Erro ao alterar trava");
     else fetchModules();
   };
   
   const handleLogout = async () => {
     await logout();
-    window.location.reload(); // Recarregar para limpar estados residuais
+    window.location.reload();
   };
 
   const manualModules = data.modules.filter(m => m.category === 'module');
