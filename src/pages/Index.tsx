@@ -11,13 +11,20 @@ import EditModuleModal from '@/components/EditModuleModal';
 import OperationalStats from '@/components/OperationalStats';
 import AddModuleModal from '@/components/AddModuleModal';
 import EditMainBriefingModal from '@/components/EditMainBriefingModal';
+import AuthTerminal from '@/components/AuthTerminal'; // Importando o terminal de autenticação
 import { Database, Loader2, Settings2 } from 'lucide-react';
 import { PortalData, TrainingModule } from '@/types/portal';
 import { AnimatePresence, motion } from 'framer-motion';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useSession } from '@/contexts/SessionContext';
 
 const Index = () => {
+  const { isAuthenticated, isLoading: isAuthLoading, session } = useSession();
+  
+  // Usamos isAuthenticated para determinar se o usuário é o 'Master' (logado)
+  const isMaster = isAuthenticated; 
+
   const [data, setData] = useState<PortalData>({
     mainVideo: "https://youtu.be/mQayAWnJQOE",
     missionTitle: "AERIS ACADEMY",
@@ -26,11 +33,11 @@ const Index = () => {
   });
 
   const [isLoading, setIsLoading] = useState(true);
-  const [isMaster, setIsMaster] = useState(true); 
   const [activeView, setActiveView] = useState('dashboard');
   const [editingModule, setEditingModule] = useState<TrainingModule | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditMainModalOpen, setIsEditMainModalOpen] = useState(false);
+  const [isAuthTerminalOpen, setIsAuthTerminalOpen] = useState(false);
 
   useEffect(() => { 
     const savedBriefing = localStorage.getItem('aeris_main_briefing');
@@ -43,11 +50,16 @@ const Index = () => {
         missionDescription: parsed.description
       }));
     }
-    fetchModules(); 
-  }, []);
+    // Só tentamos buscar módulos se a autenticação inicial tiver terminado
+    if (!isAuthLoading) {
+      fetchModules(); 
+    }
+  }, [isAuthLoading]);
 
   const fetchModules = async () => {
     setIsLoading(true);
+    // Se o usuário estiver autenticado, a RLS garantirá que ele só possa modificar
+    // Mas para SELECT, a política é pública, então todos podem ver.
     const { data: modules, error } = await supabase
       .from('training_modules')
       .select('*')
@@ -87,6 +99,11 @@ const Index = () => {
   };
 
   const handleSaveNewModule = async (newModuleData: Omit<TrainingModule, 'id' | 'dbId' | 'progress' | 'coverUrl'>, files: { audio?: File, doc?: File, cover?: File }) => {
+    if (!isMaster) {
+      toast.error("Acesso negado. Requer autenticação Master.");
+      return;
+    }
+    
     const nextId = `ASSET-${(data.modules.length + 1).toString().padStart(2, '0')}`;
     const toastId = toast.loading("Implantando assets...");
     
@@ -97,7 +114,7 @@ const Index = () => {
 
       if (files.audio) audioUrl = await uploadFile(files.audio, 'audio');
       if (files.doc) docUrl = await uploadFile(files.doc, 'docs');
-      if (files.cover) coverUrl = await uploadFile(files.cover, 'covers'); // Novo upload de capa
+      if (files.cover) coverUrl = await uploadFile(files.cover, 'covers'); 
 
       const { error } = await supabase
         .from('training_modules')
@@ -109,7 +126,7 @@ const Index = () => {
           category: newModuleData.category,
           audio_url: audioUrl,
           doc_url: docUrl,
-          cover_url: coverUrl, // Salvando a URL da capa
+          cover_url: coverUrl, 
           progress: 0,
           locked: false
         }]);
@@ -123,15 +140,20 @@ const Index = () => {
   };
 
   const handleUpdateModule = async (updated: TrainingModule, files: { audio?: File, doc?: File, cover?: File }) => {
+    if (!isMaster) {
+      toast.error("Acesso negado. Requer autenticação Master.");
+      return;
+    }
+    
     const toastId = toast.loading("Atualizando assets...");
     try {
       let audioUrl = updated.audioUrl;
       let docUrl = updated.docUrl;
-      let coverUrl = updated.coverUrl; // Mantém a URL existente se não houver novo upload
+      let coverUrl = updated.coverUrl; 
 
       if (files.audio) audioUrl = await uploadFile(files.audio, 'audio');
       if (files.doc) docUrl = await uploadFile(files.doc, 'docs');
-      if (files.cover) coverUrl = await uploadFile(files.cover, 'covers'); // Novo upload de capa
+      if (files.cover) coverUrl = await uploadFile(files.cover, 'covers'); 
 
       const { error } = await supabase
         .from('training_modules')
@@ -142,7 +164,7 @@ const Index = () => {
           locked: updated.locked,
           audio_url: audioUrl,
           doc_url: docUrl,
-          cover_url: coverUrl // Atualizando a URL da capa
+          cover_url: coverUrl 
         })
         .eq('module_id', updated.id);
       if (error) throw error;
@@ -154,22 +176,61 @@ const Index = () => {
   };
 
   const handleDeleteModule = async (id: string) => {
+    if (!isMaster) {
+      toast.error("Acesso negado. Requer autenticação Master.");
+      return;
+    }
     const { error } = await supabase.from('training_modules').delete().eq('module_id', id);
     if (error) toast.error("Erro ao deletar");
     else { toast.success("Removido com sucesso"); fetchModules(); }
   };
 
   const handleToggleLock = async (id: string) => {
+    if (!isMaster) {
+      toast.error("Acesso negado. Requer autenticação Master.");
+      return;
+    }
     const mod = data.modules.find(m => m.id === id);
     if (!mod) return;
     const { error } = await supabase.from('training_modules').update({ locked: !mod.locked }).eq('module_id', id);
     if (error) toast.error("Erro ao alterar trava");
     else fetchModules();
   };
+  
+  const handleAuthSuccess = async () => {
+    // Usando credenciais fixas para simular o login do Supabase
+    // NOTA: Em uma aplicação real, você usaria supabase.auth.signInWithPassword
+    // Como o AuthTerminal usa credenciais fixas, vamos simular o login aqui.
+    const { error } = await supabase.auth.signInWithPassword({
+      email: 'mike@aeris.academy',
+      password: '@mike2026',
+    });
+
+    if (error) {
+      toast.error(`Falha na autenticação: ${error.message}`);
+    } else {
+      // O SessionContext irá lidar com o estado de autenticação após o sucesso.
+    }
+  };
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast.error(`Erro ao sair: ${error.message}`);
+    }
+  };
 
   // Filtros de Categoria
   const manualModules = data.modules.filter(m => m.category === 'module');
   const podcastModules = data.modules.filter(m => m.category === 'podcast');
+
+  if (isAuthLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#020202]">
+        <Loader2 className="w-12 h-12 text-[#00E5FF] animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#020202] text-[#B0BEC5] font-sans overflow-x-hidden">
@@ -185,14 +246,29 @@ const Index = () => {
           description: data.missionDescription
         }}
         onSave={(newData) => {
+          if (!isMaster) {
+            toast.error("Acesso negado. Requer autenticação Master.");
+            return;
+          }
           setData(prev => ({ ...prev, missionTitle: newData.title, mainVideo: newData.video, missionDescription: newData.description }));
           localStorage.setItem('aeris_main_briefing', JSON.stringify(newData));
           toast.success("Briefing atualizado");
         }}
       />
+      
+      <AuthTerminal 
+        isOpen={isAuthTerminalOpen} 
+        onClose={() => setIsAuthTerminalOpen(false)} 
+        onSuccess={handleAuthSuccess} 
+      />
 
       <div className="fixed inset-0 pointer-events-none z-0"><div className="absolute inset-0 bg-grid-pattern opacity-5" /></div>
-      <TacticalSidebar activeView={activeView} onViewChange={setActiveView} isMaster={isMaster} onUserClick={() => setIsMaster(!isMaster)} />
+      <TacticalSidebar 
+        activeView={activeView} 
+        onViewChange={setActiveView} 
+        isMaster={isMaster} 
+        onUserClick={isMaster ? handleLogout : () => setIsAuthTerminalOpen(true)} 
+      />
       
       <div className="pl-36 pr-12 relative z-10">
         <header className="pt-12 pb-12 flex justify-between items-center border-b border-white/5 mb-8">
@@ -200,7 +276,9 @@ const Index = () => {
             <h1 className="text-3xl font-black text-white uppercase">AERIS <span className="text-[#00E5FF]">ACADEMY</span></h1>
             <div className="flex items-center gap-2"><div className={`w-1.5 h-1.5 rounded-full ${isLoading ? 'bg-amber-500 animate-pulse' : 'bg-[#00E5FF]'}`} /></div>
           </div>
-          <button onClick={() => setIsAddModalOpen(true)} className="bg-[#00E5FF] text-black px-8 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest hover:scale-105">+ Deploy Asset</button>
+          {isMaster && (
+            <button onClick={() => setIsAddModalOpen(true)} className="bg-[#00E5FF] text-black px-8 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest hover:scale-105">+ Deploy Asset</button>
+          )}
         </header>
 
         <Breadcrumbs view={activeView} />
@@ -215,7 +293,7 @@ const Index = () => {
                       title={data.missionTitle} 
                       videoUrl={data.mainVideo} 
                       description={data.missionDescription} 
-                      onEdit={isMaster ? () => setIsEditMainModalOpen(true) : undefined} // Passa a função de edição se for Master
+                      onEdit={isMaster ? () => setIsEditMainModalOpen(true) : undefined} 
                     />
                     <OperationsCenter modules={manualModules} isMaster={isMaster} onDelete={handleDeleteModule} onToggleLock={handleToggleLock} onEdit={setEditingModule} />
                     <OperationalStats />
