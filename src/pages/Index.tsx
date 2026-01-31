@@ -140,6 +140,11 @@ const Index = () => {
       return;
     }
     
+    if (!updated.dbId) {
+      toast.error("Erro: ID de referência ausente.");
+      return;
+    }
+
     const toastId = toast.loading("Atualizando assets...");
     try {
       let audioUrl = updated.audioUrl;
@@ -164,6 +169,8 @@ const Index = () => {
         .eq('id', updated.dbId); // USANDO O UUID DO BANCO DE DADOS
       
       if (error) throw error;
+      
+      setEditingModule(null); // Limpar estado de edição
       toast.success("Asset atualizado", { id: toastId });
       fetchModules();
     } catch (err: any) {
@@ -172,7 +179,6 @@ const Index = () => {
   };
 
   const handleDeleteModule = async (id: string) => {
-    // Aqui o 'id' passado pelos componentes era o module_id, vamos buscar o dbId
     if (!isMaster) return;
     const mod = data.modules.find(m => m.id === id);
     if (!mod) return;
@@ -180,7 +186,7 @@ const Index = () => {
     const { error } = await supabase
       .from('training_modules')
       .delete()
-      .eq('id', mod.dbId); // USANDO O UUID DO BANCO DE DADOS
+      .eq('id', mod.dbId); 
 
     if (error) toast.error("Erro ao deletar");
     else { toast.success("Removido com sucesso"); fetchModules(); }
@@ -194,7 +200,7 @@ const Index = () => {
     const { error } = await supabase
       .from('training_modules')
       .update({ locked: !mod.locked })
-      .eq('id', mod.dbId); // USANDO O UUID DO BANCO DE DADOS
+      .eq('id', mod.dbId);
 
     if (error) toast.error("Erro ao alterar trava");
     else fetchModules();

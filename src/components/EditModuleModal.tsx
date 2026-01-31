@@ -1,127 +1,146 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { X, Save, Type, Headphones, FileText, BarChart, Upload, Image, AlignLeft } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { X, Save, FileAudio, FileText, Image as ImageIcon } from 'lucide-react';
 import { TrainingModule } from '@/types/portal';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 
 interface EditModuleModalProps {
   isOpen: boolean;
   onClose: () => void;
   module: TrainingModule | null;
-  onSave: (updated: TrainingModule, files: { audio?: File, doc?: File, cover?: File }) => void;
+  onSave: (module: TrainingModule, files: { audio?: File, doc?: File, cover?: File }) => void;
 }
 
 const EditModuleModal = ({ isOpen, onClose, module, onSave }: EditModuleModalProps) => {
   const [formData, setFormData] = useState<TrainingModule | null>(null);
-  const [audioFile, setAudioFile] = useState<File | null>(null);
-  const [docFile, setDocFile] = useState<File | null>(null);
-  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<{ audio?: File, doc?: File, cover?: File }>({});
 
   useEffect(() => {
     if (module) {
       setFormData({ ...module });
-      setAudioFile(null);
-      setDocFile(null);
-      setCoverFile(null);
+      setFiles({});
     }
   }, [module]);
 
-  if (!formData) return null;
+  if (!isOpen || !formData) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSave(formData, { 
-      audio: audioFile || undefined, 
-      doc: docFile || undefined,
-      cover: coverFile || undefined
-    });
-    onClose();
+  const handleSave = () => {
+    if (formData) {
+      onSave(formData, files);
+      onClose();
+    }
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[150] flex items-center justify-center p-6 bg-black/90 backdrop-blur-xl"
-        >
-          <motion.div
-            initial={{ scale: 0.9, y: 20 }}
-            animate={{ scale: 1, y: 0 }}
-            exit={{ scale: 0.9, y: 20 }}
-            className="w-full max-w-2xl bg-[#020617] border border-[#00E5FF]/30 rounded-[32px] overflow-hidden shadow-[0_0_100px_rgba(0,229,255,0.1)]"
-          >
-            <div className="p-8 border-b border-white/5 flex justify-between items-center bg-black/40">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-[#00E5FF]/10 rounded-lg"><Save className="w-5 h-5 text-[#00E5FF]" /></div>
-                <div className="space-y-1">
-                  <span className="text-[10px] font-mono font-black text-[#00E5FF] uppercase tracking-widest">TACTICAL OVERRIDE</span>
-                  <h3 className="text-xl font-black text-white uppercase tracking-tighter">Edit Module: {formData.id}</h3>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={onClose} />
+      
+      <div className="relative bg-[#0A0A0A] border border-white/10 w-full max-w-2xl rounded-[32px] overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-300">
+        <div className="p-8 border-b border-white/5 flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-black text-white uppercase tracking-tight">Editar Asset</h2>
+            <p className="text-[10px] font-mono text-[#00E5FF] uppercase tracking-[0.3em] mt-1">ID: {formData.id}</p>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full transition-colors">
+            <X className="w-5 h-5 text-white/40" />
+          </button>
+        </div>
+
+        <div className="p-8 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-white/40 uppercase tracking-widest ml-1">Título do Asset</label>
+            <input 
+              type="text" 
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-4 text-white focus:border-[#00E5FF]/50 focus:outline-none transition-all"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-white/40 uppercase tracking-widest ml-1">Descrição Técnica</label>
+            <textarea 
+              value={formData.desc}
+              onChange={(e) => setFormData({ ...formData, desc: e.target.value })}
+              rows={3}
+              className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-4 text-white focus:border-[#00E5FF]/50 focus:outline-none transition-all resize-none"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-white/40 uppercase tracking-widest ml-1">Atualizar Áudio</label>
+              <div className="relative group">
+                <input 
+                  type="file" 
+                  accept="audio/*"
+                  onChange={(e) => setFiles({ ...files, audio: e.target.files?.[0] })}
+                  className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                />
+                <div className="flex items-center gap-3 bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-4 group-hover:border-white/20 transition-all">
+                  <FileAudio className="w-4 h-4 text-[#00E5FF]" />
+                  <span className="text-[11px] text-white/60 truncate">
+                    {files.audio ? files.audio.name : 'Substituir arquivo...'}
+                  </span>
                 </div>
               </div>
-              <button onClick={onClose} className="p-3 hover:bg-white/5 rounded-xl transition-colors"><X className="w-6 h-6 text-white/40" /></button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-10 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
-              <div className="grid grid-cols-1 gap-6">
-                <div className="space-y-2">
-                  <Label className="text-[9px] font-mono font-black text-white/40 uppercase tracking-[0.2em] pl-1">Module Title</Label>
-                  <Input value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className="bg-white/[0.03] border-white/10 rounded-2xl py-4 text-white" />
-                </div>
-
-                {/* Novo campo de descrição para o módulo */}
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2 text-[9px] font-mono font-black text-white/40 uppercase tracking-[0.2em] pl-1">
-                    <AlignLeft className="w-3 h-3 text-[#00E5FF]" /> Module Description
-                  </Label>
-                  <Textarea 
-                    value={formData.desc} 
-                    onChange={(e) => setFormData({ ...formData, desc: e.target.value })} 
-                    className="bg-white/[0.03] border-white/10 rounded-2xl py-4 text-white h-24 resize-none" 
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-6 bg-white/[0.02] border border-white/5 rounded-3xl">
-                  <div className="space-y-2">
-                    <Label className="flex items-center gap-2 text-[9px] font-mono font-black text-[#00E5FF] uppercase tracking-[0.2em]">
-                      <Image className="w-3 h-3" /> Cover (.jpg/.png)
-                    </Label>
-                    <Input type="file" accept=".jpg, .jpeg, .png" onChange={(e) => setCoverFile(e.target.files?.[0] || null)} className="bg-white/[0.03] border-white/10 text-white/60 text-xs file:bg-[#00E5FF]/20" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="flex items-center gap-2 text-[9px] font-mono font-black text-[#00E5FF] uppercase tracking-[0.2em]">
-                      <Headphones className="w-3 h-3" /> Audio (.mp3)
-                    </Label>
-                    <Input type="file" accept=".mp3" onChange={(e) => setAudioFile(e.target.files?.[0] || null)} className="bg-white/[0.03] border-white/10 text-white/60 text-xs file:bg-[#00E5FF]/20" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="flex items-center gap-2 text-[9px] font-mono font-black text-[#00E5FF] uppercase tracking-[0.2em]">
-                      <FileText className="w-3 h-3" /> Manual (.pdf)
-                    </Label>
-                    <Input type="file" accept=".pdf" onChange={(e) => setDocFile(e.target.files?.[0] || null)} className="bg-white/[0.03] border-white/10 text-white/60 text-xs file:bg-[#00E5FF]/20" />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-[9px] font-mono font-black text-white/40 uppercase tracking-[0.2em] pl-1">Sync Progress ({formData.progress}%)</Label>
-                  <input type="range" min="0" max="100" value={formData.progress} onChange={(e) => setFormData({ ...formData, progress: parseInt(e.target.value) })} className="w-full accent-[#00E5FF] bg-white/5 h-2 rounded-full appearance-none cursor-pointer" />
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-white/40 uppercase tracking-widest ml-1">Atualizar Documento</label>
+              <div className="relative group">
+                <input 
+                  type="file" 
+                  accept=".pdf,.doc,.docx"
+                  onChange={(e) => setFiles({ ...files, doc: e.target.files?.[0] })}
+                  className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                />
+                <div className="flex items-center gap-3 bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-4 group-hover:border-white/20 transition-all">
+                  <FileText className="w-4 h-4 text-amber-500" />
+                  <span className="text-[11px] text-white/60 truncate">
+                    {files.doc ? files.doc.name : 'Substituir arquivo...'}
+                  </span>
                 </div>
               </div>
+            </div>
 
-              <button type="submit" className="w-full py-5 bg-[#00E5FF] text-black font-black uppercase text-xs rounded-2xl shadow-[0_0_30px_rgba(0,229,255,0.2)] hover:scale-[1.02] transition-all">
-                Confirm Changes
-              </button>
-            </form>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+            <div className="space-y-2 md:col-span-2">
+              <label className="text-[10px] font-black text-white/40 uppercase tracking-widest ml-1">Atualizar Capa (Cover)</label>
+              <div className="relative group">
+                <input 
+                  type="file" 
+                  accept="image/*"
+                  onChange={(e) => setFiles({ ...files, cover: e.target.files?.[0] })}
+                  className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                />
+                <div className="flex items-center gap-3 bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-4 group-hover:border-white/20 transition-all">
+                  <ImageIcon className="w-4 h-4 text-purple-500" />
+                  <span className="text-[11px] text-white/60 truncate">
+                    {files.cover ? files.cover.name : 'Substituir imagem de capa...'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-8 bg-white/[0.02] border-t border-white/5 flex gap-4">
+          <button 
+            onClick={onClose}
+            className="flex-1 px-6 py-4 rounded-2xl border border-white/10 text-[11px] font-black uppercase tracking-widest text-white/60 hover:bg-white/5 transition-all"
+          >
+            Abortar
+          </button>
+          <button 
+            onClick={handleSave}
+            className="flex-2 bg-[#00E5FF] text-black px-10 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2"
+          >
+            <Save className="w-4 h-4" />
+            Confirmar Alterações
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 
