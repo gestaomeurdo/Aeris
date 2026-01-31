@@ -47,7 +47,25 @@ const Index = () => {
     setIsLoaded(true);
   }, []);
 
-  // Aplicar bypass de lock se for Master
+  const handleUserAuth = () => {
+    if (isMaster) {
+      if (confirm("Deseja encerrar a sessão do Operador Mike?")) {
+        setIsMaster(false);
+      }
+      return;
+    }
+
+    const user = prompt("IDENTIFICAÇÃO DO OPERADOR:");
+    const pass = prompt("CHAVE DE ACESSO:");
+    
+    if (user === "mike" && pass === "@mike2026") {
+      setIsMaster(true);
+      alert("ACESSO CONCEDIDO: Bem-vindo, Operador Mike.");
+    } else {
+      alert("ACESSO NEGADO: Credenciais de segurança inválidas.");
+    }
+  };
+
   const modulesToDisplay = data.modules.map(mod => ({
     ...mod,
     locked: isMaster ? false : mod.locked
@@ -62,7 +80,12 @@ const Index = () => {
         <div className="absolute inset-0 bg-grid-pattern opacity-5" />
       </div>
       
-      <TacticalSidebar activeView={activeView} onViewChange={setActiveView} />
+      <TacticalSidebar 
+        activeView={activeView} 
+        onViewChange={setActiveView} 
+        isMaster={isMaster}
+        onUserClick={handleUserAuth}
+      />
 
       <div className="pl-32 pr-12 relative z-10">
         <header className="pt-12 pb-12 flex justify-between items-center border-b border-white/5 mb-8">
