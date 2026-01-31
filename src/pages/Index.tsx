@@ -39,31 +39,26 @@ const LOCAL_STORAGE_KEY = 'aeris_modules_v1';
 const loadInitialData = (): PortalData => {
   const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
   
-  // Se a chave existir (saved !== null), tentamos carregar, mesmo que o array de módulos esteja vazio.
-  if (saved !== null) {
-    try {
-      const parsedData: PortalData = JSON.parse(saved);
-      
-      // Revoke old object URLs (this is a best effort, as they won't survive a full browser restart)
-      parsedData.modules.forEach(mod => {
-        if (mod.audioUrl.startsWith('blob:')) {
-          // In a real app, we'd re-upload or store the file data. Here, we just acknowledge the URL is temporary.
-        }
-        if (mod.docUrl.startsWith('blob:')) {
-          // Same for doc URLs
-        }
-      });
-      
-      return parsedData;
-    } catch (e) {
-      console.error("Matrix corrupt: resetting to initial parameters", e);
-      // Se a chave existe mas está corrompida, voltamos aos defaults para evitar crash.
-      return INITIAL_DATA;
-    }
+  // REGRA ESTREITA: Se a chave for estritamente null, é o primeiro acesso.
+  if (saved === null) {
+    console.log("Persistence key not found. Loading default modules.");
+    return INITIAL_DATA;
   }
   
-  // Se a chave for estritamente null (primeira vez), usamos os dados iniciais.
-  return INITIAL_DATA;
+  // Se a chave existe (saved !== null), tentamos carregar, mesmo que o array de módulos esteja vazio.
+  try {
+    const parsedData: PortalData = JSON.parse(saved);
+    console.log("Persistence data loaded successfully.");
+    
+    // Nota: Blob URLs (criadas via URL.createObjectURL) não persistem após o fechamento da aba/navegador.
+    // O metadata (audioUrl/docUrl) persiste, mas o asset real requer re-upload.
+    
+    return parsedData;
+  } catch (e) {
+    console.error("Matrix corrupt: Saved data could not be parsed. Resetting to initial parameters.", e);
+    // Se a chave existe mas está corrompida, voltamos aos defaults para evitar crash.
+    return INITIAL_DATA;
+  }
 };
 
 const getNextModuleId = (modules: TrainingModule[]) => {
@@ -90,7 +85,7 @@ const Index = () => {
   useEffect(() => {
     // Salva o objeto completo no localStorage
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
-  }, [data]);
+  }, [data]); // Dependência [data] garante que qualquer alteração (incluindo deleção) salve o novo estado.
 
   const handleUserClick = () => {
     if (isMaster) {
