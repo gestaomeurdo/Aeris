@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from 'react';
-import { Headphones, Play, Pause, SkipForward, Radio } from 'lucide-react';
+import { Headphones, Play, Pause, SkipForward } from 'lucide-react';
 import WaveformVisualizer from './WaveformVisualizer';
 import { AudioTrack } from '@/types/portal';
 
@@ -13,22 +13,51 @@ const AudioIntelligence = ({ tracks }: AudioIntelligenceProps) => {
   const [currentTrackIdx, setCurrentTrackIdx] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const playPromiseRef = useRef<Promise<void> | null>(null);
 
-  const togglePlay = (idx: number) => {
+  const safePlay = async () => {
+    if (audioRef.current) {
+      try {
+        playPromiseRef.current = audioRef.current.play();
+        await playPromiseRef.current;
+      } catch (error) {
+        console.error("Playback interrupted or failed:", error);
+        setIsPlaying(false);
+      }
+    }
+  };
+
+  const togglePlay = async (idx: number) => {
+    if (!audioRef.current) return;
+
+    // Se houver uma promessa de play em andamento, esperamos ou ignoramos
+    if (playPromiseRef.current) {
+      try {
+        await playPromiseRef.current;
+      } catch (e) {
+        // Ignora erros de interrupção prévia
+      }
+    }
+
     if (currentTrackIdx === idx) {
       if (isPlaying) {
-        audioRef.current?.pause();
+        audioRef.current.pause();
+        setIsPlaying(false);
       } else {
-        audioRef.current?.play();
+        setIsPlaying(true);
+        await safePlay();
       }
-      setIsPlaying(!isPlaying);
     } else {
+      // Trocando de faixa
+      setIsPlaying(false);
+      audioRef.current.pause();
+      
       setCurrentTrackIdx(idx);
+      audioRef.current.src = tracks[idx].url;
+      audioRef.current.load(); // Garante o carregamento da nova fonte
+      
       setIsPlaying(true);
-      if (audioRef.current) {
-        audioRef.current.src = tracks[idx].url;
-        audioRef.current.play();
-      }
+      await safePlay();
     }
   };
 
@@ -37,7 +66,12 @@ const AudioIntelligence = ({ tracks }: AudioIntelligenceProps) => {
       <audio 
         ref={audioRef} 
         src={tracks[currentTrackIdx]?.url} 
-        onEnded={() => setIsPlaying(false)}
+        onEnded={() => {
+          setIsPlaying(false);
+          playPromiseRef.current = null;
+        }}
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
       />
       
       <div className="flex items-center gap-4">
