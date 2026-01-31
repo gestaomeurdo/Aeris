@@ -27,7 +27,9 @@ const INITIAL_DATA: PortalData = {
     { id: "MOD-04", title: "Air Force Enlisted Ranks", desc: "Technical mapping of the global rank hierarchy.", type: "Structure", audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3", docUrl: "", progress: 20, locked: false },
     { id: "MOD-05", title: "Junior Enlisted Tier", desc: "Unlocking foundational roles and responsibilities.", type: "Structure", audioUrl: "", docUrl: "", progress: 0, locked: false },
     { id: "MOD-06", title: "Tactical Data Analysis", desc: "Advanced intelligence processing and visualization.", type: "Advanced", audioUrl: "", docUrl: "", progress: 0, locked: true },
-    { id: "MOD-07", title: "Cyber-Security Protocols", desc: "Defensive digital operations and secure uplink management.", type: "Advanced", audioUrl: "", docUrl: "", progress: 0, locked: true }
+    { id: "MOD-07", title: "Cyber-Security Protocols", desc: "Defensive digital operations and secure uplink management.", type: "Advanced", audioUrl: "", docUrl: "", progress: 0, locked: true },
+    // Slot dedicado para o áudio local
+    { id: "TEST-00", title: "Local Uplink Test", desc: "Temporary asset for local audio playback.", type: "Advanced", audioUrl: "", docUrl: "", progress: 100, locked: false }
   ]
 };
 
@@ -112,7 +114,8 @@ const Index = () => {
 
   const modulesToDisplay = data.modules.map(mod => ({
     ...mod,
-    locked: isMaster ? false : mod.locked
+    // Only unlock if isMaster is true AND the module is not the TEST-00 slot
+    locked: isMaster && mod.id !== 'TEST-00' ? false : mod.locked
   }));
 
   return (
