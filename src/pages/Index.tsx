@@ -12,6 +12,7 @@ import FutureVisionPortal from '@/components/FutureVisionPortal';
 import AuthTerminal from '@/components/AuthTerminal';
 import EditModuleModal from '@/components/EditModuleModal';
 import OperationalStats from '@/components/OperationalStats';
+import AddModuleModal from '@/components/AddModuleModal';
 import { Bell, Wifi, Plus, Edit3, Search } from 'lucide-react';
 import { PortalData, TrainingModule } from '@/types/portal';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -31,18 +32,36 @@ const INITIAL_DATA: PortalData = {
   ]
 };
 
+const getNextModuleId = (modules: TrainingModule[]) => {
+  // Find the highest existing number to ensure uniqueness
+  const maxIdNumber = modules.reduce((max, mod) => {
+    const num = parseInt(mod.id.split('-')[1], 10);
+    return num > max ? num : max;
+  }, 0);
+  
+  const nextIdNumber = maxIdNumber + 1;
+  return `MOD-${nextIdNumber.toString().padStart(2, '0')}`;
+};
+
 const Index = () => {
   const [data, setData] = useState<PortalData>(INITIAL_DATA);
   const [activeView, setActiveView] = useState('dashboard');
   const [isMaster, setIsMaster] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [editingModule, setEditingModule] = useState<TrainingModule | null>(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false); // New State for Add Modal
 
   useEffect(() => {
     const saved = localStorage.getItem('aeris_data_v5');
     if (saved) {
       try {
-        setData(JSON.parse(saved));
+        // Revoke old object URLs if they exist in saved data (cleanup simulation)
+        const parsedData: PortalData = JSON.parse(saved);
+        parsedData.modules.forEach(mod => {
+          if (mod.audioUrl.startsWith('blob:')) URL.revokeObjectURL(mod.audioUrl);
+          if (mod.docUrl.startsWith('blob:')) URL.revokeObjectURL(mod.docUrl);
+        });
+        setData(parsedData);
       } catch (e) {
         console.error("Matrix corrupt: resetting to initial parameters");
       }
@@ -50,6 +69,8 @@ const Index = () => {
   }, []);
 
   useEffect(() => {
+    // Note: We save the data, but the blob URLs will only be valid for the current session.
+    // This is expected behavior when simulating local file uploads with createObjectURL.
     localStorage.setItem('aeris_data_v5', JSON.stringify(data));
   }, [data]);
 
@@ -68,22 +89,41 @@ const Index = () => {
     if (url) setData(prev => ({ ...prev, mainVideo: url }));
   };
 
+  // Opens the new Add Module Modal
   const handleAddModule = () => {
-    const title = prompt("Título do novo módulo tático:");
-    if (title) {
-      const newModule: TrainingModule = {
-        id: `MOD-${(data.modules.length + 1).toString().padStart(2, '0')}`,
-        title,
-        desc: "New tactical asset description required.",
-        type: "Advanced",
-        audioUrl: "",
-        docUrl: "",
-        progress: 0,
-        locked: true
-      };
-      setData(prev => ({ ...prev, modules: [...prev.modules, newModule] }));
-      setEditingModule(newModule);
+    setIsAddModalOpen(true);
+  };
+
+  const handleSaveNewModule = (newModuleData: Omit<TrainingModule, 'id'>, file: File | null) => {
+    const nextId = getNextModuleId(data.modules);
+    
+    let audioUrl = newModuleData.audioUrl;
+    let docUrl = newModuleData.docUrl;
+    
+    // Process file and create local URL
+    if (file) {
+      const url = URL.createObjectURL(file);
+      if (file.type === 'audio/mp3') {
+        audioUrl = url;
+        docUrl = ''; // Ensure only one asset type is set
+      } else if (file.type === 'application/pdf') {
+        docUrl = url;
+        audioUrl = ''; // Ensure only one asset type is set
+      }
     }
+
+    const newModule: TrainingModule = {
+      ...newModuleData,
+      id: nextId,
+      audioUrl,
+      docUrl,
+      progress: 0,
+      locked: false,
+    };
+
+    setData(prev => ({ ...prev, modules: [...prev.modules, newModule] }));
+    // Optionally set the new module for immediate editing
+    setEditingModule(newModule);
   };
 
   const handleDeleteModule = (id: string) => {
@@ -116,6 +156,8 @@ const Index = () => {
     locked: isMaster ? false : mod.locked
   }));
 
+  const nextModuleId = getNextModuleId(data.modules);
+
   return (
     <div className="min-h-screen bg-[#020202] text-[#B0BEC5] font-sans selection:bg-[#00E5FF] selection:text-black overflow-x-hidden">
       <AuthTerminal 
@@ -129,6 +171,13 @@ const Index = () => {
         onClose={() => setEditingModule(null)}
         module={editingModule}
         onSave={handleUpdateModule}
+      />
+      
+      <AddModuleModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSave={handleSaveNewModule}
+        nextId={nextModuleId}
       />
 
       <div className="fixed inset-0 pointer-events-none z-0">
@@ -184,7 +233,7 @@ const Index = () => {
                     Update Video
                   </button>
                   <button 
-                    onClick={handleAddModule}
+                    onClick={handleAddModule} // Updated to open modal
                     className="flex items-center gap-2 bg-[#00E5FF]/10 hover:bg-[#00E5FF]/20 border border-[#00E5FF]/30 px-4 py-2.5 rounded-xl text-[9px] font-black text-[#00E5FF] uppercase tracking-widest transition-all"
                   >
                     <Plus className="w-3 h-3" />
