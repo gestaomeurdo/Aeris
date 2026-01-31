@@ -10,7 +10,7 @@ import { PortalData } from '@/types/portal';
 
 const INITIAL_DATA: PortalData = {
   mainVideo: "https://youtu.be/mQayAWnJQOE",
-  missionTitle: "AERIS LEARNING INITIATIVE",
+  missionTitle: "AERIS ACADEMY",
   missionDescription: "Mastering Air Force Leadership and modernizing military tactical learning through digital immersive doctrines.",
   modules: [
     { 
@@ -111,7 +111,7 @@ const Index = () => {
 
         <main className="max-w-7xl mx-auto space-y-32 pb-32">
           <MissionBriefing 
-            title="OPERATION OVERWATCH" 
+            title={data.missionTitle} 
             videoUrl={data.mainVideo} 
             description={data.missionDescription} 
           />

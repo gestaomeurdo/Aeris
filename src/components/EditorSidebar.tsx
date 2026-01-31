@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Settings, Save, ChevronRight, X, Play, FileText, Headphones } from 'lucide-react';
+import { Settings, Save, X, FileText, Headphones, Type, AlignLeft } from 'lucide-react';
 import { PortalData } from '@/types/portal';
 
 interface EditorSidebarProps {
@@ -39,14 +39,40 @@ const EditorSidebar = ({ data, onUpdate }: EditorSidebarProps) => {
           </div>
 
           <div className="space-y-8">
-            <div className="space-y-4">
-              <label className="text-[9px] font-mono text-white/40 uppercase font-black tracking-widest">Main Operation Video</label>
-              <input 
-                value={data.mainVideo}
-                onChange={(e) => updateGlobal('mainVideo', e.target.value)}
-                placeholder="URL do Vídeo (mp4/youtube)"
-                className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-xs text-white focus:border-[#00E5FF] outline-none transition-colors"
-              />
+            {/* Configurações Globais */}
+            <div className="space-y-6">
+              <h4 className="text-[10px] font-black text-[#00E5FF] uppercase tracking-[0.4em]">Global Parameters</h4>
+              
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-[9px] font-mono text-white/40 uppercase font-black tracking-widest">
+                  <Type className="w-3 h-3" /> Mission Title
+                </label>
+                <input 
+                  value={data.missionTitle}
+                  onChange={(e) => updateGlobal('missionTitle', e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-xs text-white focus:border-[#00E5FF] outline-none"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-[9px] font-mono text-white/40 uppercase font-black tracking-widest">
+                  <AlignLeft className="w-3 h-3" /> Briefing Description
+                </label>
+                <textarea 
+                  value={data.missionDescription}
+                  onChange={(e) => updateGlobal('missionDescription', e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-xs text-white focus:border-[#00E5FF] outline-none h-24 resize-none"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[9px] font-mono text-white/40 uppercase font-black tracking-widest">Main Operation Video (YouTube/MP4)</label>
+                <input 
+                  value={data.mainVideo}
+                  onChange={(e) => updateGlobal('mainVideo', e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-xs text-white focus:border-[#00E5FF] outline-none"
+                />
+              </div>
             </div>
 
             <hr className="border-white/5" />
@@ -61,7 +87,6 @@ const EditorSidebar = ({ data, onUpdate }: EditorSidebarProps) => {
                   <input 
                     value={mod.title}
                     onChange={(e) => updateModule(idx, 'title', e.target.value)}
-                    placeholder="Título da Missão"
                     className="w-full bg-transparent text-sm font-bold text-white outline-none focus:text-[#00E5FF] transition-colors"
                   />
                   <div className="space-y-2">
@@ -71,7 +96,6 @@ const EditorSidebar = ({ data, onUpdate }: EditorSidebarProps) => {
                     <input 
                       value={mod.audioUrl}
                       onChange={(e) => updateModule(idx, 'audioUrl', e.target.value)}
-                      placeholder="Link do .mp3"
                       className="w-full bg-black/40 border border-white/5 rounded-xl p-3 text-[10px] text-white outline-none focus:border-[#00E5FF]/40"
                     />
                   </div>
@@ -82,7 +106,6 @@ const EditorSidebar = ({ data, onUpdate }: EditorSidebarProps) => {
                     <input 
                       value={mod.docUrl}
                       onChange={(e) => updateModule(idx, 'docUrl', e.target.value)}
-                      placeholder="Link do PDF/Doc"
                       className="w-full bg-black/40 border border-white/5 rounded-xl p-3 text-[10px] text-white outline-none focus:border-[#00E5FF]/40"
                     />
                   </div>
@@ -94,7 +117,7 @@ const EditorSidebar = ({ data, onUpdate }: EditorSidebarProps) => {
           <button 
             onClick={() => {
               localStorage.setItem('aeris_data', JSON.stringify(data));
-              alert('COMMITTED: Mission parameters updated in local matrix.');
+              alert('COMMITTED: Mission parameters updated.');
             }}
             className="w-full py-5 bg-[#00E5FF] text-black font-black uppercase text-xs rounded-2xl shadow-[0_0_30px_rgba(0,229,255,0.2)] hover:scale-[1.02] transition-all flex items-center justify-center gap-3"
           >
