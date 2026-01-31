@@ -2,15 +2,32 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Shield, Target, Cpu, ChevronRight, Lock, Headphones, FileText, Activity, Layers } from 'lucide-react';
+import { Shield, Target, Cpu, ChevronRight, Lock, Headphones, FileText, Activity, Layers, Trash2, Unlock } from 'lucide-react';
 import { TrainingModule } from '@/types/portal';
 import MissionModal from './MissionModal';
 
 interface OperationsCenterProps {
   modules: TrainingModule[];
+  isMaster?: boolean;
+  onDelete?: (id: string) => void;
+  onToggleLock?: (id: string) => void;
 }
 
-const TacticalCard = ({ mod, index, onSelect }: { mod: TrainingModule, index: number, onSelect: (m: TrainingModule) => void }) => {
+const TacticalCard = ({ 
+  mod, 
+  index, 
+  onSelect, 
+  isMaster, 
+  onDelete, 
+  onToggleLock 
+}: { 
+  mod: TrainingModule, 
+  index: number, 
+  onSelect: (m: TrainingModule) => void,
+  isMaster?: boolean,
+  onDelete?: (id: string) => void,
+  onToggleLock?: (id: string) => void
+}) => {
   const Icon = mod.id.includes('01') ? Target : mod.id.includes('02') ? Cpu : Shield;
   
   return (
@@ -19,21 +36,30 @@ const TacticalCard = ({ mod, index, onSelect }: { mod: TrainingModule, index: nu
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true }}
       transition={{ delay: index * 0.1 }}
-      onClick={() => !mod.locked && onSelect(mod)}
-      className={`group relative bg-[#020B1A]/80 backdrop-blur-md border ${mod.locked ? 'border-white/5 opacity-50 cursor-not-allowed' : 'border-[#00E5FF]/20 hover:border-[#00E5FF]/60 cursor-pointer'} rounded-xl p-0 overflow-hidden transition-all duration-300 shadow-2xl`}
+      className={`group relative bg-[#020B1A]/80 backdrop-blur-md border ${mod.locked ? 'border-white/5 opacity-50' : 'border-[#00E5FF]/20 hover:border-[#00E5FF]/60'} rounded-xl p-0 overflow-hidden transition-all duration-300 shadow-2xl`}
     >
-      {/* HUD Scanline Effect */}
-      {!mod.locked && (
-        <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_4px,3px_100%]" />
+      {/* Admin Controls Overlay */}
+      {isMaster && (
+        <div className="absolute top-4 right-4 z-20 flex gap-2">
+           <button 
+             onClick={(e) => { e.stopPropagation(); onToggleLock?.(mod.id); }}
+             className="p-2 bg-black/40 hover:bg-[#00E5FF]/20 border border-white/10 rounded-lg text-white/60 hover:text-[#00E5FF] transition-all"
+           >
+             {mod.locked ? <Lock size={14} /> : <Unlock size={14} />}
+           </button>
+           <button 
+             onClick={(e) => { e.stopPropagation(); onDelete?.(mod.id); }}
+             className="p-2 bg-red-500/10 hover:bg-red-500/30 border border-red-500/20 rounded-lg text-red-500 transition-all"
+           >
+             <Trash2 size={14} />
+           </button>
+        </div>
       )}
 
-      {/* Decorative Coordinates */}
-      <div className="absolute top-2 left-3 flex gap-4 opacity-20 group-hover:opacity-40 transition-opacity">
-        <span className="text-[7px] font-mono text-[#00E5FF]">LAT: 38.8977° N</span>
-        <span className="text-[7px] font-mono text-[#00E5FF]">LONG: 77.0365° W</span>
-      </div>
-
-      <div className="p-6 space-y-6">
+      <div 
+        onClick={() => !mod.locked && onSelect(mod)}
+        className={`p-6 space-y-6 ${!mod.locked ? 'cursor-pointer' : 'cursor-default'}`}
+      >
         <div className="flex justify-between items-start pt-2">
           <div className={`p-3 rounded-lg bg-[#00E5FF]/5 border border-[#00E5FF]/10 group-hover:scale-110 group-hover:shadow-[0_0_15px_rgba(0,229,255,0.2)] transition-all`}>
             <Icon className={`w-6 h-6 ${mod.locked ? 'text-white/20' : 'text-[#00E5FF]'}`} />
@@ -61,7 +87,6 @@ const TacticalCard = ({ mod, index, onSelect }: { mod: TrainingModule, index: nu
           </div>
         </div>
 
-        {/* Visualizer Mockup */}
         <div className="flex items-center gap-1 h-4 w-full">
            {[...Array(20)].map((_, i) => (
              <div 
@@ -92,14 +117,11 @@ const TacticalCard = ({ mod, index, onSelect }: { mod: TrainingModule, index: nu
            )}
         </div>
       </div>
-      
-      {/* Glitch Overlay on Hover */}
-      <div className="absolute inset-0 bg-[#00E5FF]/5 opacity-0 group-hover:opacity-10 pointer-events-none mix-blend-overlay transition-opacity" />
     </motion.div>
   );
 };
 
-const OperationsCenter = ({ modules }: OperationsCenterProps) => {
+const OperationsCenter = ({ modules, isMaster, onDelete, onToggleLock }: OperationsCenterProps) => {
   const [selectedModule, setSelectedModule] = useState<TrainingModule | null>(null);
 
   return (
@@ -132,6 +154,9 @@ const OperationsCenter = ({ modules }: OperationsCenterProps) => {
             mod={mod} 
             index={i} 
             onSelect={setSelectedModule} 
+            isMaster={isMaster}
+            onDelete={onDelete}
+            onToggleLock={onToggleLock}
           />
         ))}
       </div>

@@ -11,8 +11,8 @@ import SecurityProtocol from '@/components/SecurityProtocol';
 import OperationalStats from '@/components/OperationalStats';
 import AuthTerminal from '@/components/AuthTerminal';
 import EditorSidebar from '@/components/EditorSidebar';
-import { Bell, Wifi } from 'lucide-react';
-import { PortalData } from '@/types/portal';
+import { Bell, Wifi, Plus, Edit3 } from 'lucide-react';
+import { PortalData, TrainingModule } from '@/types/portal';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const INITIAL_DATA: PortalData = {
@@ -37,7 +37,7 @@ const Index = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem('aeris_data_v2');
+    const saved = localStorage.getItem('aeris_data_v3');
     if (saved) {
       try {
         setData(JSON.parse(saved));
@@ -47,6 +47,10 @@ const Index = () => {
     }
   }, []);
 
+  useEffect(() => {
+    localStorage.setItem('aeris_data_v3', JSON.stringify(data));
+  }, [data]);
+
   const handleUserClick = () => {
     if (isMaster) {
       if (confirm("Deseja encerrar a sessão do Operador Mike?")) {
@@ -55,6 +59,42 @@ const Index = () => {
     } else {
       setIsAuthOpen(true);
     }
+  };
+
+  // Funções de Gerenciamento do Mike
+  const handleUpdateVideo = () => {
+    const url = prompt("Insira a nova URL do vídeo (YouTube ou MP4):", data.mainVideo);
+    if (url) setData(prev => ({ ...prev, mainVideo: url }));
+  };
+
+  const handleAddModule = () => {
+    const title = prompt("Título do novo módulo tático:");
+    if (title) {
+      const newModule: TrainingModule = {
+        id: `MOD-${(data.modules.length + 1).toString().padStart(2, '0')}`,
+        title,
+        desc: "New tactical asset description required.",
+        type: "Advanced",
+        audioUrl: "",
+        docUrl: "",
+        progress: 0,
+        locked: true
+      };
+      setData(prev => ({ ...prev, modules: [...prev.modules, newModule] }));
+    }
+  };
+
+  const handleDeleteModule = (id: string) => {
+    if (confirm(`Deseja remover o módulo ${id} permanentemente?`)) {
+      setData(prev => ({ ...prev, modules: prev.modules.filter(m => m.id !== id) }));
+    }
+  };
+
+  const handleToggleLock = (id: string) => {
+    setData(prev => ({
+      ...prev,
+      modules: prev.modules.map(m => m.id === id ? { ...m, locked: !m.locked } : m)
+    }));
   };
 
   const modulesToDisplay = data.modules.map(mod => ({
@@ -98,11 +138,28 @@ const Index = () => {
             <p className="text-[10px] font-mono font-black text-[#00E5FF]/40 uppercase tracking-[0.5em]">System Status: Optimal</p>
           </div>
           <div className="flex items-center gap-6">
+            {isMaster && (
+              <div className="flex gap-4">
+                <button 
+                  onClick={handleUpdateVideo}
+                  className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all"
+                >
+                  <Edit3 className="w-3 h-3 text-[#00E5FF]" />
+                  Update Video
+                </button>
+                <button 
+                  onClick={handleAddModule}
+                  className="flex items-center gap-2 bg-[#00E5FF]/10 hover:bg-[#00E5FF]/20 border border-[#00E5FF]/30 px-4 py-2.5 rounded-xl text-[9px] font-black text-[#00E5FF] uppercase tracking-widest transition-all"
+                >
+                  <Plus className="w-3 h-3" />
+                  Add Module
+                </button>
+              </div>
+            )}
             <div className="hidden md:flex items-center gap-6 px-6 py-3 bg-white/[0.03] rounded-2xl border border-white/5">
               <Wifi className="w-4 h-4 text-[#00E5FF]" />
               <span className="text-[10px] font-mono font-black text-white/60 tracking-widest uppercase">Uplink: Synchronized</span>
             </div>
-            <button className="p-3 bg-white/5 border border-white/10 rounded-2xl"><Bell className="w-5 h-5 text-white/40" /></button>
           </div>
         </header>
 
@@ -124,13 +181,23 @@ const Index = () => {
                   videoUrl={data.mainVideo} 
                   description={data.missionDescription} 
                 />
-                <OperationsCenter modules={modulesToDisplay} />
+                <OperationsCenter 
+                  modules={modulesToDisplay} 
+                  isMaster={isMaster}
+                  onDelete={handleDeleteModule}
+                  onToggleLock={handleToggleLock}
+                />
               </motion.div>
             )}
 
             {activeView === 'missions' && (
               <motion.div key="missions" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <OperationsCenter modules={modulesToDisplay} />
+                <OperationsCenter 
+                  modules={modulesToDisplay} 
+                  isMaster={isMaster}
+                  onDelete={handleDeleteModule}
+                  onToggleLock={handleToggleLock}
+                />
               </motion.div>
             )}
 
@@ -161,6 +228,10 @@ const Index = () => {
         </main>
 
         <footer className="pt-20 flex flex-col items-center gap-10 opacity-30 text-[9px] font-mono font-black text-white/20 tracking-[1em] uppercase">
+          <div className="flex gap-12">
+            <span>ENCRYPTION: AES-256</span>
+            <span>LOCAL_SYNC: ACTIVE</span>
+          </div>
           // END OF LINE // OPERATIONAL_HUB_v2.0 //
         </footer>
       </div>
