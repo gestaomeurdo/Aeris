@@ -17,8 +17,6 @@ const TacticalSidebar = ({ activeView, onViewChange, isMaster, onUserClick }: Ta
     { id: 'missions', icon: Target, label: 'MISSIONS' },
     { id: 'audio', icon: Headphones, label: 'AUDIO HUB' },
     { id: 'docs', icon: FileText, label: 'RESOURCES' },
-    { id: 'future', icon: Zap, label: 'FUTURE' },
-    { id: 'security', icon: Shield, label: 'PROTOCOL' },
   ];
 
   return (

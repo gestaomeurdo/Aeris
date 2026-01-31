@@ -14,8 +14,6 @@ const Breadcrumbs = ({ view }: BreadcrumbsProps) => {
       case 'missions': return 'TACTICAL_MODULES';
       case 'audio': return 'AURAL_INTELLIGENCE';
       case 'docs': return 'TECHNICAL_RESOURCES';
-      case 'future': return 'FUTURE_VISION';
-      case 'security': return 'SECURITY_PROTOCOL';
       default: return 'TERMINAL';
     }
   };
