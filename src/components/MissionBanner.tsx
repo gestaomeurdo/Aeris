@@ -39,7 +39,7 @@ const MissionBanner = ({ mod, index, isMaster, onSelect, onEdit, onDelete, onTog
       onClick={handleClick}
     >
       {/* Background Glow/Effect */}
-      <div className={`absolute inset-0 pointer-events-none transition-opacity duration-500 ${isActive ? 'opacity-10' : 'opacity-0 group-hover:opacity-10'}`}>
+      <div className={`absolute inset-0 pointer-events-none transition-opacity duration-500 ${isComplete ? 'opacity-10' : 'opacity-0 group-hover:opacity-10'}`}>
         <div className="absolute top-0 left-0 w-full h-[1px] bg-[#00E5FF]/10" />
         <div className="absolute bottom-0 left-0 w-full h-[1px] bg-[#00E5FF]/10" />
       </div>
