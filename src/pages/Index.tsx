@@ -31,7 +31,6 @@ const Index = () => {
   const [editingModule, setEditingModule] = useState<TrainingModule | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  // Carregar dados do Supabase ao iniciar
   useEffect(() => {
     fetchModules();
   }, []);
@@ -48,7 +47,7 @@ const Index = () => {
     } else {
       const mappedModules: TrainingModule[] = (modules || []).map(m => ({
         id: m.module_id,
-        dbId: m.id, // ID real do banco
+        dbId: m.id,
         title: m.title,
         desc: m.desc_text,
         type: m.type as any,
@@ -67,7 +66,7 @@ const Index = () => {
       const { error } = await supabase
         .from('training_modules')
         .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000'); // Deleta tudo
+        .neq('id', '00000000-0000-0000-0000-000000000000');
 
       if (error) toast.error("Erro ao limpar banco");
       else {
@@ -84,18 +83,18 @@ const Index = () => {
     
     const toastId = toast.loading("Enviando asset...");
 
-    // Upload de arquivo se existir
     if (file) {
       const fileExt = file.name.split('.').pop();
       const fileName = `${Math.random()}.${fileExt}`;
       const filePath = `${fileName}`;
 
-      const { error: uploadError, data: uploadData } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('assets')
         .upload(filePath, file);
 
       if (uploadError) {
-        toast.error("Erro no upload do arquivo", { id: toastId });
+        console.error("Erro detalhado do Supabase:", uploadError);
+        toast.error(`Erro no upload: ${uploadError.message}`, { id: toastId });
         return;
       }
 
@@ -105,8 +104,7 @@ const Index = () => {
       else if (file.type === 'application/pdf') docUrl = publicUrl;
     }
 
-    // Salvar no Banco
-    const { data: inserted, error } = await supabase
+    const { error } = await supabase
       .from('training_modules')
       .insert([{
         module_id: nextId,
@@ -117,22 +115,17 @@ const Index = () => {
         doc_url: docUrl,
         progress: 0,
         locked: false
-      }])
-      .select()
-      .single();
+      }]);
 
     if (error) {
-      toast.error("Erro ao salvar módulo", { id: toastId });
+      toast.error(`Erro ao salvar: ${error.message}`, { id: toastId });
     } else {
       toast.success("Módulo implantado com sucesso", { id: toastId });
-      fetchModules(); // Recarregar para garantir sincronia
+      fetchModules();
     }
   };
 
   const handleDeleteModule = async (id: string) => {
-    const moduleToDelete = data.modules.find(m => m.id === id);
-    if (!moduleToDelete) return;
-
     const { error } = await supabase
       .from('training_modules')
       .delete()
@@ -141,7 +134,7 @@ const Index = () => {
     if (error) toast.error("Erro ao deletar");
     else {
       toast.success("Módulo removido");
-      setData(prev => ({ ...prev, modules: prev.modules.filter(m => m.id !== id) }));
+      fetchModules();
     }
   };
 
