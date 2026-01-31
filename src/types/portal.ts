@@ -1,9 +1,10 @@
 export interface TrainingModule {
-  id: string; // Ex: MOD-01
-  dbId: string; // UUID do Supabase
+  id: string; 
+  dbId: string;
   title: string;
   desc: string;
   type: "Leadership" | "Strategy" | "Structure" | "Advanced";
+  category: "module" | "podcast"; // Nova separação clara
   audioUrl: string;
   docUrl: string;
   progress: number;

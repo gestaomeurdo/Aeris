@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { X, Save, FileText, Headphones, Upload, Zap, Shield } from 'lucide-react';
+import { X, Save, FileText, Headphones, Upload, Zap, Shield, Database, Radio } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrainingModule } from '@/types/portal';
 import { Label } from '@/components/ui/label';
@@ -11,12 +11,13 @@ import { Textarea } from '@/components/ui/textarea';
 interface AddModuleModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (newModule: Omit<TrainingModule, 'id'>, files: { audio?: File, doc?: File }) => void;
+  onSave: (newModule: Omit<TrainingModule, 'id' | 'dbId' | 'progress'>, files: { audio?: File, doc?: File }) => void;
   nextId: string;
 }
 
 const AddModuleModal = ({ isOpen, onClose, onSave, nextId }: AddModuleModalProps) => {
   const [title, setTitle] = useState('');
+  const [category, setCategory] = useState<"module" | "podcast">('module');
   const [type, setType] = useState<TrainingModule['type']>('Advanced');
   const [description, setDescription] = useState('');
   const [audioFile, setAudioFile] = useState<File | null>(null);
@@ -28,24 +29,21 @@ const AddModuleModal = ({ isOpen, onClose, onSave, nextId }: AddModuleModalProps
       setDescription('');
       setAudioFile(null);
       setDocFile(null);
-      setType('Advanced');
+      setCategory('module');
     }
   }, [isOpen]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !description) {
-      alert("Por favor, preencha o título e a descrição.");
-      return;
-    }
+    if (!title || !description) return;
 
     onSave({
       title,
       desc: description,
       type,
+      category,
       audioUrl: '', 
       docUrl: '', 
-      progress: 0,
       locked: false,
     }, { 
       audio: audioFile || undefined, 
@@ -82,33 +80,40 @@ const AddModuleModal = ({ isOpen, onClose, onSave, nextId }: AddModuleModalProps
 
             <form onSubmit={handleSubmit} className="p-10 space-y-8 max-h-[75vh] overflow-y-auto custom-scrollbar">
               <div className="space-y-6">
-                {/* Visual Type Selector */}
+                
+                {/* CATEGORY SELECTOR - SEPARAÇÃO CLARA */}
                 <div className="space-y-3">
-                  <Label className="text-[10px] font-mono font-black text-white/40 uppercase tracking-[0.2em] pl-1">Transmission Focus</Label>
+                  <Label className="text-[10px] font-mono font-black text-white/40 uppercase tracking-[0.2em] pl-1">Destino do Asset</Label>
                   <div className="grid grid-cols-2 gap-4">
                     <button
                       type="button"
-                      onClick={() => setType('Advanced')}
+                      onClick={() => setCategory('module')}
                       className={`flex flex-col items-center gap-3 p-6 rounded-2xl border transition-all duration-500 ${
-                        type === 'Advanced' 
+                        category === 'module' 
                         ? 'bg-[#00E5FF]/10 border-[#00E5FF] shadow-[0_0_20px_rgba(0,229,255,0.2)]' 
                         : 'bg-white/5 border-white/10 opacity-40 grayscale hover:grayscale-0 hover:opacity-100'
                       }`}
                     >
-                      <Headphones className={`w-8 h-8 ${type === 'Advanced' ? 'text-[#00E5FF]' : 'text-white'}`} />
-                      <span className={`text-[10px] font-black uppercase tracking-widest ${type === 'Advanced' ? 'text-[#00E5FF]' : 'text-white'}`}>🎙️ Audio Transmission</span>
+                      <Database className={`w-8 h-8 ${category === 'module' ? 'text-[#00E5FF]' : 'text-white'}`} />
+                      <div className="text-center">
+                        <span className={`block text-[10px] font-black uppercase tracking-widest ${category === 'module' ? 'text-[#00E5FF]' : 'text-white'}`}>Módulo Técnico</span>
+                        <span className="text-[8px] text-white/20 uppercase">Manuals & Ops</span>
+                      </div>
                     </button>
                     <button
                       type="button"
-                      onClick={() => setType('Strategy')}
+                      onClick={() => setCategory('podcast')}
                       className={`flex flex-col items-center gap-3 p-6 rounded-2xl border transition-all duration-500 ${
-                        type === 'Strategy' 
+                        category === 'podcast' 
                         ? 'bg-[#00E5FF]/10 border-[#00E5FF] shadow-[0_0_20px_rgba(0,229,255,0.2)]' 
                         : 'bg-white/5 border-white/10 opacity-40 grayscale hover:grayscale-0 hover:opacity-100'
                       }`}
                     >
-                      <FileText className={`w-8 h-8 ${type === 'Strategy' ? 'text-[#00E5FF]' : 'text-white'}`} />
-                      <span className={`text-[10px] font-black uppercase tracking-widest ${type === 'Strategy' ? 'text-[#00E5FF]' : 'text-white'}`}>📄 Classified Doc</span>
+                      <Radio className={`w-8 h-8 ${category === 'podcast' ? 'text-[#00E5FF]' : 'text-white'}`} />
+                      <div className="text-center">
+                        <span className={`block text-[10px] font-black uppercase tracking-widest ${category === 'podcast' ? 'text-[#00E5FF]' : 'text-white'}`}>Audio Hub</span>
+                        <span className="text-[8px] text-white/20 uppercase">Podcasts & Vox</span>
+                      </div>
                     </button>
                   </div>
                 </div>
@@ -128,9 +133,7 @@ const AddModuleModal = ({ isOpen, onClose, onSave, nextId }: AddModuleModalProps
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-white/[0.02] border border-white/5 rounded-[24px]">
                   <div className="space-y-2">
                     <Label className="text-[9px] font-mono font-black text-[#00E5FF] uppercase tracking-widest pl-1">Upload VOX (.mp3)</Label>
-                    <div className="relative group">
-                       <Input type="file" accept=".mp3" onChange={(e) => setAudioFile(e.target.files?.[0] || null)} className="bg-white/[0.03] border-white/10 text-xs file:bg-[#00E5FF]/20 file:text-[#00E5FF] file:border-0 rounded-xl" />
-                    </div>
+                    <Input type="file" accept=".mp3" onChange={(e) => setAudioFile(e.target.files?.[0] || null)} className="bg-white/[0.03] border-white/10 text-xs file:bg-[#00E5FF]/20 file:text-[#00E5FF] file:border-0 rounded-xl" />
                   </div>
                   <div className="space-y-2">
                     <Label className="text-[9px] font-mono font-black text-[#00E5FF] uppercase tracking-widest pl-1">Upload INTEL (.pdf)</Label>
