@@ -15,7 +15,7 @@ interface AudioLibraryProps {
 }
 
 const AudioLibrary = ({ modules, isMaster, onEdit, onDelete, onToggleLock }: AudioLibraryProps) => {
-  const audioModules = modules;
+  const audioModules = modules.filter(m => m.category === 'podcast'); // Filtrando apenas podcasts
   
   const [playingDbId, setPlayingDbId] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -198,54 +198,66 @@ const AudioLibrary = ({ modules, isMaster, onEdit, onDelete, onToggleLock }: Aud
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.05 }}
-              className={`group relative p-4 rounded-xl border transition-all duration-500 overflow-hidden ${
-                isLocked ? 'bg-red-500/5 border-red-500/10 opacity-40' : isActive ? 'bg-[#00E5FF]/10 border-[#00E5FF]/40 shadow-[0_0_20px_rgba(0,229,255,0.1)]' : 'bg-white/[0.02] border-white/5 hover:border-[#00E5FF]/20 hover:bg-white/[0.04]'
-              }`}
+              className={`relative w-full flex overflow-hidden group transition-all duration-500 ${
+                isLocked 
+                    ? 'bg-red-900/10 border border-red-500/20 opacity-50 cursor-default' 
+                    : 'bg-[#0A192F]/80 border border-[#00E5FF]/20 hover:border-[#00E5FF]/60 hover:shadow-[0_0_30px_rgba(0,229,255,0.1)] cursor-pointer'
+              } rounded-xl`}
             >
-              {/* Technical Overlay Lines */}
-              <div className={`absolute inset-0 pointer-events-none ${isActive ? 'opacity-10' : 'opacity-0 group-hover:opacity-5'} transition-opacity duration-500`}>
-                 <div className="absolute top-0 left-0 w-full h-[1px] bg-[#00E5FF]/5" />
-                 <div className="absolute bottom-0 left-0 w-full h-[1px] bg-[#00E5FF]/5" />
-              </div>
+              {/* 1. Vertical Status Strip */}
+              <div className={`w-2 transition-all duration-500 ${
+                  isLocked ? 'bg-red-500' : isActive ? 'bg-[#00E5FF] shadow-[0_0_15px_#00E5FF]' : 'bg-white/10 group-hover:bg-[#00E5FF]/40'
+              }`} />
 
-              <div className="flex justify-between items-center relative z-10">
-                <div className="flex items-center gap-6">
-                  {/* Play/Status Indicator */}
+              {/* 2. Hover Grid Overlay */}
+              <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-[0.05] transition-opacity duration-500 bg-grid-pattern" />
+
+              <div className="flex-1 p-6 flex justify-between items-center relative z-10">
+                {/* Left/Center Content */}
+                <div className="flex items-center gap-8">
+                  {/* Play/Status Indicator (Target Reticle style) */}
                   <button 
-                    onClick={() => !isLocked && handlePlayPause(mod.dbId, mod.audioUrl)} 
-                    disabled={isLocked} 
-                    className={`w-10 h-10 rounded-lg transition-all flex items-center justify-center ${
-                      isLocked ? 'bg-red-500/10 text-red-500' : isActive && isPlaying ? 'bg-[#00E5FF] text-black shadow-[0_0_15px_#00E5FF]' : 'bg-white/5 text-[#00E5FF] hover:bg-[#00E5FF] hover:text-black'
-                    }`}
+                      onClick={() => !isLocked && handlePlayPause(mod.dbId, mod.audioUrl)} 
+                      disabled={isLocked} 
+                      className={`relative w-12 h-12 rounded-full transition-all flex items-center justify-center ${
+                          isLocked ? 'bg-red-500/10 text-red-500' : isActive && isPlaying ? 'bg-[#00E5FF] text-black shadow-[0_0_15px_#00E5FF]' : 'bg-white/5 text-[#00E5FF] hover:bg-[#00E5FF] hover:text-black'
+                      }`}
                   >
-                    {isLocked ? <Lock size={16} /> : isActive && isPlaying ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" className="ml-1" />}
+                      {/* Target Reticle Effect */}
+                      <div className={`absolute inset-0 border-2 rounded-full transition-all duration-300 ${
+                          isActive ? 'border-[#00E5FF]/60 scale-100' : 'border-white/10 scale-125 group-hover:scale-100 group-hover:border-[#00E5FF]/40'
+                      }`} />
+                      {isLocked ? <Lock size={18} /> : isActive && isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" className="ml-1" />}
                   </button>
                   
                   <div className="space-y-1">
-                    <h3 className={`text-lg font-black uppercase tracking-tighter leading-none transition-colors ${isActive ? 'text-[#00E5FF]' : 'text-white'}`}>{mod.title}</h3>
+                    <h3 className={`text-xl font-black uppercase tracking-tighter leading-none transition-colors ${isActive ? 'text-[#00E5FF]' : 'text-white'}`}>{mod.title}</h3>
                     <div className="flex items-center gap-4">
-                        <p className="text-[9px] font-mono text-white/30 uppercase tracking-widest">
-                            {mod.id} // {mod.type}
-                        </p>
-                        {/* Hover Detail */}
-                        <motion.div 
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={isActive ? { opacity: 1, x: 0 } : {}}
-                            className="text-[8px] font-mono font-black text-white/60 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                            <Clock className="w-2 h-2 inline mr-1 text-[#00E5FF]" />
-                            AUDIO_PKT_{mod.dbId.slice(0, 4).toUpperCase()}
-                        </motion.div>
+                        {/* Tactical Labels */}
+                        <span className="text-[10px] font-mono font-black text-white/40 uppercase tracking-widest">
+                            FREQ: 104.5 // {mod.type.toUpperCase()}
+                        </span>
+                        <span className="text-[10px] font-mono font-black text-[#00E5FF]/60 uppercase tracking-widest">
+                            SECURE_CH
+                        </span>
                     </div>
                   </div>
                 </div>
                 
-                {isMaster && (
-                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={() => onEdit(mod)} className="p-2 bg-black/40 border border-white/10 rounded-lg text-white/40 hover:text-[#00E5FF]"><Settings2 size={14} /></button>
-                    <button onClick={() => onDelete(mod.id)} className="p-2 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500"><Trash2 size={14} /></button>
-                  </div>
-                )}
+                {/* Right Side: Metadata and Controls */}
+                <div className="flex items-center gap-6">
+                    <div className="text-right space-y-1 hidden sm:block">
+                        <span className="block text-[8px] font-mono text-white/20 uppercase tracking-widest">V.O.X. ID</span>
+                        <span className="block text-xs font-mono text-white/60">{mod.id}</span>
+                    </div>
+                    
+                    {isMaster && (
+                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onClick={(e) => { e.stopPropagation(); onEdit(mod); }} className="p-2 bg-black/40 border border-white/10 rounded-lg text-white/40 hover:text-[#00E5FF]"><Settings2 size={14} /></button>
+                            <button onClick={(e) => { e.stopPropagation(); onDelete(mod.id); }} className="p-2 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500"><Trash2 size={14} /></button>
+                        </div>
+                    )}
+                </div>
               </div>
             </motion.div>
           );
