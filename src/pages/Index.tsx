@@ -41,21 +41,23 @@ const loadInitialData = (): PortalData => {
   
   // REGRA ESTREITA: Se a chave for estritamente null, é o primeiro acesso.
   if (saved === null) {
-    console.log("Persistence key not found. Loading default modules.");
+    console.log("PERSISTENCE LOG: Key not found (first run). Loading default modules.");
     return INITIAL_DATA;
   }
   
   // Se a chave existe (saved !== null), tentamos carregar, mesmo que o array de módulos esteja vazio.
   try {
     const parsedData: PortalData = JSON.parse(saved);
-    console.log("Persistence data loaded successfully.");
     
-    // Nota: Blob URLs (criadas via URL.createObjectURL) não persistem após o fechamento da aba/navegador.
-    // O metadata (audioUrl/docUrl) persiste, mas o asset real requer re-upload.
+    if (parsedData.modules && parsedData.modules.length === 0) {
+        console.log("PERSISTENCE LOG: Loaded empty module list from storage. State respected.");
+    } else {
+        console.log(`PERSISTENCE LOG: Loaded ${parsedData.modules?.length || 0} modules from storage.`);
+    }
     
     return parsedData;
   } catch (e) {
-    console.error("Matrix corrupt: Saved data could not be parsed. Resetting to initial parameters.", e);
+    console.error("PERSISTENCE ERROR: Saved data could not be parsed. Resetting to initial parameters.", e);
     // Se a chave existe mas está corrompida, voltamos aos defaults para evitar crash.
     return INITIAL_DATA;
   }
