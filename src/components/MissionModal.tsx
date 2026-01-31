@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from 'react';
-import { X, Headphones, FileText, Play, Pause, ExternalLink, Activity } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { X, Headphones, FileText, Play, Pause, ExternalLink, Activity, Volume2, Maximize2, ChevronLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrainingModule } from '@/types/portal';
 import WaveformVisualizer from './WaveformVisualizer';
@@ -14,17 +14,31 @@ interface MissionModalProps {
 
 const MissionModal = ({ isOpen, onClose, module }: MissionModalProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = React.useRef<HTMLAudioElement | null>(null);
+  const [showAudioControls, setShowAudioControls] = useState(true);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setIsPlaying(false);
+      if (audioRef.current) audioRef.current.pause();
+    }
+  }, [isOpen]);
 
   if (!module) return null;
 
   const toggleAudio = () => {
     if (audioRef.current) {
-      if (isPlaying) audioRef.current.pause();
-      else audioRef.current.play();
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play().catch(e => console.error("Audio playback blocked:", e));
+      }
       setIsPlaying(!isPlaying);
     }
   };
+
+  const hasAudio = !!module.audioUrl;
+  const hasDoc = !!module.docUrl;
 
   return (
     <AnimatePresence>
@@ -33,139 +47,119 @@ const MissionModal = ({ isOpen, onClose, module }: MissionModalProps) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[110] flex items-center justify-center p-4 md:p-8 bg-black/95 backdrop-blur-xl"
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/95 backdrop-blur-2xl"
         >
-          {/* Background Matrix Effect */}
-          <div className="absolute inset-0 opacity-10 pointer-events-none overflow-hidden">
-             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
-             <motion.div 
-               animate={{ y: ["-100%", "100%"] }}
-               transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-               className="w-full h-2 bg-gradient-to-b from-transparent via-[#00E5FF]/20 to-transparent"
-             />
-          </div>
-
+          {/* Main Container */}
           <motion.div
-            initial={{ scale: 0.8, opacity: 0, filter: "blur(10px)" }}
-            animate={{ scale: 1, opacity: 1, filter: "blur(0px)" }}
-            exit={{ scale: 1.1, opacity: 0, filter: "blur(20px)" }}
-            transition={{ type: "spring", damping: 20, stiffness: 100 }}
-            className="relative w-full max-w-7xl h-[90vh] bg-[#020617] border border-[#00E5FF]/20 rounded-[32px] overflow-hidden flex flex-col shadow-[0_0_100px_rgba(0,229,255,0.1)]"
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 1.05, opacity: 0 }}
+            className="relative w-full h-full flex flex-col overflow-hidden"
           >
-            {/* Header HUD */}
-            <div className="px-10 py-8 border-b border-white/5 flex justify-between items-center bg-black/40">
-              <div className="space-y-2">
-                <div className="flex items-center gap-3">
-                  <div className="flex gap-1">
-                    <div className="w-1 h-3 bg-[#00E5FF]" />
-                    <div className="w-1 h-3 bg-[#00E5FF]/40" />
-                    <div className="w-1 h-3 bg-[#00E5FF]/10" />
-                  </div>
-                  <span className="text-[10px] font-mono font-black text-[#00E5FF] uppercase tracking-[0.4em]">ACCESSING SECURE ASSET // {module.id}</span>
-                </div>
-                <h2 className="text-4xl font-black text-white uppercase tracking-tighter">{module.title}</h2>
-              </div>
+            {/* Immersive Header HUD */}
+            <div className="h-20 px-8 flex items-center justify-between border-b border-white/5 bg-black/60 backdrop-blur-md z-50">
               <div className="flex items-center gap-6">
-                <div className="hidden lg:flex flex-col items-end">
-                   <span className="text-[8px] font-mono text-white/20 uppercase">Sync Status</span>
-                   <span className="text-xs font-mono text-[#00E5FF]">ACTIVE_UPLINK</span>
-                </div>
                 <button 
                   onClick={onClose}
-                  className="p-5 bg-white/5 hover:bg-red-500/20 hover:text-red-500 rounded-2xl transition-all border border-white/5 group"
+                  className="p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-all group"
                 >
-                  <X className="w-6 h-6 group-hover:rotate-90 transition-transform" />
+                  <ChevronLeft className="w-5 h-5 text-white/40 group-hover:text-white" />
+                </button>
+                <div className="h-8 w-[1px] bg-white/10" />
+                <div className="space-y-1">
+                  <div className="flex items-center gap-3">
+                    <span className="text-[9px] font-mono font-black text-[#00E5FF] uppercase tracking-[0.3em]">MISSION_INTEL // {module.id}</span>
+                  </div>
+                  <h2 className="text-xl font-black text-white uppercase tracking-tighter">{module.title}</h2>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-8">
+                 <div className="hidden md:flex items-center gap-3 px-4 py-2 bg-[#00E5FF]/5 border border-[#00E5FF]/20 rounded-lg">
+                    <Activity className="w-3 h-3 text-[#00E5FF] animate-pulse" />
+                    <span className="text-[9px] font-mono text-[#00E5FF] uppercase tracking-widest">Signal Integrity: Nominal</span>
+                 </div>
+                 <button 
+                  onClick={onClose}
+                  className="p-3 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-xl transition-all border border-red-500/10"
+                >
+                  <X className="w-5 h-5" />
                 </button>
               </div>
             </div>
 
-            <div className="flex-1 overflow-hidden grid grid-cols-1 lg:grid-cols-2">
-              {/* Left Side: Briefing & Audio */}
-              <div className="p-10 space-y-12 overflow-y-auto border-r border-white/5 custom-scrollbar bg-black/20">
-                <div className="space-y-8">
-                  <div className="bg-[#0A192F]/60 border border-[#00E5FF]/20 rounded-3xl p-10 space-y-8 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-4 opacity-10">
-                      <Activity className="w-24 h-24 text-[#00E5FF]" />
-                    </div>
-                    
-                    <div className="space-y-1 relative z-10">
-                      <p className="text-[10px] font-mono font-black text-[#00E5FF] uppercase tracking-widest">Aural Intelligence</p>
-                      <h4 className="text-2xl font-bold text-white uppercase">MISSION AUDIO BRIEFING</h4>
-                    </div>
-
-                    <div className="flex items-center gap-8 bg-black/60 p-8 rounded-3xl border border-white/5 relative z-10">
-                      <button 
-                        onClick={toggleAudio}
-                        disabled={!module.audioUrl}
-                        className="w-20 h-20 bg-[#00E5FF] rounded-full flex items-center justify-center text-black shadow-[0_0_40px_rgba(0,229,255,0.4)] hover:scale-105 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {isPlaying ? <Pause className="w-8 h-8 fill-black" /> : <Play className="w-8 h-8 fill-black ml-1" />}
-                      </button>
-                      <div className="flex-1 space-y-4">
-                        <WaveformVisualizer active={isPlaying} />
-                        <div className="flex justify-between items-center text-[9px] font-mono text-white/20 uppercase tracking-widest">
-                           <span>Signal Strength: {module.audioUrl ? '98%' : 'N/A'}</span>
-                           <span>Bitrate: 320kbps</span>
-                        </div>
-                      </div>
-                      <audio ref={audioRef} src={module.audioUrl} onEnded={() => setIsPlaying(false)} />
-                    </div>
-                  </div>
-
-                  <div className="space-y-6">
-                    <div className="flex items-center gap-3">
-                      <div className="h-[2px] w-8 bg-[#00E5FF]" />
-                      <h4 className="text-[11px] font-black text-white/40 uppercase tracking-[0.5em]">Executive Summary</h4>
-                    </div>
-                    <p className="text-white/70 leading-relaxed text-xl font-medium">
-                      {module.desc} 
-                    </p>
-                    <div className="grid grid-cols-2 gap-4 pt-6">
-                       <div className="p-4 bg-white/5 border border-white/10 rounded-2xl">
-                          <p className="text-[8px] font-mono text-white/20 uppercase mb-1">Complexity</p>
-                          <p className="text-sm font-black text-white">LEVEL_04</p>
-                       </div>
-                       <div className="p-4 bg-white/5 border border-white/10 rounded-2xl">
-                          <p className="text-[8px] font-mono text-white/20 uppercase mb-1">Access Tier</p>
-                          <p className="text-sm font-black text-[#00E5FF]">CONFIDENTIAL</p>
-                       </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Side: Tactical Document Viewer */}
-              <div className="bg-black/40 relative group">
-                {module.docUrl ? (
+            {/* Content Area */}
+            <div className="flex-1 relative flex">
+              {/* PDF VIEWER (Fundo principal) */}
+              <div className="flex-1 bg-[#020617] relative">
+                {hasDoc ? (
                   <iframe 
-                    src={module.docUrl} 
-                    className="w-full h-full border-none grayscale-[0.8] hover:grayscale-0 transition-all duration-1000 opacity-80 hover:opacity-100"
-                    title="Tactical Asset"
-                    allowFullScreen // Added for better PDF viewing experience
+                    src={`${module.docUrl}#toolbar=0&navpanes=0`} 
+                    className="w-full h-full border-none opacity-90 hover:opacity-100 transition-opacity duration-700"
+                    title="Technical Manual"
                   />
                 ) : (
                   <div className="w-full h-full flex flex-col items-center justify-center gap-6 text-white/5">
-                    <FileText className="w-24 h-24" />
-                    <p className="text-[10px] font-mono font-black uppercase tracking-[1em]">Asset Restricted</p>
+                    <FileText className="w-32 h-32" />
+                    <p className="text-xs font-mono font-black uppercase tracking-[1em]">Restricted Document Data</p>
                   </div>
                 )}
                 
-                {/* HUD Elements for Viewer */}
-                <div className="absolute inset-0 pointer-events-none border-[30px] border-black/10" />
-                {module.docUrl && (
-                  <div className="absolute top-10 right-10 pointer-events-auto">
-                    <a 
-                      href={module.docUrl} 
-                      target="_blank" 
-                      rel="noreferrer"
-                      className="flex items-center gap-3 px-5 py-3 bg-black/80 backdrop-blur-xl border border-[#00E5FF]/30 rounded-2xl text-[10px] font-black text-[#00E5FF] uppercase tracking-widest hover:bg-[#00E5FF] hover:text-black transition-all shadow-2xl"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                      Full Expansion
-                    </a>
-                  </div>
-                )}
+                {/* HUD Scanlines overlay over PDF */}
+                <div className="absolute inset-0 pointer-events-none bg-scanline opacity-[0.03]" />
               </div>
+
+              {/* FLOATING AUDIO CONTROLS (Só aparece se tiver áudio) */}
+              {hasAudio && (
+                <motion.div 
+                  drag
+                  dragConstraints={{ left: -500, right: 0, top: 0, bottom: 500 }}
+                  initial={{ x: 20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  className="absolute bottom-10 right-10 z-[60] cursor-move"
+                >
+                  <div className="bg-black/80 backdrop-blur-2xl border border-[#00E5FF]/40 rounded-3xl p-8 shadow-[0_20px_60px_rgba(0,0,0,0.8),0_0_30px_rgba(0,229,255,0.1)] flex items-center gap-8 min-w-[400px]">
+                    <div className="relative">
+                      <button 
+                        onClick={toggleAudio}
+                        className="w-16 h-16 bg-[#00E5FF] rounded-full flex items-center justify-center text-black shadow-[0_0_30px_rgba(0,229,255,0.3)] hover:scale-105 active:scale-95 transition-all"
+                      >
+                        {isPlaying ? <Pause className="w-7 h-7 fill-black" /> : <Play className="w-7 h-7 fill-black ml-1" />}
+                      </button>
+                      {isPlaying && (
+                        <div className="absolute -inset-2 border-2 border-[#00E5FF] rounded-full animate-ping opacity-20 pointer-events-none" />
+                      )}
+                    </div>
+
+                    <div className="flex-1 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-mono font-black text-[#00E5FF] uppercase tracking-widest">Audiobook Uplink</span>
+                        <div className="flex items-center gap-2">
+                           <Volume2 className="w-3 h-3 text-white/20" />
+                           <div className="w-12 h-1 bg-white/10 rounded-full"><div className="w-2/3 h-full bg-[#00E5FF] rounded-full" /></div>
+                        </div>
+                      </div>
+                      <div className="flex justify-start">
+                        <WaveformVisualizer active={isPlaying} />
+                      </div>
+                    </div>
+                    
+                    <audio ref={audioRef} src={module.audioUrl} onEnded={() => setIsPlaying(false)} onPlay={() => setIsPlaying(true)} onPause={() => setIsPlaying(false)} />
+                  </div>
+                </motion.div>
+              )}
+            </div>
+
+            {/* Bottom Status Bar */}
+            <div className="h-10 px-8 bg-black/80 border-t border-white/5 flex items-center justify-between">
+               <div className="flex gap-6">
+                 <span className="text-[8px] font-mono text-white/20 uppercase tracking-widest">Protocol: AES-256</span>
+                 <span className="text-[8px] font-mono text-white/20 uppercase tracking-widest">Source: Aeris_Academy_Vault</span>
+               </div>
+               <div className="flex items-center gap-2">
+                 <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                 <span className="text-[8px] font-mono text-green-500 uppercase font-black">Secure Link Established</span>
+               </div>
             </div>
           </motion.div>
         </motion.div>

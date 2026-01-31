@@ -1,9 +1,10 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FileText, ExternalLink, ShieldAlert, Edit3, Lock, Unlock, Trash2, Database } from 'lucide-react';
 import { TrainingModule } from '@/types/portal';
+import MissionModal from './MissionModal';
 
 interface DocGalleryProps {
   modules: TrainingModule[];
@@ -14,6 +15,7 @@ interface DocGalleryProps {
 }
 
 const DocGallery = ({ modules, isMaster, onEdit, onToggleLock, onDelete }: DocGalleryProps) => {
+  const [selectedModule, setSelectedModule] = useState<TrainingModule | null>(null);
   const docModules = modules.filter(m => m.docUrl || isMaster);
 
   return (
@@ -34,7 +36,8 @@ const DocGallery = ({ modules, isMaster, onEdit, onToggleLock, onDelete }: DocGa
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.1 }}
-              className={`relative aspect-[3/4.5] bg-black/60 border ${isLocked ? 'border-red-500/20 opacity-60' : 'border-[#00E5FF]/30 shadow-[0_0_30px_rgba(0,229,255,0.05)]'} rounded-3xl overflow-hidden group p-8 flex flex-col justify-between transition-all hover:bg-black/80 hover:border-[#00E5FF]/60`}
+              onClick={() => !isLocked && hasDoc && setSelectedModule(mod)}
+              className={`relative aspect-[3/4.5] bg-black/60 border ${isLocked ? 'border-red-500/20 opacity-60' : 'border-[#00E5FF]/30 shadow-[0_0_30px_rgba(0,229,255,0.05)]'} rounded-3xl overflow-hidden group p-8 flex flex-col justify-between transition-all hover:bg-black/80 hover:border-[#00E5FF]/60 cursor-pointer`}
             >
               <div className="space-y-6">
                 <div className="flex justify-between items-start">
@@ -71,11 +74,10 @@ const DocGallery = ({ modules, isMaster, onEdit, onToggleLock, onDelete }: DocGa
                   </div>
                 ) : hasDoc ? (
                   <button 
-                    onClick={() => window.open(mod.docUrl, '_blank')}
                     className="w-full py-4 bg-[#00E5FF] text-black rounded-2xl flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_30px_rgba(0,229,255,0.2)]"
                   >
-                    <ExternalLink size={14} />
-                    View Technical File
+                    <FileText size={14} />
+                    Open Document
                   </button>
                 ) : (
                   <div className="py-4 text-center border border-dashed border-white/10 rounded-2xl">
@@ -87,14 +89,16 @@ const DocGallery = ({ modules, isMaster, onEdit, onToggleLock, onDelete }: DocGa
               {/* Master Controls */}
               {isMaster && (
                 <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                   <button onClick={() => onEdit?.(mod)} className="p-2 bg-black/60 border border-white/10 rounded-lg text-white/40 hover:text-[#00E5FF]"><Edit3 size={14} /></button>
-                   <button onClick={() => onDelete?.(mod.id)} className="p-2 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500"><Trash2 size={14} /></button>
+                   <button onClick={(e) => { e.stopPropagation(); onEdit?.(mod); }} className="p-2 bg-black/60 border border-white/10 rounded-lg text-white/40 hover:text-[#00E5FF]"><Edit3 size={14} /></button>
+                   <button onClick={(e) => { e.stopPropagation(); onDelete?.(mod.id); }} className="p-2 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500"><Trash2 size={14} /></button>
                 </div>
               )}
             </motion.div>
           );
         })}
       </div>
+
+      <MissionModal isOpen={!!selectedModule} onClose={() => setSelectedModule(null)} module={selectedModule} />
     </div>
   );
 };

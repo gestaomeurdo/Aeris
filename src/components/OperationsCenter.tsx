@@ -39,11 +39,8 @@ const TacticalCard = ({
 
   const handleClick = () => {
     if (isLocked) return;
-    if (isDoc && mod.docUrl) {
-      window.open(mod.docUrl, '_blank');
-    } else {
-      onSelect(mod);
-    }
+    // Agora sempre abre no modal interno para evitar popups
+    onSelect(mod);
   };
 
   return (
@@ -75,7 +72,7 @@ const TacticalCard = ({
             <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full border ${isLocked ? 'border-red-500/30 bg-red-500/10' : 'border-[#00E5FF]/30 bg-[#00E5FF]/10'}`}>
               <div className={`w-1 h-1 rounded-full ${isLocked ? 'bg-red-500' : 'bg-[#00E5FF] animate-pulse'}`} />
               <span className={`text-[8px] font-mono font-black uppercase tracking-tighter ${isLocked ? 'text-red-400' : 'text-[#00E5FF]'}`}>
-                {isLocked ? 'ENCRYPTED' : isDoc ? 'READ-ONLY INTEL' : 'SIGNAL ACTIVE'}
+                {isLocked ? 'ENCRYPTED' : isDoc ? 'TECHNICAL DATA' : 'SIGNAL ACTIVE'}
               </span>
             </div>
             <span className="text-[8px] font-mono text-white/20 uppercase">{mod.type} // {mod.id}</span>
@@ -87,7 +84,7 @@ const TacticalCard = ({
             {mod.title}
           </h4>
           <p className="text-[11px] text-white/40 leading-relaxed line-clamp-2 italic">
-            {isDoc ? "TECHNICAL MANUAL: Accessing secure repository data..." : mod.desc}
+            {mod.desc}
           </p>
         </div>
 
@@ -106,9 +103,9 @@ const TacticalCard = ({
            {!isLocked && (
              <div className="flex items-center gap-2 group/btn">
                <span className="text-[9px] font-mono font-black text-[#00E5FF] uppercase">
-                 {isDoc ? 'VIEW FILE' : 'START MISSION'}
+                 INITIALIZE MISSION
                </span>
-               {isDoc ? <ExternalLink className="w-3 h-3 text-[#00E5FF]" /> : <ChevronRight className="w-3 h-3 text-[#00E5FF]" />}
+               <ChevronRight className="w-3 h-3 text-[#00E5FF]" />
              </div>
            )}
         </div>
