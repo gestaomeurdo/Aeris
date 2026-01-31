@@ -32,63 +32,38 @@ const INITIAL_DATA: PortalData = {
   ]
 };
 
-// Chave de persistência
-const PERSISTENCE_KEY = 'aeris_modules_v1';
-
-// Helper function to load initial state from sessionStorage
-const loadInitialData = (): PortalData => {
-  // Usando sessionStorage como workaround para o ambiente que limpa localStorage
-  const saved = sessionStorage.getItem(PERSISTENCE_KEY);
-  
-  // REGRA ESTREITA: Se a chave for estritamente null, é o primeiro acesso.
-  if (saved === null) {
-    console.log("PERSISTENCE LOG (SessionStorage): Key not found (first run). Loading default modules.");
-    return INITIAL_DATA;
-  }
-  
-  // Se a chave existe (saved !== null), tentamos carregar, mesmo que o array de módulos esteja vazio.
-  try {
-    const parsedData: PortalData = JSON.parse(saved);
-    
-    if (parsedData.modules && parsedData.modules.length === 0) {
-        console.log("PERSISTENCE LOG (SessionStorage): Loaded empty module list from storage. State respected.");
-    } else {
-        console.log(`PERSISTENCE LOG (SessionStorage): Loaded ${parsedData.modules?.length || 0} modules from storage.`);
-    }
-    
-    return parsedData;
-  } catch (e) {
-    console.error("PERSISTENCE ERROR: Saved data could not be parsed. Resetting to initial parameters.", e);
-    // Se a chave existe mas está corrompida, voltamos aos defaults para evitar crash.
-    return INITIAL_DATA;
-  }
-};
-
-const getNextModuleId = (modules: TrainingModule[]) => {
-  // Find the highest existing number to ensure uniqueness
-  const maxIdNumber = modules.reduce((max, mod) => {
-    const num = parseInt(mod.id.split('-')[1], 10);
-    return num > max ? num : max;
-  }, 0);
-  
-  const nextIdNumber = maxIdNumber + 1;
-  return `MOD-${nextIdNumber.toString().padStart(2, '0')}`;
-};
+const STORAGE_KEY = 'aeris_content_data';
 
 const Index = () => {
-  // Initialize state using the function to load from sessionStorage immediately
-  const [data, setData] = useState<PortalData>(loadInitialData);
+  // Inicialização do estado seguindo estritamente a lógica solicitada
+  const [data, setData] = useState<PortalData>(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    
+    // CENÁRIO A: Dados existem no storage (mesmo que seja [])
+    if (saved !== null) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error("Erro ao processar dados salvos:", e);
+        return INITIAL_DATA;
+      }
+    }
+    
+    // CENÁRIO B: Primeira visita (saved === null)
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_DATA));
+    return INITIAL_DATA;
+  });
+
   const [activeView, setActiveView] = useState('dashboard');
   const [isMaster, setIsMaster] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [editingModule, setEditingModule] = useState<TrainingModule | null>(null);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false); // New State for Add Modal
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  // Effect to save data whenever it changes
+  // Sincronização constante com o localStorage
   useEffect(() => {
-    // Salva o objeto completo no sessionStorage
-    sessionStorage.setItem(PERSISTENCE_KEY, JSON.stringify(data));
-  }, [data]); // Dependência [data] garante que qualquer alteração (incluindo deleção) salve o novo estado.
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }, [data]);
 
   const handleUserClick = () => {
     if (isMaster) {
@@ -105,9 +80,20 @@ const Index = () => {
     if (url) setData(prev => ({ ...prev, mainVideo: url }));
   };
 
-  // Opens the new Add Module Modal
   const handleAddModule = () => {
     setIsAddModalOpen(true);
+  };
+
+  const getNextModuleId = (modules: TrainingModule[]) => {
+    const maxIdNumber = modules.reduce((max, mod) => {
+      const parts = mod.id.split('-');
+      if (parts.length < 2) return max;
+      const num = parseInt(parts[1], 10);
+      return !isNaN(num) && num > max ? num : max;
+    }, 0);
+    
+    const nextIdNumber = maxIdNumber + 1;
+    return `MOD-${nextIdNumber.toString().padStart(2, '0')}`;
   };
 
   const handleSaveNewModule = (newModuleData: Omit<TrainingModule, 'id'>, file: File | null) => {
@@ -116,15 +102,14 @@ const Index = () => {
     let audioUrl = newModuleData.audioUrl;
     let docUrl = newModuleData.docUrl;
     
-    // Process file and create local URL
     if (file) {
       const url = URL.createObjectURL(file);
       if (file.type === 'audio/mp3' || file.type === 'audio/mpeg') {
         audioUrl = url;
-        docUrl = ''; // Ensure only one asset type is set
+        docUrl = '';
       } else if (file.type === 'application/pdf') {
         docUrl = url;
-        audioUrl = ''; // Ensure only one asset type is set
+        audioUrl = '';
       }
     }
 
@@ -137,20 +122,19 @@ const Index = () => {
       locked: false,
     };
 
-    // Adiciona o novo módulo e salva, garantindo persistência
     setData(prev => ({ ...prev, modules: [...prev.modules, newModule] }));
-    // Não define editingModule aqui para evitar abrir o modal de edição imediatamente após a criação.
   };
 
   const handleDeleteModule = (id: string) => {
     if (confirm(`Deseja remover o módulo ${id} permanentemente?`)) {
-      // Filtra e salva, garantindo persistência
-      setData(prev => ({ ...prev, modules: prev.modules.filter(m => m.id !== id) }));
+      setData(prev => ({ 
+        ...prev, 
+        modules: prev.modules.filter(m => m.id !== id) 
+      }));
     }
   };
 
   const handleToggleLock = (id: string) => {
-    // Atualiza e salva, garantindo persistência
     setData(prev => ({
       ...prev,
       modules: prev.modules.map(m => m.id === id ? { ...m, locked: !m.locked } : m)
@@ -158,7 +142,6 @@ const Index = () => {
   };
 
   const handleUpdateModule = (updated: TrainingModule) => {
-    // Atualiza e salva, garantindo persistência
     setData(prev => ({
       ...prev,
       modules: prev.modules.map(m => m.id === updated.id ? updated : m)
@@ -171,7 +154,6 @@ const Index = () => {
 
   const modulesToDisplay = data.modules.map(mod => ({
     ...mod,
-    // Only unlock if isMaster is true
     locked: isMaster ? false : mod.locked
   }));
 
@@ -252,7 +234,7 @@ const Index = () => {
                     Update Video
                   </button>
                   <button 
-                    onClick={handleAddModule} // Updated to open modal
+                    onClick={handleAddModule}
                     className="flex items-center gap-2 bg-[#00E5FF]/10 hover:bg-[#00E5FF]/20 border border-[#00E5FF]/30 px-4 py-2.5 rounded-xl text-[9px] font-black text-[#00E5FF] uppercase tracking-widest transition-all"
                   >
                     <Plus className="w-3 h-3" />
@@ -343,7 +325,7 @@ const Index = () => {
           <footer className="pt-20 flex flex-col items-center gap-10 opacity-30 text-[9px] font-mono font-black text-white/20 tracking-[1em] uppercase">
             <div className="flex gap-12">
               <span>ENCRYPTION: AES-256</span>
-              <span>LOCAL_SYNC: ACTIVE</span>
+              <span>STORAGE_SYNC: ACTIVE</span>
             </div>
             // END OF LINE // OPERATIONAL_HUB_v2.0 //
           </footer>
