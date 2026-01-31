@@ -15,22 +15,15 @@ interface SessionContextType {
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
 
-// A senha mestra definida para o sistema
 const MASTER_KEY = "@mike2026";
 const MASTER_USER = "mike";
 
 export const SessionContextProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isMaster, setIsMaster] = useState(false);
+  const [isMaster, setIsMaster] = useState(false); // Inicia sempre como falso
 
   useEffect(() => {
-    // Verificar se já estava logado como Master anteriormente
-    const savedMaster = localStorage.getItem('aeris_master_active');
-    if (savedMaster === 'true') {
-      setIsMaster(true);
-    }
-
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
         setSession(currentSession);
@@ -51,7 +44,6 @@ export const SessionContextProvider = ({ children }: { children: ReactNode }) =>
   const loginMaster = (user: string, pass: string) => {
     if (user.toLowerCase() === MASTER_USER && pass === MASTER_KEY) {
       setIsMaster(true);
-      localStorage.setItem('aeris_master_active', 'true');
       toast.success("ACESSO MASTER CONCEDIDO. Privilégios de edição ativados.");
       return true;
     }
@@ -60,8 +52,7 @@ export const SessionContextProvider = ({ children }: { children: ReactNode }) =>
 
   const logout = async () => {
     setIsMaster(false);
-    localStorage.removeItem('aeris_master_active');
-    toast.info("Sessão Master encerrada. Ferramentas de edição ocultas.");
+    toast.info("Sessão Master encerrada.");
   };
 
   return (
