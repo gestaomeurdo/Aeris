@@ -10,7 +10,6 @@ import DocGallery from '@/components/DocGallery';
 import SecurityProtocol from '@/components/SecurityProtocol';
 import OperationalStats from '@/components/OperationalStats';
 import AuthTerminal from '@/components/AuthTerminal';
-import EditorSidebar from '@/components/EditorSidebar';
 import { Bell, Wifi, Plus, Edit3 } from 'lucide-react';
 import { PortalData, TrainingModule } from '@/types/portal';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -37,7 +36,7 @@ const Index = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem('aeris_data_v3');
+    const saved = localStorage.getItem('aeris_data_v4');
     if (saved) {
       try {
         setData(JSON.parse(saved));
@@ -48,7 +47,7 @@ const Index = () => {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('aeris_data_v3', JSON.stringify(data));
+    localStorage.setItem('aeris_data_v4', JSON.stringify(data));
   }, [data]);
 
   const handleUserClick = () => {
@@ -61,7 +60,6 @@ const Index = () => {
     }
   };
 
-  // Funções de Gerenciamento do Mike
   const handleUpdateVideo = () => {
     const url = prompt("Insira a nova URL do vídeo (YouTube ou MP4):", data.mainVideo);
     if (url) setData(prev => ({ ...prev, mainVideo: url }));
@@ -97,6 +95,13 @@ const Index = () => {
     }));
   };
 
+  const handleUpdateModule = (updated: TrainingModule) => {
+    setData(prev => ({
+      ...prev,
+      modules: prev.modules.map(m => m.id === updated.id ? updated : m)
+    }));
+  };
+
   const modulesToDisplay = data.modules.map(mod => ({
     ...mod,
     locked: isMaster ? false : mod.locked
@@ -104,8 +109,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-[#020202] text-[#B0BEC5] font-sans selection:bg-[#00E5FF] selection:text-black overflow-x-hidden">
-      <EditorSidebar data={data} onUpdate={setData} />
-      
       <AuthTerminal 
         isOpen={isAuthOpen} 
         onClose={() => setIsAuthOpen(false)} 
@@ -186,6 +189,7 @@ const Index = () => {
                   isMaster={isMaster}
                   onDelete={handleDeleteModule}
                   onToggleLock={handleToggleLock}
+                  onUpdateModule={handleUpdateModule}
                 />
               </motion.div>
             )}
@@ -197,6 +201,7 @@ const Index = () => {
                   isMaster={isMaster}
                   onDelete={handleDeleteModule}
                   onToggleLock={handleToggleLock}
+                  onUpdateModule={handleUpdateModule}
                 />
               </motion.div>
             )}

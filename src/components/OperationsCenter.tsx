@@ -2,21 +2,24 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Shield, Target, Cpu, ChevronRight, Lock, Headphones, FileText, Activity, Layers, Trash2, Unlock } from 'lucide-react';
+import { Shield, Target, Cpu, ChevronRight, Lock, Headphones, FileText, Activity, Layers, Trash2, Unlock, Edit3 } from 'lucide-react';
 import { TrainingModule } from '@/types/portal';
 import MissionModal from './MissionModal';
+import EditModuleModal from './EditModuleModal';
 
 interface OperationsCenterProps {
   modules: TrainingModule[];
   isMaster?: boolean;
   onDelete?: (id: string) => void;
   onToggleLock?: (id: string) => void;
+  onUpdateModule?: (updated: TrainingModule) => void;
 }
 
 const TacticalCard = ({ 
   mod, 
   index, 
   onSelect, 
+  onEdit,
   isMaster, 
   onDelete, 
   onToggleLock 
@@ -24,6 +27,7 @@ const TacticalCard = ({
   mod: TrainingModule, 
   index: number, 
   onSelect: (m: TrainingModule) => void,
+  onEdit: (m: TrainingModule) => void,
   isMaster?: boolean,
   onDelete?: (id: string) => void,
   onToggleLock?: (id: string) => void
@@ -41,6 +45,13 @@ const TacticalCard = ({
       {/* Admin Controls Overlay */}
       {isMaster && (
         <div className="absolute top-4 right-4 z-20 flex gap-2">
+           <button 
+             onClick={(e) => { e.stopPropagation(); onEdit(mod); }}
+             className="p-2 bg-black/40 hover:bg-[#00E5FF]/20 border border-white/10 rounded-lg text-white/60 hover:text-[#00E5FF] transition-all"
+             title="Edit Parameters"
+           >
+             <Edit3 size={14} />
+           </button>
            <button 
              onClick={(e) => { e.stopPropagation(); onToggleLock?.(mod.id); }}
              className="p-2 bg-black/40 hover:bg-[#00E5FF]/20 border border-white/10 rounded-lg text-white/60 hover:text-[#00E5FF] transition-all"
@@ -88,23 +99,23 @@ const TacticalCard = ({
         </div>
 
         <div className="flex items-center gap-1 h-4 w-full">
-           {[...Array(20)].map((_, i) => (
-             <div 
-               key={i} 
-               className={`w-full bg-[#00E5FF] transition-all duration-300 ${mod.locked ? 'h-[1px] opacity-10' : 'opacity-20 group-hover:opacity-60'}`}
-               style={{ height: mod.locked ? '1px' : `${Math.random() * 100}%` }}
+           <div className="h-full bg-[#00E5FF]/20 w-full rounded-full overflow-hidden">
+             <motion.div 
+               initial={{ width: 0 }}
+               animate={{ width: `${mod.progress}%` }}
+               className="h-full bg-[#00E5FF] shadow-[0_0_10px_#00E5FF]"
              />
-           ))}
+           </div>
         </div>
 
         <div className="flex items-center justify-between pt-4 border-t border-white/5">
            <div className="flex gap-3">
              <div className="flex items-center gap-1">
-               <Headphones className="w-3 h-3 text-white/20" />
+               <Headphones className={`w-3 h-3 ${mod.audioUrl ? 'text-[#00E5FF]' : 'text-white/20'}`} />
                <span className="text-[8px] font-mono text-white/40">VOX</span>
              </div>
              <div className="flex items-center gap-1">
-               <FileText className="w-3 h-3 text-white/20" />
+               <FileText className={`w-3 h-3 ${mod.docUrl ? 'text-[#00E5FF]' : 'text-white/20'}`} />
                <span className="text-[8px] font-mono text-white/40">DOC</span>
              </div>
            </div>
@@ -121,8 +132,9 @@ const TacticalCard = ({
   );
 };
 
-const OperationsCenter = ({ modules, isMaster, onDelete, onToggleLock }: OperationsCenterProps) => {
+const OperationsCenter = ({ modules, isMaster, onDelete, onToggleLock, onUpdateModule }: OperationsCenterProps) => {
   const [selectedModule, setSelectedModule] = useState<TrainingModule | null>(null);
+  const [editingModule, setEditingModule] = useState<TrainingModule | null>(null);
 
   return (
     <section className="space-y-12">
@@ -154,6 +166,7 @@ const OperationsCenter = ({ modules, isMaster, onDelete, onToggleLock }: Operati
             mod={mod} 
             index={i} 
             onSelect={setSelectedModule} 
+            onEdit={setEditingModule}
             isMaster={isMaster}
             onDelete={onDelete}
             onToggleLock={onToggleLock}
@@ -165,6 +178,13 @@ const OperationsCenter = ({ modules, isMaster, onDelete, onToggleLock }: Operati
         isOpen={!!selectedModule}
         onClose={() => setSelectedModule(null)}
         module={selectedModule}
+      />
+
+      <EditModuleModal
+        isOpen={!!editingModule}
+        onClose={() => setEditingModule(null)}
+        module={editingModule}
+        onSave={(updated) => onUpdateModule?.(updated)}
       />
     </section>
   );
