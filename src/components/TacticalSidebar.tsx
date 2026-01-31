@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { LayoutGrid, Target, Headphones, FileText, Shield, User, Zap } from 'lucide-react';
+import { LayoutGrid, Target, Headphones, FileText, Shield, User, LogOut } from 'lucide-react';
 import AerisLogo from './AerisLogo';
 
 interface TacticalSidebarProps {
@@ -61,10 +61,14 @@ const TacticalSidebar = ({ activeView, onViewChange, isMaster, onUserClick }: Ta
             : 'text-white/20 hover:text-white hover:bg-white/5'
           }`}
         >
-          <User className={`w-6 h-6 transition-all ${isMaster ? 'drop-shadow-[0_0_10px_rgba(34,197,94,0.8)] scale-110' : ''}`} />
+          {isMaster ? (
+            <LogOut className="w-6 h-6 drop-shadow-[0_0_10px_rgba(34,197,94,0.8)] scale-110" />
+          ) : (
+            <User className="w-6 h-6 transition-all" />
+          )}
           
-          <div className={`absolute left-full ml-6 px-4 py-2 ${isMaster ? 'bg-green-500' : 'bg-white'} text-black text-[9px] font-black uppercase tracking-widest rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-all translate-x-[-10px] group-hover:translate-x-0 shadow-2xl whitespace-nowrap z-50`}>
-            {isMaster ? 'OPERATOR: MIKE' : 'IDENTIFY USER'}
+          <div className={`absolute left-full ml-6 px-4 py-2 ${isMaster ? 'bg-red-500' : 'bg-white'} text-black text-[9px] font-black uppercase tracking-widest rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-all translate-x-[-10px] group-hover:translate-x-0 shadow-2xl whitespace-nowrap z-50`}>
+            {isMaster ? 'TERMINATE MASTER SESSION' : 'IDENTIFY OPERATOR'}
           </div>
         </button>
       </div>

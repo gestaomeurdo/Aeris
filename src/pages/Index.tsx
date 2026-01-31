@@ -11,7 +11,7 @@ import EditModuleModal from '@/components/EditModuleModal';
 import OperationalStats from '@/components/OperationalStats';
 import AddModuleModal from '@/components/AddModuleModal';
 import EditMainBriefingModal from '@/components/EditMainBriefingModal';
-import AuthTerminal from '@/components/AuthTerminal'; // Importando o terminal de autenticação
+import AuthTerminal from '@/components/AuthTerminal';
 import { Database, Loader2, Settings2 } from 'lucide-react';
 import { PortalData, TrainingModule } from '@/types/portal';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -20,11 +20,8 @@ import { toast } from "sonner";
 import { useSession } from '@/contexts/SessionContext';
 
 const Index = () => {
-  const { isAuthenticated, isLoading: isAuthLoading, session } = useSession();
+  const { isMaster, isLoading: isAuthLoading, logout } = useSession();
   
-  // Usamos isAuthenticated para determinar se o usuário é o 'Master' (logado)
-  const isMaster = isAuthenticated; 
-
   const [data, setData] = useState<PortalData>({
     mainVideo: "https://youtu.be/mQayAWnJQOE",
     missionTitle: "AERIS ACADEMY",
@@ -50,7 +47,7 @@ const Index = () => {
         missionDescription: parsed.description
       }));
     }
-    // Só tentamos buscar módulos se a autenticação inicial tiver terminado
+    
     if (!isAuthLoading) {
       fetchModules(); 
     }
@@ -58,8 +55,6 @@ const Index = () => {
 
   const fetchModules = async () => {
     setIsLoading(true);
-    // Se o usuário estiver autenticado, a RLS garantirá que ele só possa modificar
-    // Mas para SELECT, a política é pública, então todos podem ver.
     const { data: modules, error } = await supabase
       .from('training_modules')
       .select('*')
@@ -74,10 +69,10 @@ const Index = () => {
         title: m.title,
         desc: m.desc_text,
         type: m.type as any,
-        category: (m.category as any) || 'module', // Garante fallback
+        category: (m.category as any) || 'module',
         audioUrl: m.audio_url || '',
         docUrl: m.doc_url || '',
-        coverUrl: m.cover_url || '', // Mapeando a nova URL da capa
+        coverUrl: m.cover_url || '',
         progress: m.progress,
         locked: m.locked
       }));
@@ -100,7 +95,7 @@ const Index = () => {
 
   const handleSaveNewModule = async (newModuleData: Omit<TrainingModule, 'id' | 'dbId' | 'progress' | 'coverUrl'>, files: { audio?: File, doc?: File, cover?: File }) => {
     if (!isMaster) {
-      toast.error("Acesso negado. Requer autenticação Master.");
+      toast.error("Acesso negado.");
       return;
     }
     
@@ -141,7 +136,7 @@ const Index = () => {
 
   const handleUpdateModule = async (updated: TrainingModule, files: { audio?: File, doc?: File, cover?: File }) => {
     if (!isMaster) {
-      toast.error("Acesso negado. Requer autenticação Master.");
+      toast.error("Acesso negado.");
       return;
     }
     
@@ -176,20 +171,14 @@ const Index = () => {
   };
 
   const handleDeleteModule = async (id: string) => {
-    if (!isMaster) {
-      toast.error("Acesso negado. Requer autenticação Master.");
-      return;
-    }
+    if (!isMaster) return;
     const { error } = await supabase.from('training_modules').delete().eq('module_id', id);
     if (error) toast.error("Erro ao deletar");
     else { toast.success("Removido com sucesso"); fetchModules(); }
   };
 
   const handleToggleLock = async (id: string) => {
-    if (!isMaster) {
-      toast.error("Acesso negado. Requer autenticação Master.");
-      return;
-    }
+    if (!isMaster) return;
     const mod = data.modules.find(m => m.id === id);
     if (!mod) return;
     const { error } = await supabase.from('training_modules').update({ locked: !mod.locked }).eq('module_id', id);
@@ -197,20 +186,11 @@ const Index = () => {
     else fetchModules();
   };
   
-  // A função handleAuthSuccess não precisa mais de lógica de login, pois o AuthTerminal
-  // agora apenas envia o link mágico. O SessionContext lida com a autenticação após o clique no link.
-  const handleAuthSuccess = () => {
-    // Apenas fecha o terminal, a notificação de sucesso virá do SessionContext
-  };
-
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast.error(`Erro ao sair: ${error.message}`);
-    }
+    await logout();
+    window.location.reload(); // Recarregar para limpar estados residuais
   };
 
-  // Filtros de Categoria
   const manualModules = data.modules.filter(m => m.category === 'module');
   const podcastModules = data.modules.filter(m => m.category === 'podcast');
 
@@ -236,10 +216,7 @@ const Index = () => {
           description: data.missionDescription
         }}
         onSave={(newData) => {
-          if (!isMaster) {
-            toast.error("Acesso negado. Requer autenticação Master.");
-            return;
-          }
+          if (!isMaster) return;
           setData(prev => ({ ...prev, missionTitle: newData.title, mainVideo: newData.video, missionDescription: newData.description }));
           localStorage.setItem('aeris_main_briefing', JSON.stringify(newData));
           toast.success("Briefing atualizado");
@@ -249,7 +226,7 @@ const Index = () => {
       <AuthTerminal 
         isOpen={isAuthTerminalOpen} 
         onClose={() => setIsAuthTerminalOpen(false)} 
-        onSuccess={handleAuthSuccess} 
+        onSuccess={() => {}} 
       />
 
       <div className="fixed inset-0 pointer-events-none z-0"><div className="absolute inset-0 bg-grid-pattern opacity-5" /></div>

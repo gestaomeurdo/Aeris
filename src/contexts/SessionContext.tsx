@@ -8,30 +8,30 @@ import { toast } from 'sonner';
 interface SessionContextType {
   session: Session | null;
   isLoading: boolean;
-  isAuthenticated: boolean;
+  isMaster: boolean;
+  loginMaster: (user: string, pass: string) => boolean;
+  logout: () => void;
 }
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
 
 export const SessionContextProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
+  const [isMasterInternal, setIsMasterInternal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Verificar se o modo master estava ativo no localStorage
+    const savedMaster = localStorage.getItem('aeris_master_active') === 'true';
+    if (savedMaster) setIsMasterInternal(true);
+
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
         setSession(currentSession);
         setIsLoading(false);
-        
-        if (event === 'SIGNED_IN') {
-          toast.success("Uplink estabelecido: Operador autenticado.");
-        } else if (event === 'SIGNED_OUT') {
-          toast.info("Sessão encerrada: Desconectado.");
-        }
       }
     );
 
-    // Fetch initial session
     supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
       setSession(initialSession);
       setIsLoading(false);
@@ -42,10 +42,28 @@ export const SessionContextProvider = ({ children }: { children: ReactNode }) =>
     };
   }, []);
 
-  const isAuthenticated = !!session;
+  const loginMaster = (user: string, pass: string) => {
+    if (user.toLowerCase() === 'mike' && pass === 'mike2026') {
+      setIsMasterInternal(true);
+      localStorage.setItem('aeris_master_active', 'true');
+      toast.success("ACESSO MASTER CONCEDIDO: Bem-vindo de volta, Operador Mike.");
+      return true;
+    }
+    return false;
+  };
+
+  const logout = async () => {
+    setIsMasterInternal(false);
+    localStorage.removeItem('aeris_master_active');
+    await supabase.auth.signOut();
+    toast.info("Sessão encerrada.");
+  };
+
+  // O usuário é Master se estiver logado via Supabase OU via modo Master manual
+  const isMaster = !!session || isMasterInternal;
 
   return (
-    <SessionContext.Provider value={{ session, isLoading, isAuthenticated }}>
+    <SessionContext.Provider value={{ session, isLoading, isMaster, loginMaster, logout }}>
       {children}
     </SessionContext.Provider>
   );
