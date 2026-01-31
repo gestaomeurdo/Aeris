@@ -1,68 +1,70 @@
 "use client";
 
 import React from 'react';
-import { Play, Activity, Wifi, ShieldAlert, Radio } from 'lucide-react';
+import { Play, Activity, Radio, Maximize2, Settings } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const CommandBriefing = () => {
   return (
-    <div className="relative w-full aspect-video bg-[#020B1A] rounded-sm p-4 border border-[#B0BEC5]/20 shadow-2xl overflow-hidden group">
-      {/* Silver Metallic Frame Effect */}
-      <div className="absolute inset-0 border-[1px] border-[#B0BEC5]/10 pointer-events-none z-20 rounded-sm" />
-      <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent pointer-events-none z-10" />
-
-      {/* Video Content */}
-      <div className="relative w-full h-full overflow-hidden bg-black flex items-center justify-center">
-        <img 
+    <div className="relative w-full aspect-video bg-[#020B1A] rounded-2xl p-1 border border-white/[0.05] shadow-2xl overflow-hidden group">
+      <div className="relative w-full h-full overflow-hidden bg-black rounded-xl flex items-center justify-center">
+        {/* Camada de Imagem com Zoom Suave */}
+        <motion.img 
+          initial={{ scale: 1.1 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 20, repeat: Infinity, repeatType: "reverse" }}
           src="https://i.ibb.co/mrPSkq5v/1.png" 
           alt="Briefing Cover" 
-          className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-70 transition-opacity duration-1000 grayscale-[0.3]"
+          className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-opacity duration-1000 grayscale-[0.2]"
         />
         
-        {/* HUD Overlay - Cyber Space Style */}
-        <div className="absolute inset-0 p-8 flex flex-col justify-between pointer-events-none z-30">
+        {/* HUD Moderno */}
+        <div className="absolute inset-0 p-10 flex flex-col justify-between z-30 pointer-events-none">
           <div className="flex justify-between items-start">
-            <div className="flex items-center gap-4 bg-[#020B1A]/80 backdrop-blur-md border border-[#00E5FF]/30 px-4 py-2">
-              <Activity className="w-4 h-4 text-[#00E5FF]" />
+            <div className="flex items-center gap-4 bg-black/40 backdrop-blur-xl border border-white/10 px-5 py-2.5 rounded-full">
+              <div className="w-2 h-2 rounded-full bg-[#00E5FF] animate-pulse" />
               <div className="flex flex-col">
-                <span className="text-[10px] font-mono text-[#00E5FF] font-bold uppercase tracking-widest">CYBER STREAM // 7.0</span>
-                <span className="text-[8px] font-mono text-[#B0BEC5] uppercase">Deep Space Uplink Enabled</span>
+                <span className="text-[9px] font-mono text-white/80 font-black uppercase tracking-[0.2em]">LIVE UPLINK // 7.0-BETA</span>
               </div>
             </div>
             
-            <div className="flex items-center gap-3 bg-[#020B1A]/60 backdrop-blur-md border border-[#B0BEC5]/20 px-3 py-1.5">
-              <Radio className="w-3 h-3 text-red-500 animate-pulse" />
-              <span className="text-[9px] font-mono text-[#B0BEC5] font-bold uppercase tracking-widest">Live</span>
+            <div className="flex gap-3">
+              <button className="p-2.5 bg-black/40 backdrop-blur-xl border border-white/10 rounded-full pointer-events-auto hover:bg-[#00E5FF]/10 hover:border-[#00E5FF]/40 transition-all">
+                <Settings className="w-4 h-4 text-white/60" />
+              </button>
             </div>
           </div>
 
-          <div className="flex justify-center items-center gap-12">
-            <button className="pointer-events-auto group/btn relative w-24 h-24 flex items-center justify-center">
-              <div className="absolute inset-0 border border-[#00E5FF]/30 group-hover/btn:border-[#00E5FF] group-hover/btn:rotate-45 transition-all duration-700 rounded-full" />
-              <div className="absolute inset-2 border border-[#00E5FF]/10 group-hover/btn:border-[#00E5FF]/40 rounded-full" />
-              <div className="w-16 h-16 bg-[#00E5FF]/10 group-hover/btn:bg-[#00E5FF]/20 rounded-full flex items-center justify-center backdrop-blur-sm transition-all">
-                <Play className="w-8 h-8 text-[#00E5FF] fill-[#00E5FF]/20 group-hover/btn:scale-110 transition-transform" />
+          <div className="flex justify-center items-center">
+            <button className="pointer-events-auto group/btn relative w-20 h-20 flex items-center justify-center">
+              <div className="absolute inset-0 bg-[#00E5FF]/20 blur-2xl opacity-0 group-hover/btn:opacity-100 transition-opacity duration-500 rounded-full" />
+              <div className="absolute inset-0 border-2 border-[#00E5FF]/40 group-hover/btn:border-[#00E5FF] transition-all duration-500 rounded-full scale-110 group-hover/btn:scale-100" />
+              <div className="w-16 h-16 bg-white/10 group-hover/btn:bg-[#00E5FF] rounded-full flex items-center justify-center backdrop-blur-md transition-all duration-300">
+                <Play className="w-6 h-6 text-white fill-white group-hover/btn:scale-110 transition-transform" />
               </div>
             </button>
           </div>
 
           <div className="flex justify-between items-end">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <Wifi className="w-3 h-3 text-[#00E5FF]/60" />
-                <span className="text-[10px] font-mono text-[#B0BEC5] font-bold uppercase tracking-widest">Auth: Encrypted Node</span>
+            <div className="space-y-2">
+              <h2 className="text-3xl font-bold text-white tracking-tight uppercase">OPERATIONAL BRIEFING</h2>
+              <div className="flex items-center gap-3">
+                <Activity className="w-3 h-3 text-[#00E5FF]" />
+                <span className="text-[10px] font-mono font-bold text-[#B0BEC5]/60 uppercase tracking-[0.4em]">Ready for synchronization</span>
               </div>
-              <h2 className="text-xl font-bold text-white uppercase tracking-tighter">Mission Briefing Module</h2>
             </div>
             
-            <div className="bg-[#00E5FF]/10 border border-[#00E5FF]/30 px-5 py-2 flex items-center gap-3">
-              <ShieldAlert className="w-4 h-4 text-[#00E5FF]" />
-              <span className="text-[10px] font-mono font-bold text-[#00E5FF] uppercase tracking-[0.3em]">Secured</span>
+            <div className="flex items-center gap-4">
+              <button className="p-3 bg-black/40 backdrop-blur-xl border border-white/10 rounded-full pointer-events-auto hover:bg-white/10 transition-all">
+                <Maximize2 className="w-4 h-4 text-white/60" />
+              </button>
             </div>
           </div>
         </div>
 
-        {/* Scanlines Effect */}
-        <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(0,229,255,0.02)_50%,rgba(0,0,0,0.1)_50%)] z-40 bg-[length:100%_4px]" />
+        {/* Efeito de Vinheta e Scanlines Subtis */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40 pointer-events-none" />
+        <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(0,229,255,1)_50%,rgba(0,0,0,1)_50%)] bg-[length:100%_4px]" />
       </div>
     </div>
   );

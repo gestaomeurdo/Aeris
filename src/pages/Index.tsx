@@ -1,117 +1,170 @@
 "use client";
 
-import React from 'react';
-import AerisLogo from '@/components/AerisLogo';
-import CommandBriefing from '@/components/CommandBriefing';
-import OperationCard from '@/components/OperationCard';
-import { Menu, Terminal, Target, Shield, Bell, Cpu, Grid3X3 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import TacticalSidebar from '@/components/TacticalSidebar';
+import Breadcrumbs from '@/components/Breadcrumbs';
+import MissionBriefing from '@/components/MissionBriefing';
+import OperationsCenter from '@/components/OperationsCenter';
+import AudioLibrary from '@/components/AudioLibrary';
+import DocGallery from '@/components/DocGallery';
+import EditorSidebar from '@/components/EditorSidebar';
+import { Bell, Wifi } from 'lucide-react';
+import { PortalData } from '@/types/portal';
+import { motion, AnimatePresence } from 'framer-motion';
 
-const operations = [
-  { code: "01", title: "Core Fundamentals", status: 'complete' as const, progress: 100 },
-  { code: "02", title: "Tactical Operations", status: 'active' as const, progress: 45 },
-  { code: "03", title: "Cyber Defense Matrix", status: 'locked' as const, progress: 0 },
-  { code: "04", title: "Elite Leadership", status: 'locked' as const, progress: 0 },
-];
+const INITIAL_DATA: PortalData = {
+  mainVideo: "https://youtu.be/mQayAWnJQOE",
+  missionTitle: "AERIS ACADEMY",
+  missionDescription: "Mastering Air Force Leadership and modernizing military tactical learning through digital immersive doctrines.",
+  modules: [
+    { 
+      id: "MOD-01", 
+      title: "Mastering Air Force Leadership", 
+      desc: "Comprehensive development of leadership core values for modern aviation environments and strategic command.", 
+      audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+      docUrl: "https://www.africau.edu/images/default/sample.pdf", 
+      progress: 85, 
+      locked: false 
+    },
+    { 
+      id: "MOD-02", 
+      title: "Modernizing Military Learning", 
+      desc: "Transformation of legacy document structures into dynamic, high-fidelity digital tactical interfaces.", 
+      audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+      docUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf", 
+      progress: 30, 
+      locked: false 
+    },
+    { 
+      id: "MOD-03", 
+      title: "The Air Force SNCOs", 
+      desc: "Strategic analysis of 'Leaders of Leaders' and the implementation of advanced enlisted command protocols.", 
+      audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+      docUrl: "https://pdfobject.com/pdf/sample.pdf", 
+      progress: 0, 
+      locked: false 
+    },
+    { 
+      id: "MOD-04", 
+      title: "Enlisted Ranks & Structure", 
+      desc: "Technical mapping of the global Air Force rank hierarchy and operational responsibilities.", 
+      audioUrl: "",
+      docUrl: "", 
+      progress: 0, 
+      locked: true 
+    }
+  ]
+};
 
 const Index = () => {
-  return (
-    <div className="min-h-screen bg-[#020B1A] text-[#B0BEC5] font-sans selection:bg-[#00E5FF] selection:text-black overflow-x-hidden">
-      {/* Cyber Space Overlay */}
-      <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(0,229,255,0.05),transparent_50%)] pointer-events-none" />
-      
-      {/* Sidebar Navigation - Space Command Style */}
-      <nav className="fixed left-0 top-0 bottom-0 w-20 bg-[#020B1A] border-r border-[#00E5FF]/10 flex flex-col items-center py-10 gap-10 z-50">
-        <button className="p-3 text-[#00E5FF] hover:bg-[#00E5FF]/5 transition-all duration-300 border-b border-transparent hover:border-[#00E5FF]/30">
-          <Grid3X3 className="w-6 h-6" />
-        </button>
-        <button className="p-3 text-[#B0BEC5]/40 hover:text-[#00E5FF] transition-all duration-300">
-          <Target className="w-6 h-6" />
-        </button>
-        <button className="p-3 text-[#B0BEC5]/40 hover:text-[#00E5FF] transition-all duration-300">
-          <Terminal className="w-6 h-6" />
-        </button>
-        <button className="p-3 text-[#B0BEC5]/40 hover:text-[#00E5FF] transition-all duration-300 mt-auto">
-          <Menu className="w-6 h-6" />
-        </button>
-      </nav>
+  const [data, setData] = useState<PortalData>(INITIAL_DATA);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [activeView, setActiveView] = useState('dashboard');
 
-      {/* Main Content Area */}
-      <div className="pl-20">
-        <header className="pt-16 pb-12 flex flex-col items-center relative">
-          <AerisLogo />
-          
-          {/* Status Bar */}
-          <div className="mt-10 flex items-center gap-10 text-[10px] font-mono text-[#B0BEC5]/40 uppercase tracking-[0.4em] font-medium">
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#00E5FF] shadow-[0_0_8px_#00E5FF]" />
-              NEURAL LINK: ACTIVE
+  useEffect(() => {
+    const saved = localStorage.getItem('aeris_data');
+    if (saved) {
+      try {
+        setData(JSON.parse(saved));
+      } catch (e) {
+        console.error("Matrix corrupt: resetting to initial parameters");
+      }
+    }
+    setIsLoaded(true);
+  }, []);
+
+  if (!isLoaded) return null;
+
+  return (
+    <div className="min-h-screen bg-[#020617] text-[#B0BEC5] font-sans selection:bg-[#00E5FF] selection:text-black overflow-x-hidden">
+      <EditorSidebar data={data} onUpdate={setData} />
+
+      {/* Background FX */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-[50%] h-[50%] bg-[#00E5FF]/5 blur-[120px] rounded-full opacity-30" />
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03]" />
+      </div>
+      
+      <TacticalSidebar activeView={activeView} onViewChange={setActiveView} />
+
+      <div className="pl-32 pr-12">
+        <header className="pt-12 pb-12 flex justify-between items-center border-b border-white/5 mb-8">
+          <div className="space-y-1">
+            <p className="text-[10px] font-mono font-black text-[#00E5FF]/40 uppercase tracking-[0.5em]">AERIS ACADEMY TERMINAL</p>
+            <h1 className="text-3xl font-black text-white tracking-tighter uppercase">AERIS ACADEMY</h1>
+          </div>
+          <div className="flex items-center gap-6">
+            <div className="hidden md:flex items-center gap-6 px-6 py-3 bg-white/[0.03] rounded-2xl border border-white/5">
+              <Wifi className="w-4 h-4 text-[#00E5FF]" />
+              <span className="text-[10px] font-mono font-black text-white/60 tracking-widest uppercase">Uplink: Synchronized</span>
             </div>
-            <div className="w-[1px] h-3 bg-[#B0BEC5]/10" />
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#0A192F]" />
-              CADET NODE: ALPHA-7
-            </div>
+            <button className="p-3 bg-white/5 border border-white/10 rounded-2xl"><Bell className="w-5 h-5 text-white/40" /></button>
           </div>
         </header>
 
-        <main className="max-w-6xl mx-auto px-8 pb-24 space-y-24">
-          {/* Main Briefing Section */}
-          <section className="space-y-8">
-            <div className="flex justify-between items-end border-b border-[#00E5FF]/10 pb-6">
-              <div className="space-y-1">
-                <span className="text-[11px] font-mono text-[#00E5FF] uppercase tracking-[0.3em] font-bold">Cyber Intelligence</span>
-                <h2 className="text-3xl font-light text-white tracking-tight uppercase">MISSION <span className="font-bold">BRIEFING</span></h2>
-              </div>
-              <div className="flex items-center gap-4 bg-[#0A192F] p-3 border border-[#00E5FF]/20 rounded-sm">
-                <Cpu className="w-5 h-5 text-[#00E5FF]" />
-                <span className="text-[10px] font-mono font-bold text-[#B0BEC5]">UPLINK STABLE</span>
-              </div>
-            </div>
-            <CommandBriefing />
-          </section>
+        <Breadcrumbs view={activeView} />
 
-          {/* Operations Grid */}
-          <section className="space-y-10">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <h3 className="text-2xl font-light text-white tracking-tight uppercase">Neural <span className="font-bold">Modules</span></h3>
-                <p className="text-[10px] font-mono text-[#B0BEC5]/40 uppercase tracking-widest">Select module for synchronization</p>
-              </div>
-              <div className="flex items-center gap-4 px-5 py-3 bg-[#0A192F] border border-[#00E5FF]/10">
-                <Shield className="w-4 h-4 text-[#00E5FF]" />
-                <span className="text-xs font-bold text-[#B0BEC5] tracking-widest uppercase">Rank: Cyber Elite</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {operations.map((op) => (
-                <OperationCard 
-                  key={op.code}
-                  code={op.code}
-                  title={op.title}
-                  status={op.status}
-                  progress={op.progress}
+        <main className="max-w-7xl mx-auto pb-32">
+          <AnimatePresence mode="wait">
+            {activeView === 'dashboard' && (
+              <motion.div
+                key="dashboard"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5 }}
+                className="space-y-32"
+              >
+                <MissionBriefing 
+                  title={data.missionTitle} 
+                  videoUrl={data.mainVideo} 
+                  description={data.missionDescription} 
                 />
-              ))}
-            </div>
-          </section>
+                <OperationsCenter modules={data.modules} />
+              </motion.div>
+            )}
 
-          <footer className="pt-20 border-t border-[#00E5FF]/10 flex flex-col items-center gap-6 opacity-40 hover:opacity-100 transition-all duration-500">
-            <div className="flex gap-16 text-[9px] font-mono text-[#B0BEC5] uppercase tracking-[0.5em] font-bold">
-              <span>AERIS ACADEMY</span>
-              <span className="text-[#00E5FF]/30">|</span>
-              <span>CYBER DIVISION</span>
-              <span className="text-[#00E5FF]/30">|</span>
-              <span>v4.0.2</span>
-            </div>
-          </footer>
+            {activeView === 'missions' && (
+              <motion.div
+                key="missions"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5 }}
+              >
+                <OperationsCenter modules={data.modules} />
+              </motion.div>
+            )}
+
+            {activeView === 'audio' && (
+              <motion.div
+                key="audio"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5 }}
+              >
+                <AudioLibrary modules={data.modules} />
+              </motion.div>
+            )}
+
+            {activeView === 'docs' && (
+              <motion.div
+                key="docs"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5 }}
+              >
+                <DocGallery modules={data.modules} />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </main>
-      </div>
 
-      {/* Aesthetic Space HUD Elements */}
-      <div className="fixed top-10 right-10 flex flex-col gap-6 pointer-events-none opacity-20">
-        <Bell className="w-4 h-4 text-[#00E5FF]" />
-        <div className="h-40 w-[1px] bg-gradient-to-b from-[#00E5FF] to-transparent" />
+        <footer className="pt-20 flex flex-col items-center gap-10 opacity-30 text-[9px] font-mono font-black text-white/20 tracking-[1em] uppercase">
+          // END OF LINE // SYSTEM SECURE //
+        </footer>
       </div>
     </div>
   );
