@@ -32,25 +32,37 @@ const INITIAL_DATA: PortalData = {
   ]
 };
 
-const LOCAL_STORAGE_KEY = 'aeris_data_v5';
+// Chave de persistência atualizada conforme solicitado
+const LOCAL_STORAGE_KEY = 'aeris_modules_v1';
 
 // Helper function to load initial state from localStorage
 const loadInitialData = (): PortalData => {
   const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-  if (saved) {
+  
+  // Se a chave existir (saved !== null), tentamos carregar, mesmo que o array de módulos esteja vazio.
+  if (saved !== null) {
     try {
       const parsedData: PortalData = JSON.parse(saved);
-      // Revoke old object URLs if they exist (cleanup simulation)
+      
+      // Revoke old object URLs (this is a best effort, as they won't survive a full browser restart)
       parsedData.modules.forEach(mod => {
-        if (mod.audioUrl.startsWith('blob:')) URL.revokeObjectURL(mod.audioUrl);
-        if (mod.docUrl.startsWith('blob:')) URL.revokeObjectURL(mod.docUrl);
+        if (mod.audioUrl.startsWith('blob:')) {
+          // In a real app, we'd re-upload or store the file data. Here, we just acknowledge the URL is temporary.
+        }
+        if (mod.docUrl.startsWith('blob:')) {
+          // Same for doc URLs
+        }
       });
+      
       return parsedData;
     } catch (e) {
       console.error("Matrix corrupt: resetting to initial parameters", e);
+      // Se a chave existe mas está corrompida, voltamos aos defaults para evitar crash.
       return INITIAL_DATA;
     }
   }
+  
+  // Se a chave for estritamente null (primeira vez), usamos os dados iniciais.
   return INITIAL_DATA;
 };
 
@@ -76,6 +88,7 @@ const Index = () => {
 
   // Effect to save data whenever it changes
   useEffect(() => {
+    // Salva o objeto completo no localStorage
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
   }, [data]);
 
@@ -126,18 +139,20 @@ const Index = () => {
       locked: false,
     };
 
+    // Adiciona o novo módulo e salva, garantindo persistência
     setData(prev => ({ ...prev, modules: [...prev.modules, newModule] }));
-    // Optionally set the new module for immediate editing
-    setEditingModule(newModule);
+    // Não define editingModule aqui para evitar abrir o modal de edição imediatamente após a criação.
   };
 
   const handleDeleteModule = (id: string) => {
     if (confirm(`Deseja remover o módulo ${id} permanentemente?`)) {
+      // Filtra e salva, garantindo persistência
       setData(prev => ({ ...prev, modules: prev.modules.filter(m => m.id !== id) }));
     }
   };
 
   const handleToggleLock = (id: string) => {
+    // Atualiza e salva, garantindo persistência
     setData(prev => ({
       ...prev,
       modules: prev.modules.map(m => m.id === id ? { ...m, locked: !m.locked } : m)
@@ -145,6 +160,7 @@ const Index = () => {
   };
 
   const handleUpdateModule = (updated: TrainingModule) => {
+    // Atualiza e salva, garantindo persistência
     setData(prev => ({
       ...prev,
       modules: prev.modules.map(m => m.id === updated.id ? updated : m)

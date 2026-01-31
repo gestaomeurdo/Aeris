@@ -32,14 +32,22 @@ const TacticalCard = ({
   onToggleLock?: (id: string) => void
 }) => {
   const Icon = mod.id.includes('01') ? Target : mod.id.includes('02') ? Cpu : Shield;
+  const hasContent = !!mod.audioUrl || !!mod.docUrl;
+  const isLocked = mod.locked && !isMaster;
   
+  const handleClick = () => {
+    if (!isLocked && hasContent) {
+      onSelect(mod);
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, x: -20 }}
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true }}
       transition={{ delay: index * 0.1 }}
-      className={`group relative bg-[#020B1A]/80 backdrop-blur-md border ${mod.locked ? 'border-white/5 opacity-50' : 'border-[#00E5FF]/20 hover:border-[#00E5FF]/60'} rounded-xl p-0 overflow-hidden transition-all duration-300 shadow-2xl`}
+      className={`group relative bg-[#020B1A]/80 backdrop-blur-md border ${isLocked ? 'border-white/5 opacity-50' : 'border-[#00E5FF]/20 hover:border-[#00E5FF]/60'} rounded-xl p-0 overflow-hidden transition-all duration-300 shadow-2xl`}
     >
       {/* Admin Controls Overlay */}
       {isMaster && (
@@ -66,18 +74,18 @@ const TacticalCard = ({
       )}
 
       <div 
-        onClick={() => !mod.locked && onSelect(mod)}
-        className={`p-6 space-y-6 ${!mod.locked ? 'cursor-pointer' : 'cursor-default'}`}
+        onClick={handleClick}
+        className={`p-6 space-y-6 ${!isLocked && hasContent ? 'cursor-pointer group-hover:bg-white/[0.01]' : 'cursor-default'}`}
       >
         <div className="flex justify-between items-start pt-2">
           <div className={`p-3 rounded-lg bg-[#00E5FF]/5 border border-[#00E5FF]/10 group-hover:scale-110 group-hover:shadow-[0_0_15px_rgba(0,229,255,0.2)] transition-all`}>
-            <Icon className={`w-6 h-6 ${mod.locked ? 'text-white/20' : 'text-[#00E5FF]'}`} />
+            <Icon className={`w-6 h-6 ${isLocked ? 'text-white/20' : 'text-[#00E5FF]'}`} />
           </div>
           <div className="flex flex-col items-end gap-1">
-            <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full border ${mod.locked ? 'border-white/10' : 'border-[#00E5FF]/30 bg-[#00E5FF]/10'}`}>
-              <div className={`w-1 h-1 rounded-full ${mod.locked ? 'bg-white/20' : 'bg-[#00E5FF] animate-pulse'}`} />
-              <span className={`text-[8px] font-mono font-black uppercase tracking-tighter ${mod.locked ? 'text-white/20' : 'text-[#00E5FF]'}`}>
-                {mod.locked ? 'ENCRYPTED' : 'READY FOR BRIEFING'}
+            <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full border ${isLocked ? 'border-white/10' : 'border-[#00E5FF]/30 bg-[#00E5FF]/10'}`}>
+              <div className={`w-1 h-1 rounded-full ${isLocked ? 'bg-white/20' : 'bg-[#00E5FF] animate-pulse'}`} />
+              <span className={`text-[8px] font-mono font-black uppercase tracking-tighter ${isLocked ? 'text-white/20' : 'text-[#00E5FF]'}`}>
+                {isLocked ? 'ENCRYPTED' : 'READY FOR BRIEFING'}
               </span>
             </div>
             <span className="text-[8px] font-mono text-white/20 uppercase">ID: {mod.id}</span>
@@ -118,11 +126,14 @@ const TacticalCard = ({
              </div>
            </div>
            
-           {!mod.locked && (
+           {!isLocked && hasContent && (
              <div className="flex items-center gap-1 group/btn">
                <span className="text-[9px] font-mono font-black text-[#00E5FF] uppercase group-hover:mr-2 transition-all">START MISSION</span>
                <ChevronRight className="w-3 h-3 text-[#00E5FF]" />
              </div>
+           )}
+           {(!hasContent && !isLocked) && (
+             <span className="text-[9px] font-mono font-black text-white/20 uppercase">NO ASSETS</span>
            )}
         </div>
       </div>

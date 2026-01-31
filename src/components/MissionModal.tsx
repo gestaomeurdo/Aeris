@@ -96,14 +96,15 @@ const MissionModal = ({ isOpen, onClose, module }: MissionModalProps) => {
                     <div className="flex items-center gap-8 bg-black/60 p-8 rounded-3xl border border-white/5 relative z-10">
                       <button 
                         onClick={toggleAudio}
-                        className="w-20 h-20 bg-[#00E5FF] rounded-full flex items-center justify-center text-black shadow-[0_0_40px_rgba(0,229,255,0.4)] hover:scale-105 transition-transform"
+                        disabled={!module.audioUrl}
+                        className="w-20 h-20 bg-[#00E5FF] rounded-full flex items-center justify-center text-black shadow-[0_0_40px_rgba(0,229,255,0.4)] hover:scale-105 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {isPlaying ? <Pause className="w-8 h-8 fill-black" /> : <Play className="w-8 h-8 fill-black ml-1" />}
                       </button>
                       <div className="flex-1 space-y-4">
                         <WaveformVisualizer active={isPlaying} />
                         <div className="flex justify-between items-center text-[9px] font-mono text-white/20 uppercase tracking-widest">
-                           <span>Signal Strength: 98%</span>
+                           <span>Signal Strength: {module.audioUrl ? '98%' : 'N/A'}</span>
                            <span>Bitrate: 320kbps</span>
                         </div>
                       </div>
@@ -140,6 +141,7 @@ const MissionModal = ({ isOpen, onClose, module }: MissionModalProps) => {
                     src={module.docUrl} 
                     className="w-full h-full border-none grayscale-[0.8] hover:grayscale-0 transition-all duration-1000 opacity-80 hover:opacity-100"
                     title="Tactical Asset"
+                    allowFullScreen // Added for better PDF viewing experience
                   />
                 ) : (
                   <div className="w-full h-full flex flex-col items-center justify-center gap-6 text-white/5">
@@ -150,17 +152,19 @@ const MissionModal = ({ isOpen, onClose, module }: MissionModalProps) => {
                 
                 {/* HUD Elements for Viewer */}
                 <div className="absolute inset-0 pointer-events-none border-[30px] border-black/10" />
-                <div className="absolute top-10 right-10 pointer-events-auto">
-                  <a 
-                    href={module.docUrl} 
-                    target="_blank" 
-                    rel="noreferrer"
-                    className="flex items-center gap-3 px-5 py-3 bg-black/80 backdrop-blur-xl border border-[#00E5FF]/30 rounded-2xl text-[10px] font-black text-[#00E5FF] uppercase tracking-widest hover:bg-[#00E5FF] hover:text-black transition-all shadow-2xl"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                    Full Expansion
-                  </a>
-                </div>
+                {module.docUrl && (
+                  <div className="absolute top-10 right-10 pointer-events-auto">
+                    <a 
+                      href={module.docUrl} 
+                      target="_blank" 
+                      rel="noreferrer"
+                      className="flex items-center gap-3 px-5 py-3 bg-black/80 backdrop-blur-xl border border-[#00E5FF]/30 rounded-2xl text-[10px] font-black text-[#00E5FF] uppercase tracking-widest hover:bg-[#00E5FF] hover:text-black transition-all shadow-2xl"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                      Full Expansion
+                    </a>
+                  </div>
+                )}
               </div>
             </div>
           </motion.div>
