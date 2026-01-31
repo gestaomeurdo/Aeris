@@ -115,8 +115,6 @@ const Index = () => {
     }
   };
 
-  // ... (restante das funções iguais, apenas ajustando o filtro nos componentes)
-
   const handleUpdateModule = async (updated: TrainingModule, files: { audio?: File, doc?: File }) => {
     const toastId = toast.loading("Atualizando assets...");
     try {
@@ -201,13 +199,18 @@ const Index = () => {
               <motion.div key={activeView} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                 {activeView === 'dashboard' && (
                   <div className="space-y-32">
-                    <MissionBriefing title={data.missionTitle} videoUrl={data.mainVideo} description={data.missionDescription} />
+                    <MissionBriefing 
+                      title={data.missionTitle} 
+                      videoUrl={data.mainVideo} 
+                      description={data.missionDescription} 
+                      onEdit={isMaster ? () => setIsEditMainModalOpen(true) : undefined} // Passa a função de edição se for Master
+                    />
                     <OperationsCenter modules={manualModules} isMaster={isMaster} onDelete={handleDeleteModule} onToggleLock={handleToggleLock} onEdit={setEditingModule} />
                     <OperationalStats />
                   </div>
                 )}
                 {activeView === 'missions' && <OperationsCenter modules={manualModules} isMaster={isMaster} onDelete={handleDeleteModule} onToggleLock={handleToggleLock} onEdit={setEditingModule} />}
-                {activeView === 'audio' && <AudioLibrary modules={podcastModules} isMaster={isMaster} onEdit={setEditingModule} onToggleLock={handleToggleLock} onDelete={handleDeleteModule} />}
+                {activeView === 'audio' && <AudioLibrary modules={podcastModules} isMaster={isMaster} onEdit={setEditingModule} onDelete={handleDeleteModule} onToggleLock={handleToggleLock} />}
                 {activeView === 'docs' && <DocGallery modules={manualModules} isMaster={isMaster} onEdit={setEditingModule} onToggleLock={handleToggleLock} onDelete={handleDeleteModule} />}
               </motion.div>
             </AnimatePresence>

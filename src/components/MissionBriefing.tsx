@@ -1,16 +1,17 @@
 "use client";
 
 import React from 'react';
-import { Play, Activity } from 'lucide-react';
+import { Play, Activity, Settings2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface MissionBriefingProps {
   title: string;
   videoUrl: string;
   description: string;
+  onEdit?: () => void; // Nova prop para o botão de edição
 }
 
-const MissionBriefing = ({ title, videoUrl, description }: MissionBriefingProps) => {
+const MissionBriefing = ({ title, videoUrl, description, onEdit }: MissionBriefingProps) => {
   // Função para converter links normais do YouTube em links de EMBED limpos
   const getEmbedUrl = (url: string) => {
     if (!url) return "";
@@ -44,9 +45,20 @@ const MissionBriefing = ({ title, videoUrl, description }: MissionBriefingProps)
             {title.split(' ')[0]} <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-white/40 font-light">{title.split(' ').slice(1).join(' ')}</span>
           </h2>
         </div>
-        <div className="flex items-center gap-4 bg-white/[0.03] backdrop-blur-xl border border-white/10 px-6 py-3 rounded-xl">
-          <Activity className="w-4 h-4 text-[#00E5FF]" />
-          <span className="text-[11px] font-mono font-bold text-white/80 uppercase tracking-widest">Signal: Encrypted</span>
+        <div className="flex items-center gap-4">
+          {onEdit && (
+            <button 
+              onClick={onEdit}
+              className="flex items-center gap-2 bg-white/[0.03] backdrop-blur-xl border border-white/10 px-4 py-2 rounded-xl text-white/60 hover:text-[#00E5FF] hover:border-[#00E5FF]/40 transition-all"
+            >
+              <Settings2 className="w-4 h-4" />
+              <span className="text-[10px] font-mono font-bold uppercase tracking-widest">EDIT BRIEFING</span>
+            </button>
+          )}
+          <div className="flex items-center gap-4 bg-white/[0.03] backdrop-blur-xl border border-white/10 px-6 py-3 rounded-xl">
+            <Activity className="w-4 h-4 text-[#00E5FF]" />
+            <span className="text-[11px] font-mono font-bold text-white/80 uppercase tracking-widest">Signal: Encrypted</span>
+          </div>
         </div>
       </div>
 
