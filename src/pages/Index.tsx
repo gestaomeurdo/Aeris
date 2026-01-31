@@ -2,24 +2,23 @@
 
 import React, { useState, useEffect } from 'react';
 import TacticalSidebar from '@/components/TacticalSidebar';
-import StreamingHero from '@/components/StreamingHero';
-import StreamingCategory from '@/components/StreamingCategory';
 import Breadcrumbs from '@/components/Breadcrumbs';
-import MissionModal from '@/components/MissionModal';
+import MissionBriefing from '@/components/MissionBriefing';
+import OperationsCenter from '@/components/OperationsCenter';
 import AudioLibrary from '@/components/AudioLibrary';
 import DocGallery from '@/components/DocGallery';
 import SecurityProtocol from '@/components/SecurityProtocol';
 import FutureVisionPortal from '@/components/FutureVisionPortal';
 import AuthTerminal from '@/components/AuthTerminal';
 import EditModuleModal from '@/components/EditModuleModal';
-import { Search, Wifi, Plus, Edit3, Settings, Shield } from 'lucide-react';
+import { Bell, Wifi, Plus, Edit3, Search } from 'lucide-react';
 import { PortalData, TrainingModule } from '@/types/portal';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const INITIAL_DATA: PortalData = {
   mainVideo: "https://youtu.be/mQayAWnJQOE",
-  missionTitle: "AERIS LEARNING INITIATIVE OVERVIEW",
-  missionDescription: "Transformando o treinamento estático em inteligência imersiva e pronta para o combate. A revolução digital na formação da Força Aérea.",
+  missionTitle: "AERIS ACADEMY",
+  missionDescription: "Mastering Air Force Leadership and modernizing military tactical learning through digital immersive doctrines.",
   modules: [
     { id: "MOD-01", title: "Mastering Air Force Leadership", desc: "The NCO Core: Comprehensive development of leadership values.", type: "Leadership", audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", docUrl: "https://www.africau.edu/images/default/sample.pdf", progress: 100, locked: false },
     { id: "MOD-02", title: "Modernizing Military Learning", desc: "Transformation of legacy structures into high-fidelity interfaces.", type: "Strategy", audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3", docUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf", progress: 85, locked: false },
@@ -37,14 +36,6 @@ const Index = () => {
   const [isMaster, setIsMaster] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [editingModule, setEditingModule] = useState<TrainingModule | null>(null);
-  const [selectedModule, setSelectedModule] = useState<TrainingModule | null>(null);
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   useEffect(() => {
     const saved = localStorage.getItem('aeris_data_v5');
@@ -72,17 +63,17 @@ const Index = () => {
   };
 
   const handleUpdateVideo = () => {
-    const url = prompt("Insira a nova URL do vídeo:", data.mainVideo);
+    const url = prompt("Insira a nova URL do vídeo (YouTube ou MP4):", data.mainVideo);
     if (url) setData(prev => ({ ...prev, mainVideo: url }));
   };
 
   const handleAddModule = () => {
-    const title = prompt("Título do novo módulo:");
+    const title = prompt("Título do novo módulo tático:");
     if (title) {
       const newModule: TrainingModule = {
         id: `MOD-${(data.modules.length + 1).toString().padStart(2, '0')}`,
         title,
-        desc: "Tactical description required.",
+        desc: "New tactical asset description required.",
         type: "Advanced",
         audioUrl: "",
         docUrl: "",
@@ -95,7 +86,7 @@ const Index = () => {
   };
 
   const handleDeleteModule = (id: string) => {
-    if (confirm(`Remover módulo ${id}?`)) {
+    if (confirm(`Deseja remover o módulo ${id} permanentemente?`)) {
       setData(prev => ({ ...prev, modules: prev.modules.filter(m => m.id !== id) }));
     }
   };
@@ -119,13 +110,8 @@ const Index = () => {
     locked: isMaster ? false : mod.locked
   }));
 
-  const categories = [
-    { title: "Doutrina de Liderança (NCO/SNCO)", items: modulesToDisplay.filter(m => m.type === 'Leadership' || m.type === 'Strategy') },
-    { title: "Estrutura & Operações Táticas", items: modulesToDisplay.filter(m => m.type === 'Structure' || m.type === 'Advanced') }
-  ];
-
   return (
-    <div className="min-h-screen bg-[#020202] text-[#B0BEC5] font-sans selection:bg-[#00E5FF]/30 selection:text-white">
+    <div className="min-h-screen bg-[#020202] text-[#B0BEC5] font-sans selection:bg-[#00E5FF] selection:text-black overflow-x-hidden">
       <AuthTerminal 
         isOpen={isAuthOpen} 
         onClose={() => setIsAuthOpen(false)} 
@@ -139,87 +125,107 @@ const Index = () => {
         onSave={handleUpdateModule}
       />
 
-      <MissionModal 
-        isOpen={!!selectedModule}
-        onClose={() => setSelectedModule(null)}
-        module={selectedModule}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute top-0 left-1/4 w-[50%] h-[50%] bg-[#00E5FF]/5 blur-[120px] rounded-full opacity-30" />
+        <div className="absolute inset-0 bg-grid-pattern opacity-5" />
+      </div>
+      
+      <TacticalSidebar 
+        activeView={activeView} 
+        onViewChange={setActiveView} 
+        isMaster={isMaster}
+        onUserClick={handleUserClick}
       />
 
-      {/* NAVBAR ESTILO STREAMING */}
-      <nav className={`fixed top-0 w-full h-24 px-12 md:px-20 flex items-center justify-between z-[100] transition-all duration-500 ${scrolled ? 'bg-[#020202]/95 backdrop-blur-md border-b border-white/5' : 'bg-gradient-to-b from-black/80 to-transparent'}`}>
-        <div className="flex items-center gap-12">
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => setActiveView('dashboard')}>
-            <Shield className="text-[#00E5FF]" size={32} />
-            <h1 className="text-2xl font-black tracking-tighter uppercase italic text-white">Aeris <span className="text-[#00E5FF] not-italic">Academy</span></h1>
-          </div>
-          <div className="hidden lg:flex gap-8 text-[11px] font-black uppercase tracking-widest text-white/40">
-            <button onClick={() => setActiveView('dashboard')} className={`hover:text-[#00E5FF] transition-colors ${activeView === 'dashboard' ? 'text-white' : ''}`}>Home</button>
-            <button onClick={() => setActiveView('stats')} className={`hover:text-[#00E5FF] transition-colors ${activeView === 'stats' ? 'text-white' : ''}`}>Vision 2026</button>
-            <button onClick={() => setActiveView('audio')} className={`hover:text-[#00E5FF] transition-colors ${activeView === 'audio' ? 'text-white' : ''}`}>Audio Hub</button>
-            <button onClick={() => setActiveView('docs')} className={`hover:text-[#00E5FF] transition-colors ${activeView === 'docs' ? 'text-white' : ''}`}>Resources</button>
-          </div>
-        </div>
-        
-        <div className="flex items-center gap-8">
-          <div className="relative group hidden md:block">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-hover:text-[#00E5FF] transition-colors" size={16} />
-            <input 
-              className="bg-white/5 border border-white/5 rounded-full py-2.5 pl-12 pr-6 text-xs w-64 focus:outline-none focus:border-[#00E5FF]/30 transition-all placeholder:text-white/10 text-white" 
-              placeholder="Pesquisar assets..." 
-            />
-          </div>
-          
-          {isMaster && (
-            <div className="flex gap-4">
-              <button onClick={handleUpdateVideo} className="p-3 bg-white/5 hover:bg-white/10 rounded-xl text-white/60 transition-all"><Edit3 size={18} /></button>
-              <button onClick={handleAddModule} className="p-3 bg-[#00E5FF]/10 hover:bg-[#00E5FF]/20 text-[#00E5FF] rounded-xl transition-all"><Plus size={18} /></button>
+      <div className="pl-32 pr-12 relative z-10">
+        <header className="pt-12 pb-12 flex justify-between items-center border-b border-white/5 mb-8">
+          <div className="flex items-center gap-8">
+            <div className="space-y-1">
+              <h1 className="text-3xl font-black text-white tracking-tighter uppercase">AERIS <span className="text-[#00E5FF]">ACADEMY</span></h1>
+              <p className="text-[10px] font-mono font-black text-[#00E5FF]/40 uppercase tracking-[0.5em]">System Status: Optimal</p>
             </div>
-          )}
+            <div className="h-8 w-[1px] bg-white/10 hidden md:block" />
+            <span className="text-[10px] font-mono text-[#00E5FF] uppercase tracking-widest font-black hidden md:block">
+              {isMaster ? 'MASTER_NODE' : 'PUBLIC_ACCESS'}
+            </span>
+          </div>
 
-          <button 
-            onClick={handleUserClick} 
-            className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${isMaster ? 'border-green-500 text-green-500 shadow-[0_0_15px_rgba(34,197,94,0.3)]' : 'border-white/10 text-white/20 hover:text-white'}`}
-          >
-            <Settings size={20} />
-          </button>
-        </div>
-      </nav>
-      
-      <div className="relative">
-        <main className="pb-32">
+          <div className="flex items-center gap-6">
+            <div className="relative group hidden lg:block">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-hover:text-[#00E5FF] transition-colors" size={14} />
+              <input 
+                className="bg-white/[0.03] border border-white/5 rounded-full py-2.5 pl-12 pr-6 text-xs w-64 focus:outline-none focus:border-[#00E5FF]/30 transition-all placeholder:text-white/10" 
+                placeholder="Search tactical assets..." 
+              />
+            </div>
+
+            {isMaster && (
+              <div className="flex gap-4">
+                <button 
+                  onClick={handleUpdateVideo}
+                  className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all"
+                >
+                  <Edit3 className="w-3 h-3 text-[#00E5FF]" />
+                  Update Video
+                </button>
+                <button 
+                  onClick={handleAddModule}
+                  className="flex items-center gap-2 bg-[#00E5FF]/10 hover:bg-[#00E5FF]/20 border border-[#00E5FF]/30 px-4 py-2.5 rounded-xl text-[9px] font-black text-[#00E5FF] uppercase tracking-widest transition-all"
+                >
+                  <Plus className="w-3 h-3" />
+                  Add Module
+                </button>
+              </div>
+            )}
+            <div className="hidden md:flex items-center gap-6 px-6 py-3 bg-white/[0.03] rounded-2xl border border-white/5">
+              <Wifi className="w-4 h-4 text-[#00E5FF]" />
+              <span className="text-[10px] font-mono font-black text-white/60 tracking-widest uppercase">Uplink: Synchronized</span>
+            </div>
+          </div>
+        </header>
+
+        <Breadcrumbs view={activeView} />
+
+        <main className="max-w-7xl mx-auto pb-32">
           <AnimatePresence mode="wait">
             {activeView === 'dashboard' && (
               <motion.div
                 key="dashboard"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="space-y-16"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5 }}
+                className="space-y-32"
               >
-                <StreamingHero 
+                <MissionBriefing 
                   title={data.missionTitle} 
+                  videoUrl={data.mainVideo} 
                   description={data.missionDescription} 
-                  onWatch={() => setSelectedModule(modulesToDisplay[0])}
                 />
-                
-                <div className="relative z-10 -mt-20 space-y-24">
-                  {categories.map((cat, i) => (
-                    <StreamingCategory 
-                      key={i}
-                      title={cat.title}
-                      modules={cat.items}
-                      onSelect={setSelectedModule}
-                      isMaster={isMaster}
-                      onEdit={setEditingModule}
-                      onDelete={handleDeleteModule}
-                    />
-                  ))}
-                </div>
+                <OperationsCenter 
+                  modules={modulesToDisplay} 
+                  isMaster={isMaster}
+                  onDelete={handleDeleteModule}
+                  onToggleLock={handleToggleLock}
+                  onEdit={setEditingModule}
+                />
+              </motion.div>
+            )}
+
+            {activeView === 'missions' && (
+              <motion.div key="missions" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <OperationsCenter 
+                  modules={modulesToDisplay} 
+                  isMaster={isMaster}
+                  onDelete={handleDeleteModule}
+                  onToggleLock={handleToggleLock}
+                  onEdit={setEditingModule}
+                />
               </motion.div>
             )}
 
             {activeView === 'audio' && (
-              <motion.div key="audio" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="pt-40 px-20">
+              <motion.div key="audio" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                 <AudioLibrary 
                   modules={modulesToDisplay} 
                   isMaster={isMaster}
@@ -231,7 +237,7 @@ const Index = () => {
             )}
 
             {activeView === 'docs' && (
-              <motion.div key="docs" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="pt-40 px-20">
+              <motion.div key="docs" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                 <DocGallery 
                   modules={modulesToDisplay} 
                   isMaster={isMaster}
@@ -249,21 +255,19 @@ const Index = () => {
             )}
 
             {activeView === 'security' && (
-              <motion.div key="security" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="pt-40 px-20">
+              <motion.div key="security" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                 <SecurityProtocol isMaster={isMaster} onLogin={setIsMaster} />
               </motion.div>
             )}
           </AnimatePresence>
         </main>
 
-        <footer className="px-20 py-12 border-t border-white/5 bg-black/40 flex flex-col md:flex-row justify-between items-center gap-6 opacity-30 text-[9px] font-mono font-black text-white/40 tracking-[0.5em] uppercase">
+        <footer className="pt-20 flex flex-col items-center gap-10 opacity-30 text-[9px] font-mono font-black text-white/20 tracking-[1em] uppercase">
           <div className="flex gap-12">
-            <span>AERIS ACADEMY v2.6</span>
-            <span>UPLINK: ENCRYPTED</span>
+            <span>ENCRYPTION: AES-256</span>
+            <span>LOCAL_SYNC: ACTIVE</span>
           </div>
-          <div className="flex gap-8">
-            <span>// END OF LINE //</span>
-          </div>
+          // END OF LINE // OPERATIONAL_HUB_v2.0 //
         </footer>
       </div>
     </div>
