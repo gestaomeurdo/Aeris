@@ -93,7 +93,6 @@ const Index = () => {
         .upload(filePath, file);
 
       if (uploadError) {
-        console.error("Erro detalhado do Supabase:", uploadError);
         toast.error(`Erro no upload: ${uploadError.message}`, { id: toastId });
         return;
       }
@@ -138,7 +137,32 @@ const Index = () => {
     }
   };
 
-  const handleUpdateModule = async (updated: TrainingModule) => {
+  const handleUpdateModule = async (updated: TrainingModule, file: File | null) => {
+    const toastId = toast.loading("Atualizando módulo...");
+    let audioUrl = updated.audioUrl;
+    let docUrl = updated.docUrl;
+
+    if (file) {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('assets')
+        .upload(filePath, file);
+
+      if (!uploadError) {
+        const { data: { publicUrl } } = supabase.storage.from('assets').getPublicUrl(filePath);
+        if (file.type.startsWith('audio/')) {
+          audioUrl = publicUrl;
+          docUrl = ''; // Limpa o outro se estiver trocando tipo
+        } else if (file.type === 'application/pdf') {
+          docUrl = publicUrl;
+          audioUrl = ''; // Limpa o outro
+        }
+      }
+    }
+
     const { error } = await supabase
       .from('training_modules')
       .update({
@@ -146,14 +170,15 @@ const Index = () => {
         desc_text: updated.desc,
         progress: updated.progress,
         locked: updated.locked,
-        audio_url: updated.audioUrl,
-        doc_url: updated.docUrl
+        audio_url: audioUrl,
+        doc_url: docUrl
       })
       .eq('module_id', updated.id);
 
-    if (error) toast.error("Erro ao atualizar");
-    else {
-      toast.success("Módulo atualizado");
+    if (error) {
+      toast.error("Erro ao atualizar", { id: toastId });
+    } else {
+      toast.success("Módulo atualizado", { id: toastId });
       fetchModules();
     }
   };

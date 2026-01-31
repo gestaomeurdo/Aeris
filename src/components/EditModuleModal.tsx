@@ -1,30 +1,41 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { X, Save, Type, AlignLeft, Headphones, FileText, BarChart } from 'lucide-react';
+import { X, Save, Type, AlignLeft, Headphones, FileText, BarChart, Upload } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrainingModule } from '@/types/portal';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 
 interface EditModuleModalProps {
   isOpen: boolean;
   onClose: () => void;
   module: TrainingModule | null;
-  onSave: (updated: TrainingModule) => void;
+  onSave: (updated: TrainingModule, file: File | null) => void;
 }
 
 const EditModuleModal = ({ isOpen, onClose, module, onSave }: EditModuleModalProps) => {
   const [formData, setFormData] = useState<TrainingModule | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   useEffect(() => {
-    if (module) setFormData({ ...module });
+    if (module) {
+      setFormData({ ...module });
+      setSelectedFile(null);
+    }
   }, [module]);
 
   if (!formData) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(formData);
+    onSave(formData, selectedFile);
     onClose();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setSelectedFile(file);
   };
 
   return (
@@ -60,20 +71,20 @@ const EditModuleModal = ({ isOpen, onClose, module, onSave }: EditModuleModalPro
             <form onSubmit={handleSubmit} className="p-10 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
               <div className="grid grid-cols-1 gap-6">
                 <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-[9px] font-mono font-black text-white/40 uppercase tracking-[0.2em] pl-1">
+                  <Label className="flex items-center gap-2 text-[9px] font-mono font-black text-white/40 uppercase tracking-[0.2em] pl-1">
                     <Type className="w-3 h-3 text-[#00E5FF]" /> Module Title
-                  </label>
-                  <input
+                  </Label>
+                  <Input
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-4 px-6 text-sm text-white focus:border-[#00E5FF]/40 outline-none transition-all"
+                    className="bg-white/[0.03] border border-white/10 rounded-2xl py-4 px-6 text-sm text-white focus:border-[#00E5FF]/40 outline-none transition-all"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-[9px] font-mono font-black text-white/40 uppercase tracking-[0.2em] pl-1">
+                  <Label className="flex items-center gap-2 text-[9px] font-mono font-black text-white/40 uppercase tracking-[0.2em] pl-1">
                     <AlignLeft className="w-3 h-3 text-[#00E5FF]" /> Tactical Description
-                  </label>
+                  </Label>
                   <textarea
                     value={formData.desc}
                     onChange={(e) => setFormData({ ...formData, desc: e.target.value })}
@@ -81,35 +92,23 @@ const EditModuleModal = ({ isOpen, onClose, module, onSave }: EditModuleModalPro
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="flex items-center gap-2 text-[9px] font-mono font-black text-white/40 uppercase tracking-[0.2em] pl-1">
-                      <Headphones className="w-3 h-3 text-[#00E5FF]" /> Audio URL (MP3)
-                    </label>
-                    <input
-                      value={formData.audioUrl}
-                      onChange={(e) => setFormData({ ...formData, audioUrl: e.target.value })}
-                      placeholder="https://..."
-                      className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-4 px-6 text-sm text-white focus:border-[#00E5FF]/40 outline-none transition-all"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="flex items-center gap-2 text-[9px] font-mono font-black text-white/40 uppercase tracking-[0.2em] pl-1">
-                      <FileText className="w-3 h-3 text-[#00E5FF]" /> Document URL (PDF)
-                    </label>
-                    <input
-                      value={formData.docUrl}
-                      onChange={(e) => setFormData({ ...formData, docUrl: e.target.value })}
-                      placeholder="https://..."
-                      className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-4 px-6 text-sm text-white focus:border-[#00E5FF]/40 outline-none transition-all"
-                    />
-                  </div>
+                <div className="space-y-4 p-6 bg-white/[0.02] border border-white/5 rounded-3xl">
+                   <Label className="flex items-center gap-2 text-[9px] font-mono font-black text-[#00E5FF] uppercase tracking-[0.2em] mb-2">
+                    <Upload className="w-3 h-3" /> Update Asset (PDF or MP3)
+                  </Label>
+                  <Input
+                    type="file"
+                    accept=".pdf,.mp3"
+                    onChange={handleFileChange}
+                    className="bg-white/[0.03] border-white/10 text-white/60 file:bg-[#00E5FF]/20 file:text-[#00E5FF] file:border-0 file:rounded-full file:px-4 file:py-1"
+                  />
+                  <p className="text-[9px] font-mono text-white/20 italic">If you select a file, it will replace the current one.</p>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-[9px] font-mono font-black text-white/40 uppercase tracking-[0.2em] pl-1">
+                  <Label className="flex items-center gap-2 text-[9px] font-mono font-black text-white/40 uppercase tracking-[0.2em] pl-1">
                     <BarChart className="w-3 h-3 text-[#00E5FF]" /> Synchronization Progress ({formData.progress}%)
-                  </label>
+                  </Label>
                   <input
                     type="range"
                     min="0"
