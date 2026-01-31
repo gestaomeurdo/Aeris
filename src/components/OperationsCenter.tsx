@@ -57,7 +57,7 @@ const TacticalCard = ({ mod, index, onSelect }: { mod: TrainingModule, index: nu
             <span className="text-[8px] font-mono font-black text-[#00E5FF]/40 uppercase tracking-widest">Mission Objective</span>
             <p className="text-[11px] text-white/40 leading-relaxed line-clamp-2">
               {mod.desc}
-            </div>
+            </p>
           </div>
         </div>
 
