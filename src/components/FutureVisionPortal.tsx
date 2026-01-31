@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Play, Info, ChevronRight, Star, Shield, Activity, Terminal, Lock, Radio } from 'lucide-react';
+import VideoModal from './VideoModal';
 
 interface FutureVisionPortalProps {
   onExit: () => void;
@@ -9,14 +10,20 @@ interface FutureVisionPortalProps {
 
 const FutureVisionPortal = ({ onExit }: FutureVisionPortalProps) => {
   const [stage, setStage] = useState('message');
-  const LOGO_URL = "https://i.ibb.co/BKdX0Nzn/1.png"; //
+  const [isVideoOpen, setIsVideoOpen] = useState(false);
+  const LOGO_URL = "https://i.ibb.co/BKdX0Nzn/1.png"; 
+  const ACADEMY_VIDEO_URL = "https://www.youtube.com/embed/qN4w_g-224E?autoplay=1"; // Placeholder video URL
 
   useEffect(() => {
     const timer = setTimeout(() => setStage('portal'), 3500);
     return () => clearTimeout(timer);
   }, []);
 
-  // Capas voltadas especificamente para a USAF e tecnologia militar
+  const handleInitializeAcademy = () => {
+    setIsVideoOpen(true);
+  };
+
+  // Content sections
   const sections = [
     {
       title: "Top Command Picks // 2026",
@@ -36,7 +43,7 @@ const FutureVisionPortal = ({ onExit }: FutureVisionPortalProps) => {
         { title: "Junior Tier Foundations", img: "https://images.unsplash.com/photo-1496247749665-49cf94d9967d?q=80&w=800", type: "Podcast" }
       ]
     }
-  ]; //
+  ]; 
 
   if (stage === 'message') {
     return (
@@ -57,6 +64,12 @@ const FutureVisionPortal = ({ onExit }: FutureVisionPortalProps) => {
   return (
     <div className="min-h-screen bg-[#050505] text-white font-sans overflow-x-hidden animate-in fade-in duration-700">
       
+      <VideoModal 
+        isOpen={isVideoOpen} 
+        onClose={() => setIsVideoOpen(false)} 
+        videoUrl={ACADEMY_VIDEO_URL} 
+      />
+
       {/* NAVBAR */}
       <nav className="fixed top-0 w-full h-24 px-12 flex items-center justify-between bg-gradient-to-b from-black via-black/80 to-transparent z-[110]">
         <div className="flex items-center gap-10">
@@ -87,10 +100,13 @@ const FutureVisionPortal = ({ onExit }: FutureVisionPortalProps) => {
             WE LEARN <br/> <span className="text-transparent stroke-text">LIKE THIS.</span>
           </h2>
           <p className="text-2xl text-zinc-400 font-light max-w-2xl leading-relaxed">
-            A AERIS Academy não é apenas uma plataforma; é o futuro da prontidão tática. Integrando vídeo, áudio e doutrina digital em um único centro de comando.
+            AERIS Academy is not just a platform; it is the future of tactical readiness. Integrating video, audio, and digital doctrine into a single command center.
           </p>
           <div className="flex gap-6 pt-6">
-            <button className="flex items-center gap-4 bg-white text-black px-12 py-5 rounded-2xl font-black uppercase text-sm hover:bg-cyan-500 transition-all shadow-[0_20px_40px_rgba(255,255,255,0.1)]">
+            <button 
+              onClick={handleInitializeAcademy} 
+              className="flex items-center gap-4 bg-white text-black px-12 py-5 rounded-2xl font-black uppercase text-sm hover:bg-cyan-500 transition-all shadow-[0_20px_40px_rgba(255,255,255,0.1)]"
+            >
               <Play size={20} fill="black" /> Initialize Academy
             </button>
             <button className="flex items-center gap-4 bg-zinc-900/60 backdrop-blur-xl border border-white/10 text-white px-12 py-5 rounded-2xl font-black uppercase text-sm hover:bg-zinc-800 transition-all">

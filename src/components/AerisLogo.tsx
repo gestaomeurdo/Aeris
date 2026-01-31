@@ -31,13 +31,6 @@ const AerisLogo = ({ size = 64 }: AerisLogoProps) => {
           className="relative z-10 object-contain drop-shadow-[0_0_10px_rgba(0,229,255,0.3)]"
         />
       </div>
-      
-      <div className="mt-4 flex flex-col items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-        <div className="h-[1px] w-8 bg-gradient-to-r from-transparent via-[#00E5FF]/30 to-transparent" />
-        <span className="text-[7px] tracking-[0.6em] text-[#00E5FF]/60 font-mono uppercase font-black pl-[0.6em]">
-          CORE_SYNC
-        </span>
-      </div>
     </div>
   );
 };
