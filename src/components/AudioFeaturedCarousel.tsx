@@ -42,7 +42,8 @@ const AudioFeaturedCarousel = ({ modules, onPlay, currentPlayingId }: AudioFeatu
         <div className="embla__container flex">
           {featuredModules.map((mod, index) => {
             const isActive = currentPlayingId === mod.dbId;
-            const imageUrl = placeholderImages[index % placeholderImages.length];
+            // Usa a coverUrl se existir, caso contrário, usa o placeholder
+            const imageUrl = mod.coverUrl || placeholderImages[index % placeholderImages.length];
 
             return (
               <div key={mod.dbId} className="embla__slide flex-[0_0_90%] md:flex-[0_0_50%] lg:flex-[0_0_33.333%] pl-4 first:pl-0">

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { X, Save, FileText, Headphones, Upload, Zap, Shield, Database, Radio } from 'lucide-react';
+import { X, Save, FileText, Headphones, Upload, Zap, Shield, Database, Radio, Image } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrainingModule } from '@/types/portal';
 import { Label } from '@/components/ui/label';
@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 interface AddModuleModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (newModule: Omit<TrainingModule, 'id' | 'dbId' | 'progress'>, files: { audio?: File, doc?: File }) => void;
+  onSave: (newModule: Omit<TrainingModule, 'id' | 'dbId' | 'progress' | 'coverUrl'>, files: { audio?: File, doc?: File, cover?: File }) => void;
   nextId: string;
 }
 
@@ -22,6 +22,7 @@ const AddModuleModal = ({ isOpen, onClose, onSave, nextId }: AddModuleModalProps
   const [description, setDescription] = useState('');
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [docFile, setDocFile] = useState<File | null>(null);
+  const [coverFile, setCoverFile] = useState<File | null>(null); // Novo estado para a capa
 
   useEffect(() => {
     if (isOpen) {
@@ -29,6 +30,7 @@ const AddModuleModal = ({ isOpen, onClose, onSave, nextId }: AddModuleModalProps
       setDescription('');
       setAudioFile(null);
       setDocFile(null);
+      setCoverFile(null);
       setCategory('module');
     }
   }, [isOpen]);
@@ -47,7 +49,8 @@ const AddModuleModal = ({ isOpen, onClose, onSave, nextId }: AddModuleModalProps
       locked: false,
     }, { 
       audio: audioFile || undefined, 
-      doc: docFile || undefined 
+      doc: docFile || undefined,
+      cover: coverFile || undefined // Passando o arquivo de capa
     });
     onClose();
   };
@@ -130,13 +133,23 @@ const AddModuleModal = ({ isOpen, onClose, onSave, nextId }: AddModuleModalProps
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-white/[0.02] border border-white/5 rounded-[24px]">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 bg-white/[0.02] border border-white/5 rounded-[24px]">
                   <div className="space-y-2">
-                    <Label className="text-[9px] font-mono font-black text-[#00E5FF] uppercase tracking-widest pl-1">Upload VOX (.mp3)</Label>
+                    <Label className="flex items-center gap-1 text-[9px] font-mono font-black text-[#00E5FF] uppercase tracking-widest pl-1">
+                      <Image className="w-3 h-3" /> Upload Cover (.jpg/.png)
+                    </Label>
+                    <Input type="file" accept=".jpg, .jpeg, .png" onChange={(e) => setCoverFile(e.target.files?.[0] || null)} className="bg-white/[0.03] border-white/10 text-xs file:bg-[#00E5FF]/20 file:text-[#00E5FF] file:border-0 rounded-xl" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-1 text-[9px] font-mono font-black text-[#00E5FF] uppercase tracking-widest pl-1">
+                      <Headphones className="w-3 h-3" /> Upload VOX (.mp3)
+                    </Label>
                     <Input type="file" accept=".mp3" onChange={(e) => setAudioFile(e.target.files?.[0] || null)} className="bg-white/[0.03] border-white/10 text-xs file:bg-[#00E5FF]/20 file:text-[#00E5FF] file:border-0 rounded-xl" />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-[9px] font-mono font-black text-[#00E5FF] uppercase tracking-widest pl-1">Upload INTEL (.pdf)</Label>
+                    <Label className="flex items-center gap-1 text-[9px] font-mono font-black text-[#00E5FF] uppercase tracking-widest pl-1">
+                      <FileText className="w-3 h-3" /> Upload INTEL (.pdf)
+                    </Label>
                     <Input type="file" accept=".pdf" onChange={(e) => setDocFile(e.target.files?.[0] || null)} className="bg-white/[0.03] border-white/10 text-xs file:bg-[#00E5FF]/20 file:text-[#00E5FF] file:border-0 rounded-xl" />
                   </div>
                 </div>

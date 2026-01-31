@@ -65,6 +65,7 @@ const Index = () => {
         category: (m.category as any) || 'module', // Garante fallback
         audioUrl: m.audio_url || '',
         docUrl: m.doc_url || '',
+        coverUrl: m.cover_url || '', // Mapeando a nova URL da capa
         progress: m.progress,
         locked: m.locked
       }));
@@ -73,25 +74,30 @@ const Index = () => {
     setIsLoading(false);
   };
 
-  const uploadFile = async (file: File) => {
+  const uploadFile = async (file: File, bucketPath: string) => {
     const fileExt = file.name.split('.').pop();
-    const fileName = `${Math.random()}.${fileExt}`;
-    const filePath = `${fileName}`;
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
+    const filePath = `${bucketPath}/${fileName}`;
+    
     const { error: uploadError } = await supabase.storage.from('assets').upload(filePath, file);
     if (uploadError) throw uploadError;
+    
     const { data: { publicUrl } } = supabase.storage.from('assets').getPublicUrl(filePath);
     return publicUrl;
   };
 
-  const handleSaveNewModule = async (newModuleData: Omit<TrainingModule, 'id' | 'dbId' | 'progress'>, files: { audio?: File, doc?: File }) => {
-    const nextId = `MOD-${(data.modules.length + 1).toString().padStart(2, '0')}`;
+  const handleSaveNewModule = async (newModuleData: Omit<TrainingModule, 'id' | 'dbId' | 'progress' | 'coverUrl'>, files: { audio?: File, doc?: File, cover?: File }) => {
+    const nextId = `ASSET-${(data.modules.length + 1).toString().padStart(2, '0')}`;
     const toastId = toast.loading("Implantando assets...");
     
     try {
       let audioUrl = '';
       let docUrl = '';
-      if (files.audio) audioUrl = await uploadFile(files.audio);
-      if (files.doc) docUrl = await uploadFile(files.doc);
+      let coverUrl = '';
+
+      if (files.audio) audioUrl = await uploadFile(files.audio, 'audio');
+      if (files.doc) docUrl = await uploadFile(files.doc, 'docs');
+      if (files.cover) coverUrl = await uploadFile(files.cover, 'covers'); // Novo upload de capa
 
       const { error } = await supabase
         .from('training_modules')
@@ -100,9 +106,10 @@ const Index = () => {
           title: newModuleData.title,
           desc_text: newModuleData.desc,
           type: newModuleData.type,
-          category: newModuleData.category, // Salvando a categoria
+          category: newModuleData.category,
           audio_url: audioUrl,
           doc_url: docUrl,
+          cover_url: coverUrl, // Salvando a URL da capa
           progress: 0,
           locked: false
         }]);
@@ -115,13 +122,17 @@ const Index = () => {
     }
   };
 
-  const handleUpdateModule = async (updated: TrainingModule, files: { audio?: File, doc?: File }) => {
+  const handleUpdateModule = async (updated: TrainingModule, files: { audio?: File, doc?: File, cover?: File }) => {
     const toastId = toast.loading("Atualizando assets...");
     try {
       let audioUrl = updated.audioUrl;
       let docUrl = updated.docUrl;
-      if (files.audio) audioUrl = await uploadFile(files.audio);
-      if (files.doc) docUrl = await uploadFile(files.doc);
+      let coverUrl = updated.coverUrl; // Mantém a URL existente se não houver novo upload
+
+      if (files.audio) audioUrl = await uploadFile(files.audio, 'audio');
+      if (files.doc) docUrl = await uploadFile(files.doc, 'docs');
+      if (files.cover) coverUrl = await uploadFile(files.cover, 'covers'); // Novo upload de capa
+
       const { error } = await supabase
         .from('training_modules')
         .update({
@@ -130,7 +141,8 @@ const Index = () => {
           progress: updated.progress,
           locked: updated.locked,
           audio_url: audioUrl,
-          doc_url: docUrl
+          doc_url: docUrl,
+          cover_url: coverUrl // Atualizando a URL da capa
         })
         .eq('module_id', updated.id);
       if (error) throw error;

@@ -25,6 +25,9 @@ const AudioGridCard = ({ mod, index, onPlay, isActive, isPlaying }: AudioGridCar
       onPlay(mod.dbId, mod.audioUrl);
     }
   };
+  
+  // Usa a coverUrl se existir, caso contrário, usa o placeholder
+  const imageUrl = mod.coverUrl || defaultGridImage;
 
   return (
     <motion.div
@@ -42,7 +45,7 @@ const AudioGridCard = ({ mod, index, onPlay, isActive, isPlaying }: AudioGridCar
       {/* Image and Visual Effects */}
       <div className="relative h-1/2 w-full">
         <img 
-          src={defaultGridImage} 
+          src={imageUrl} 
           alt={mod.title} 
           className="w-full h-full object-cover opacity-70 grayscale-[0.5] transition-all duration-700"
           style={{ filter: 'hue-rotate(180deg) saturate(1.5)' }}
