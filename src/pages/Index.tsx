@@ -197,20 +197,10 @@ const Index = () => {
     else fetchModules();
   };
   
-  const handleAuthSuccess = async () => {
-    // Usando credenciais fixas para simular o login do Supabase
-    // NOTA: Em uma aplicação real, você usaria supabase.auth.signInWithPassword
-    // Como o AuthTerminal usa credenciais fixas, vamos simular o login aqui.
-    const { error } = await supabase.auth.signInWithPassword({
-      email: 'mike@aeris.academy',
-      password: '@mike2026',
-    });
-
-    if (error) {
-      toast.error(`Falha na autenticação: ${error.message}`);
-    } else {
-      // O SessionContext irá lidar com o estado de autenticação após o sucesso.
-    }
+  // A função handleAuthSuccess não precisa mais de lógica de login, pois o AuthTerminal
+  // agora apenas envia o link mágico. O SessionContext lida com a autenticação após o clique no link.
+  const handleAuthSuccess = () => {
+    // Apenas fecha o terminal, a notificação de sucesso virá do SessionContext
   };
 
   const handleLogout = async () => {
