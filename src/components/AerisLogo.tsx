@@ -8,7 +8,7 @@ interface AerisLogoProps {
 }
 
 const AerisLogo = ({ size = 44 }: AerisLogoProps) => {
-  const logoSrc = "/aeris-logo.png"; // Referência ao novo logo
+  const logoSrc = "https://i.ibb.co/BKdX0Nzn/1.png"; // Usando URL externa para garantir o carregamento
 
   return (
     <div className="relative flex flex-col items-center group">
