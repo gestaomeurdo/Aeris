@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { BarChart3, TrendingUp, Users, Target } from 'lucide-react';
+import { BarChart3, TrendingUp, Users, Target, Shield } from 'lucide-react';
 import { TrainingModule } from '@/types/portal';
 
 interface TroopReadinessProps {
