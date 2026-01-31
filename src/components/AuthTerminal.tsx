@@ -17,7 +17,8 @@ const AuthTerminal = ({ isOpen, onClose, onSuccess }: AuthTerminalProps) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (user === "mike" && pass === "@mike2026") {
+    // A validação local agora usa o email completo para consistência
+    if (user === "mike@aeris.academy" && pass === "@mike2026") {
       onSuccess();
       onClose();
       setUser('');
@@ -63,7 +64,7 @@ const AuthTerminal = ({ isOpen, onClose, onSuccess }: AuthTerminalProps) => {
                       autoFocus
                       value={user}
                       onChange={(e) => setUser(e.target.value)}
-                      placeholder="OPERATOR_ID"
+                      placeholder="OPERATOR_ID (e.g., mike@aeris.academy)"
                       className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-4 pl-12 pr-4 text-sm text-white placeholder:text-white/5 outline-none focus:border-[#00E5FF]/40 transition-colors font-mono"
                     />
                   </div>
