@@ -31,9 +31,7 @@ const Index = () => {
   const [editingModule, setEditingModule] = useState<TrainingModule | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  useEffect(() => {
-    fetchModules();
-  }, []);
+  useEffect(() => { fetchModules(); }, []);
 
   const fetchModules = async () => {
     setIsLoading(true);
@@ -61,137 +59,87 @@ const Index = () => {
     setIsLoading(false);
   };
 
-  const handlePurgeAll = async () => {
-    if (confirm("Apagar todos os módulos do banco de dados?")) {
+  const uploadFile = async (file: File) => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random()}.${fileExt}`;
+    const filePath = `${fileName}`;
+    const { error: uploadError } = await supabase.storage.from('assets').upload(filePath, file);
+    if (uploadError) throw uploadError;
+    const { data: { publicUrl } } = supabase.storage.from('assets').getPublicUrl(filePath);
+    return publicUrl;
+  };
+
+  const handleSaveNewModule = async (newModuleData: Omit<TrainingModule, 'id'>, files: { audio?: File, doc?: File }) => {
+    const nextId = `MOD-${(data.modules.length + 1).toString().padStart(2, '0')}`;
+    const toastId = toast.loading("Implantando assets...");
+    
+    try {
+      let audioUrl = '';
+      let docUrl = '';
+      if (files.audio) audioUrl = await uploadFile(files.audio);
+      if (files.doc) docUrl = await uploadFile(files.doc);
+
       const { error } = await supabase
         .from('training_modules')
-        .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000');
+        .insert([{
+          module_id: nextId,
+          title: newModuleData.title,
+          desc_text: newModuleData.desc,
+          type: newModuleData.type,
+          audio_url: audioUrl,
+          doc_url: docUrl,
+          progress: 0,
+          locked: false
+        }]);
 
-      if (error) toast.error("Erro ao limpar banco");
-      else {
-        setData(prev => ({ ...prev, modules: [] }));
-        toast.success("Banco de dados limpo");
-      }
+      if (error) throw error;
+      toast.success("Módulo implantado com sucesso", { id: toastId });
+      fetchModules();
+    } catch (err: any) {
+      toast.error(`Falha na missão: ${err.message}`, { id: toastId });
     }
   };
 
-  const handleSaveNewModule = async (newModuleData: Omit<TrainingModule, 'id'>, file: File | null) => {
-    const nextId = `MOD-${(data.modules.length + 1).toString().padStart(2, '0')}`;
-    let audioUrl = '';
-    let docUrl = '';
+  const handleUpdateModule = async (updated: TrainingModule, files: { audio?: File, doc?: File }) => {
+    const toastId = toast.loading("Atualizando assets...");
     
-    const toastId = toast.loading("Enviando asset...");
+    try {
+      let audioUrl = updated.audioUrl;
+      let docUrl = updated.docUrl;
 
-    if (file) {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random()}.${fileExt}`;
-      const filePath = `${fileName}`;
+      if (files.audio) audioUrl = await uploadFile(files.audio);
+      if (files.doc) docUrl = await uploadFile(files.doc);
 
-      const { error: uploadError } = await supabase.storage
-        .from('assets')
-        .upload(filePath, file);
+      const { error } = await supabase
+        .from('training_modules')
+        .update({
+          title: updated.title,
+          desc_text: updated.desc,
+          progress: updated.progress,
+          locked: updated.locked,
+          audio_url: audioUrl,
+          doc_url: docUrl
+        })
+        .eq('module_id', updated.id);
 
-      if (uploadError) {
-        toast.error(`Erro no upload: ${uploadError.message}`, { id: toastId });
-        return;
-      }
-
-      const { data: { publicUrl } } = supabase.storage.from('assets').getPublicUrl(filePath);
-      
-      if (file.type.startsWith('audio/')) audioUrl = publicUrl;
-      else if (file.type === 'application/pdf') docUrl = publicUrl;
-    }
-
-    const { error } = await supabase
-      .from('training_modules')
-      .insert([{
-        module_id: nextId,
-        title: newModuleData.title,
-        desc_text: newModuleData.desc,
-        type: newModuleData.type,
-        audio_url: audioUrl,
-        doc_url: docUrl,
-        progress: 0,
-        locked: false
-      }]);
-
-    if (error) {
-      toast.error(`Erro ao salvar: ${error.message}`, { id: toastId });
-    } else {
-      toast.success("Módulo implantado com sucesso", { id: toastId });
+      if (error) throw error;
+      toast.success("Módulo atualizado", { id: toastId });
       fetchModules();
+    } catch (err: any) {
+      toast.error(`Falha na atualização: ${err.message}`, { id: toastId });
     }
   };
 
   const handleDeleteModule = async (id: string) => {
-    const { error } = await supabase
-      .from('training_modules')
-      .delete()
-      .eq('module_id', id);
-
+    const { error } = await supabase.from('training_modules').delete().eq('module_id', id);
     if (error) toast.error("Erro ao deletar");
-    else {
-      toast.success("Módulo removido");
-      fetchModules();
-    }
-  };
-
-  const handleUpdateModule = async (updated: TrainingModule, file: File | null) => {
-    const toastId = toast.loading("Atualizando módulo...");
-    let audioUrl = updated.audioUrl;
-    let docUrl = updated.docUrl;
-
-    if (file) {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random()}.${fileExt}`;
-      const filePath = `${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('assets')
-        .upload(filePath, file);
-
-      if (!uploadError) {
-        const { data: { publicUrl } } = supabase.storage.from('assets').getPublicUrl(filePath);
-        if (file.type.startsWith('audio/')) {
-          audioUrl = publicUrl;
-          docUrl = ''; // Limpa o outro se estiver trocando tipo
-        } else if (file.type === 'application/pdf') {
-          docUrl = publicUrl;
-          audioUrl = ''; // Limpa o outro
-        }
-      }
-    }
-
-    const { error } = await supabase
-      .from('training_modules')
-      .update({
-        title: updated.title,
-        desc_text: updated.desc,
-        progress: updated.progress,
-        locked: updated.locked,
-        audio_url: audioUrl,
-        doc_url: docUrl
-      })
-      .eq('module_id', updated.id);
-
-    if (error) {
-      toast.error("Erro ao atualizar", { id: toastId });
-    } else {
-      toast.success("Módulo atualizado", { id: toastId });
-      fetchModules();
-    }
+    else { toast.success("Módulo removido"); fetchModules(); }
   };
 
   const handleToggleLock = async (id: string) => {
     const mod = data.modules.find(m => m.id === id);
     if (!mod) return;
-
-    const { error } = await supabase
-      .from('training_modules')
-      .update({ locked: !mod.locked })
-      .eq('module_id', id);
-
+    const { error } = await supabase.from('training_modules').update({ locked: !mod.locked }).eq('module_id', id);
     if (error) toast.error("Erro ao alterar trava");
     else fetchModules();
   };
@@ -200,49 +148,22 @@ const Index = () => {
     <div className="min-h-screen bg-[#020202] text-[#B0BEC5] font-sans overflow-x-hidden">
       <EditModuleModal isOpen={!!editingModule} onClose={() => setEditingModule(null)} module={editingModule} onSave={handleUpdateModule} />
       <AddModuleModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} onSave={handleSaveNewModule} nextId={`MOD-${(data.modules.length + 1).toString().padStart(2, '0')}`} />
-
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-0 left-1/4 w-[50%] h-[50%] bg-[#00E5FF]/5 blur-[120px] rounded-full opacity-30" />
-        <div className="absolute inset-0 bg-grid-pattern opacity-5" />
-      </div>
-      
+      <div className="fixed inset-0 pointer-events-none z-0"><div className="absolute inset-0 bg-grid-pattern opacity-5" /></div>
       <TacticalSidebar activeView={activeView} onViewChange={setActiveView} isMaster={isMaster} onUserClick={() => setIsMaster(!isMaster)} />
-
       <div className="pl-36 pr-12 relative z-10">
         <header className="pt-12 pb-12 flex justify-between items-center border-b border-white/5 mb-8">
           <div className="space-y-1">
-            <h1 className="text-3xl font-black text-white tracking-tighter uppercase">AERIS <span className="text-[#00E5FF]">ACADEMY</span></h1>
-            <div className="flex items-center gap-2">
-              <div className={`w-1.5 h-1.5 rounded-full ${isLoading ? 'bg-amber-500 animate-pulse' : 'bg-[#00E5FF]'}`} />
-              <p className="text-[10px] font-mono text-[#00E5FF]/40 uppercase tracking-[0.5em]">{isLoading ? 'Syncing...' : 'Database Connected'}</p>
-            </div>
+            <h1 className="text-3xl font-black text-white uppercase">AERIS <span className="text-[#00E5FF]">ACADEMY</span></h1>
+            <div className="flex items-center gap-2"><div className={`w-1.5 h-1.5 rounded-full ${isLoading ? 'bg-amber-500 animate-pulse' : 'bg-[#00E5FF]'}`} /></div>
           </div>
-
           <div className="flex items-center gap-4">
-            <button onClick={handlePurgeAll} className="flex items-center gap-2 bg-red-500/10 hover:bg-red-600 text-red-500 hover:text-white border border-red-500/20 px-6 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all">
-              <Trash2 size={14} /> Limpar Tudo
-            </button>
-            <button onClick={() => setIsAddModalOpen(true)} className="bg-[#00E5FF] text-black px-8 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all hover:scale-105">
-              + Novo Módulo
-            </button>
-            <div className="flex items-center gap-4 px-6 py-3 bg-white/[0.03] rounded-2xl border border-white/5">
-              <Database className="w-4 h-4 text-[#00E5FF]" />
-              <span className="text-[10px] font-mono font-black text-white/60 uppercase">{data.modules.length} Módulos</span>
-            </div>
+            <button onClick={() => setIsAddModalOpen(true)} className="bg-[#00E5FF] text-black px-8 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest hover:scale-105">+ Novo Módulo</button>
+            <div className="flex items-center gap-4 px-6 py-3 bg-white/[0.03] rounded-2xl border border-white/5"><Database className="w-4 h-4 text-[#00E5FF]" /></div>
           </div>
         </header>
-
         <Breadcrumbs view={activeView} />
-
         <main className="max-w-7xl mx-auto pb-32">
-          {isLoading ? (
-            <div className="h-[40vh] flex flex-col items-center justify-center gap-4">
-              <Loader2 className="w-12 h-12 text-[#00E5FF] animate-spin" />
-              <span className="text-[10px] font-mono text-white/20 uppercase tracking-[0.5em]">Retrieving Data...</span>
-            </div>
-          ) : activeView === 'future' ? (
-             <FutureVisionPortal onExit={() => setActiveView('dashboard')} />
-          ) : (
+          {isLoading ? <div className="h-[40vh] flex items-center justify-center"><Loader2 className="w-12 h-12 text-[#00E5FF] animate-spin" /></div> : (
             <AnimatePresence mode="wait">
               <motion.div key={activeView} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                 {activeView === 'dashboard' && (
