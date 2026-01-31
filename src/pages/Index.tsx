@@ -98,7 +98,7 @@ const Index = () => {
         <header className="pt-12 pb-12 flex justify-between items-center border-b border-white/5 mb-16">
           <div className="space-y-1">
             <p className="text-[10px] font-mono font-black text-[#00E5FF]/40 uppercase tracking-[0.5em]">AERIS ACADEMY TERMINAL</p>
-            <h1 className="text-3xl font-black text-white tracking-tighter uppercase">{data.missionTitle}</h1>
+            <h1 className="text-3xl font-black text-white tracking-tighter uppercase">AERIS ACADEMY</h1>
           </div>
           <div className="flex items-center gap-6">
             <div className="hidden md:flex items-center gap-6 px-6 py-3 bg-white/[0.03] rounded-2xl border border-white/5">
