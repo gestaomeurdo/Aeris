@@ -13,8 +13,8 @@ interface AudioGridCardProps {
   isPlaying: boolean;
 }
 
-// Placeholder image for grid items
-const defaultGridImage = "https://images.unsplash.com/photo-1517976384346-3136801d605d?q=80&w=400";
+// Placeholder image for grid items (Tactical/Command theme)
+const defaultGridImage = "https://images.unsplash.com/photo-1517976384346-3136801d605d?q=80&w=400&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
 
 const AudioGridCard = ({ mod, index, onPlay, isActive, isPlaying }: AudioGridCardProps) => {
   const isLocked = mod.locked; // Assuming master controls locking status

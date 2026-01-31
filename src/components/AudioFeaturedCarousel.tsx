@@ -12,12 +12,12 @@ interface AudioFeaturedCarouselProps {
   currentPlayingId: string | null;
 }
 
-// Placeholder images for visual impact
+// Placeholder images for visual impact (USAF/Tactical themes)
 const placeholderImages = [
-  "https://images.unsplash.com/photo-1517976384346-3136801d605d?q=80&w=1200", // Jet cockpit
-  "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1200", // Tech/AI
-  "https://images.unsplash.com/photo-1526470608268-f674ce90ebd4?q=80&w=1200", // Air Force
-  "https://images.unsplash.com/photo-1511447333015-45b65e60f6d5?q=80&w=1200", // Cyber
+  "https://images.unsplash.com/photo-1517976384346-3136801d605d?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Jet cockpit/flight
+  "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Tech/AI/Cyber
+  "https://images.unsplash.com/photo-1526470608268-f674ce90ebd4?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Air Force personnel/leadership
+  "https://images.unsplash.com/photo-1511447333015-45b65e60f6d5?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Command center/strategy
 ];
 
 const AudioFeaturedCarousel = ({ modules, onPlay, currentPlayingId }: AudioFeaturedCarouselProps) => {
