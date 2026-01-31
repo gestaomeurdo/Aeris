@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Headset, Lock, Edit3, Trash2, Play, Pause, FileAudio, Settings2, Activity, Radio } from 'lucide-react';
+import { Headset, Lock, Edit3, Trash2, Play, Pause, Radio, Volume2, Clock, Activity, Settings2 } from 'lucide-react';
 import { TrainingModule } from '@/types/portal';
 import WaveformVisualizer from './WaveformVisualizer';
 
@@ -15,7 +15,6 @@ interface AudioLibraryProps {
 }
 
 const AudioLibrary = ({ modules, isMaster, onEdit, onDelete, onToggleLock }: AudioLibraryProps) => {
-  // Agora recebe apenas os módulos já filtrados por categoria 'podcast' no Index.tsx
   const audioModules = modules;
   
   const [playingDbId, setPlayingDbId] = useState<string | null>(null);
@@ -23,6 +22,13 @@ const AudioLibrary = ({ modules, isMaster, onEdit, onDelete, onToggleLock }: Aud
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [volume, setVolume] = useState(0.8); // New state for volume
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+    }
+  }, [volume]);
 
   useEffect(() => {
     return () => {
@@ -59,6 +65,14 @@ const AudioLibrary = ({ modules, isMaster, onEdit, onDelete, onToggleLock }: Aud
       setDuration(audioRef.current.duration);
     }
   };
+  
+  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (audioRef.current) {
+      const seekTime = parseFloat(e.target.value);
+      audioRef.current.currentTime = seekTime;
+      setCurrentTime(seekTime);
+    }
+  };
 
   const formatTime = (seconds: number) => {
     if (isNaN(seconds) || seconds === Infinity) return "0:00";
@@ -86,13 +100,26 @@ const AudioLibrary = ({ modules, isMaster, onEdit, onDelete, onToggleLock }: Aud
         <h2 className="text-4xl font-black text-white uppercase tracking-tighter">AURAL <span className="font-light text-white/20">INTELLIGENCE</span></h2>
       </div>
 
+      {/* COMMAND CONSOLE (Player Principal) */}
       {playingDbId && currentModule ? (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="p-10 bg-[#0A192F]/60 border border-[#00E5FF]/40 rounded-[32px] shadow-[0_0_50px_rgba(0,229,255,0.15)] space-y-8 relative overflow-hidden"
+          className="p-10 bg-black/60 backdrop-blur-xl border border-[#00E5FF]/40 rounded-[32px] shadow-[0_0_50px_rgba(0,229,255,0.15)] space-y-8 relative overflow-hidden"
         >
-          <div className="absolute inset-0 bg-scanline opacity-[0.05] pointer-events-none" />
+          {/* Neon Pulse Border Effect */}
+          <div className="absolute inset-0 rounded-[32px] border-4 border-transparent pointer-events-none animate-pulse-slow">
+             <style>{`
+                @keyframes pulse-slow {
+                    0%, 100% { box-shadow: 0 0 10px rgba(0, 229, 255, 0.3); }
+                    50% { box-shadow: 0 0 30px rgba(0, 229, 255, 0.8); }
+                }
+                .animate-pulse-slow {
+                    animation: pulse-slow 4s infinite ease-in-out;
+                }
+             `}</style>
+          </div>
+          
           <div className="flex items-center justify-between relative z-10">
             <div className="flex items-center gap-6">
               <div className="w-20 h-20 bg-[#00E5FF]/10 rounded-2xl border border-[#00E5FF]/20 flex items-center justify-center relative overflow-hidden">
@@ -106,6 +133,8 @@ const AudioLibrary = ({ modules, isMaster, onEdit, onDelete, onToggleLock }: Aud
                 <h3 className="text-3xl font-black text-white uppercase tracking-tighter leading-none">{currentModule.title}</h3>
               </div>
             </div>
+            
+            {/* Play/Pause Button */}
             <button 
               onClick={() => handlePlayPause(currentModule.dbId, currentUrl)} 
               className="w-20 h-20 bg-[#00E5FF] text-black rounded-full hover:scale-105 active:scale-95 transition-all shadow-[0_0_40px_rgba(0,229,255,0.4)] flex items-center justify-center"
@@ -113,16 +142,41 @@ const AudioLibrary = ({ modules, isMaster, onEdit, onDelete, onToggleLock }: Aud
               {isPlaying ? <Pause size={32} fill="black" /> : <Play size={32} fill="black" className="ml-1" />}
             </button>
           </div>
-          {/* Progress & Waveform */}
-          <div className="space-y-4 relative z-10">
-            <div className="flex items-center gap-6">
-              <span className="text-xs font-mono text-white/40 w-12 text-right">{formatTime(currentTime)}</span>
-              <div className="flex-1 h-3 bg-white/5 rounded-full overflow-hidden border border-white/5">
-                <motion.div initial={false} animate={{ width: `${(currentTime / duration) * 100}%` }} className="h-full bg-gradient-to-r from-[#00E5FF]/40 to-[#00E5FF] shadow-[0_0_20px_#00E5FF]" />
-              </div>
-              <span className="text-xs font-mono text-white/40 w-12">{formatTime(duration)}</span>
+          
+          {/* Progress & Waveform & Controls */}
+          <div className="space-y-6 relative z-10">
+            {/* Waveform Visualizer */}
+            <div className="flex justify-center h-16 w-full bg-black/40 rounded-xl border border-white/10 p-2">
+                <WaveformVisualizer active={isPlaying} />
             </div>
-            <div className="flex justify-center h-12"><WaveformVisualizer active={isPlaying} /></div>
+
+            {/* Time and Seek Bar */}
+            <div className="flex items-center gap-6">
+              <span className="text-sm font-mono text-[#00E5FF] w-12 text-right">{formatTime(currentTime)}</span>
+              <input 
+                type="range" 
+                min="0" 
+                max={duration} 
+                value={currentTime} 
+                onChange={handleSeek} 
+                className="flex-1 h-2 bg-white/10 rounded-full appearance-none cursor-pointer accent-[#00E5FF]" 
+              />
+              <span className="text-sm font-mono text-white/40 w-12">{formatTime(duration)}</span>
+            </div>
+
+            {/* Volume Control */}
+            <div className="flex items-center justify-end gap-4 pt-4 border-t border-white/5">
+                <Volume2 className="w-4 h-4 text-[#00E5FF]" />
+                <input 
+                    type="range" 
+                    min="0" 
+                    max="1" 
+                    step="0.01" 
+                    value={volume} 
+                    onChange={(e) => setVolume(parseFloat(e.target.value))} 
+                    className="w-32 h-1 bg-white/10 rounded-full appearance-none cursor-pointer accent-[#00E5FF]" 
+                />
+            </div>
           </div>
         </motion.div>
       ) : (
@@ -132,35 +186,64 @@ const AudioLibrary = ({ modules, isMaster, onEdit, onDelete, onToggleLock }: Aud
         </div>
       )}
 
-      {/* Lista de Podcasts Filtrados */}
-      <div className="grid grid-cols-1 gap-4">
+      {/* Lista de Módulos (Frequency Strips) */}
+      <div className="grid grid-cols-1 gap-3">
         {audioModules.map((mod, i) => {
           const isActive = playingDbId === mod.dbId;
           const isLocked = mod.locked && !isMaster;
+          
           return (
             <motion.div
               key={mod.dbId}
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.05 }}
-              className={`group relative p-6 rounded-2xl border transition-all duration-500 overflow-hidden ${
-                isLocked ? 'bg-red-500/5 border-red-500/10 opacity-40' : isActive ? 'bg-[#00E5FF]/10 border-[#00E5FF]/40 shadow-[0_0_30px_rgba(0,229,255,0.1)]' : 'bg-white/[0.02] border-white/5 hover:border-[#00E5FF]/20 hover:bg-white/[0.04]'
+              className={`group relative p-4 rounded-xl border transition-all duration-500 overflow-hidden ${
+                isLocked ? 'bg-red-500/5 border-red-500/10 opacity-40' : isActive ? 'bg-[#00E5FF]/10 border-[#00E5FF]/40 shadow-[0_0_20px_rgba(0,229,255,0.1)]' : 'bg-white/[0.02] border-white/5 hover:border-[#00E5FF]/20 hover:bg-white/[0.04]'
               }`}
             >
+              {/* Technical Overlay Lines */}
+              <div className={`absolute inset-0 pointer-events-none ${isActive ? 'opacity-10' : 'opacity-0 group-hover:opacity-5'} transition-opacity duration-500`}>
+                 <div className="absolute top-0 left-0 w-full h-[1px] bg-[#00E5FF]/5" />
+                 <div className="absolute bottom-0 left-0 w-full h-[1px] bg-[#00E5FF]/5" />
+              </div>
+
               <div className="flex justify-between items-center relative z-10">
                 <div className="flex items-center gap-6">
-                  <button onClick={() => !isLocked && handlePlayPause(mod.dbId, mod.audioUrl)} disabled={isLocked} className={`w-12 h-12 rounded-full transition-all flex items-center justify-center ${isActive && isPlaying ? 'bg-[#00E5FF] text-black shadow-[0_0_20px_#00E5FF]' : 'bg-white/5 text-[#00E5FF] hover:bg-[#00E5FF] hover:text-black'}`}>
-                    {isActive && isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" className="ml-1" />}
+                  {/* Play/Status Indicator */}
+                  <button 
+                    onClick={() => !isLocked && handlePlayPause(mod.dbId, mod.audioUrl)} 
+                    disabled={isLocked} 
+                    className={`w-10 h-10 rounded-lg transition-all flex items-center justify-center ${
+                      isLocked ? 'bg-red-500/10 text-red-500' : isActive && isPlaying ? 'bg-[#00E5FF] text-black shadow-[0_0_15px_#00E5FF]' : 'bg-white/5 text-[#00E5FF] hover:bg-[#00E5FF] hover:text-black'
+                    }`}
+                  >
+                    {isLocked ? <Lock size={16} /> : isActive && isPlaying ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" className="ml-1" />}
                   </button>
+                  
                   <div className="space-y-1">
-                    <h3 className={`text-xl font-black uppercase tracking-tighter leading-none transition-colors ${isActive ? 'text-[#00E5FF]' : 'text-white'}`}>{mod.title}</h3>
-                    <p className="text-[9px] font-mono text-white/30 uppercase tracking-widest">{mod.id} // SECURE_PODCAST</p>
+                    <h3 className={`text-lg font-black uppercase tracking-tighter leading-none transition-colors ${isActive ? 'text-[#00E5FF]' : 'text-white'}`}>{mod.title}</h3>
+                    <div className="flex items-center gap-4">
+                        <p className="text-[9px] font-mono text-white/30 uppercase tracking-widest">
+                            {mod.id} // {mod.type}
+                        </p>
+                        {/* Hover Detail */}
+                        <motion.div 
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={isActive ? { opacity: 1, x: 0 } : {}}
+                            className="text-[8px] font-mono font-black text-white/60 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                            <Clock className="w-2 h-2 inline mr-1 text-[#00E5FF]" />
+                            AUDIO_PKT_{mod.dbId.slice(0, 4).toUpperCase()}
+                        </motion.div>
+                    </div>
                   </div>
                 </div>
+                
                 {isMaster && (
                   <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={() => onEdit(mod)} className="p-3 bg-black/40 border border-white/10 rounded-xl text-white/40 hover:text-[#00E5FF]"><Settings2 size={16} /></button>
-                    <button onClick={() => onDelete(mod.id)} className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500"><Trash2 size={16} /></button>
+                    <button onClick={() => onEdit(mod)} className="p-2 bg-black/40 border border-white/10 rounded-lg text-white/40 hover:text-[#00E5FF]"><Settings2 size={14} /></button>
+                    <button onClick={() => onDelete(mod.id)} className="p-2 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500"><Trash2 size={14} /></button>
                   </div>
                 )}
               </div>
