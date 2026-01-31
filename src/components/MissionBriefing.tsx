@@ -11,20 +11,20 @@ interface MissionBriefingProps {
 }
 
 const MissionBriefing = ({ title, videoUrl, description }: MissionBriefingProps) => {
-  // Função para converter links normais do YouTube em links de EMBED
+  // Função para converter links normais do YouTube em links de EMBED limpos
   const getEmbedUrl = (url: string) => {
     if (!url) return "";
     
-    // Trata links curtos (youtu.be/ID)
+    let id = "";
     if (url.includes('youtu.be/')) {
-      const id = url.split('youtu.be/')[1].split(/[?#]/)[0];
-      return `https://www.youtube.com/embed/${id}?autoplay=0&rel=0`;
+      id = url.split('youtu.be/')[1].split(/[?#]/)[0];
+    } else if (url.includes('watch?v=')) {
+      id = url.split('v=')[1].split(/[&?#]/)[0];
     }
-    
-    // Trata links longos (youtube.com/watch?v=ID)
-    if (url.includes('watch?v=')) {
-      const id = url.split('v=')[1].split(/[&?#]/)[0];
-      return `https://www.youtube.com/embed/${id}?autoplay=0&rel=0`;
+
+    if (id) {
+      // Modest branding e ocultação de info o máximo possível
+      return `https://www.youtube.com/embed/${id}?autoplay=0&rel=0&modestbranding=1&showinfo=0&iv_load_policy=3&controls=1&autohide=1`;
     }
 
     return url;
@@ -51,13 +51,19 @@ const MissionBriefing = ({ title, videoUrl, description }: MissionBriefingProps)
       </div>
 
       <div className="relative aspect-video rounded-3xl overflow-hidden border border-white/10 shadow-2xl group bg-black">
+        {/* Camada de Gradiente para suavizar as bordas do player */}
+        <div className="absolute inset-0 z-20 pointer-events-none shadow-[inset_0_0_100px_rgba(0,0,0,0.8)]" />
+        
         {embedUrl ? (
-          <iframe 
-            src={embedUrl} 
-            className="w-full h-full border-none"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-            allowFullScreen
-          />
+          <div className="absolute inset-0 w-full h-full scale-[1.02]"> 
+            {/* Scale 1.02 ajuda a esconder ligeiramente as bordas de UI do YouTube */}
+            <iframe 
+              src={embedUrl} 
+              className="w-full h-full border-none"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+              allowFullScreen
+            />
+          </div>
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-white/10">
             <Play className="w-20 h-20" />
@@ -65,8 +71,8 @@ const MissionBriefing = ({ title, videoUrl, description }: MissionBriefingProps)
           </div>
         )}
         
-        {/* HUD Elements Overlay (Hover) */}
-        <div className="absolute inset-0 pointer-events-none p-8 flex flex-col justify-between z-10 bg-gradient-to-t from-black via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+        {/* HUD Elements Overlay (Sempre visível no hover para passar info) */}
+        <div className="absolute inset-0 pointer-events-none p-8 flex flex-col justify-between z-30 bg-gradient-to-t from-black via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
           <div className="flex justify-between items-start">
              <div className="bg-black/40 backdrop-blur-md border border-white/10 p-4 rounded-2xl flex gap-6">
               <div className="space-y-1">
@@ -75,7 +81,7 @@ const MissionBriefing = ({ title, videoUrl, description }: MissionBriefingProps)
               </div>
             </div>
           </div>
-          <p className="text-lg text-white font-medium max-w-lg">{description}</p>
+          <p className="text-lg text-white font-medium max-w-lg drop-shadow-lg">{description}</p>
         </div>
       </div>
     </section>
