@@ -13,11 +13,13 @@ import AuthTerminal from '@/components/AuthTerminal';
 import EditModuleModal from '@/components/EditModuleModal';
 import OperationalStats from '@/components/OperationalStats';
 import AddModuleModal from '@/components/AddModuleModal';
-import { Bell, Wifi, Plus, Edit3, Search } from 'lucide-react';
+import { Wifi, Plus, Edit3, Search } from 'lucide-react';
 import { PortalData, TrainingModule } from '@/types/portal';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const INITIAL_DATA: PortalData = {
+const STORAGE_KEY = 'aeris_content_data';
+
+const DEFAULT_DATA: PortalData = {
   mainVideo: "https://youtu.be/mQayAWnJQOE",
   missionTitle: "AERIS ACADEMY",
   missionDescription: "Mastering Air Force Leadership and modernizing military tactical learning through digital immersive doctrines.",
@@ -32,26 +34,24 @@ const INITIAL_DATA: PortalData = {
   ]
 };
 
-const STORAGE_KEY = 'aeris_content_data';
-
 const Index = () => {
-  // Inicialização do estado seguindo estritamente a lógica solicitada
+  // Lógica Exata de Inicialização
   const [data, setData] = useState<PortalData>(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     
-    // CENÁRIO A: Dados existem no storage (mesmo que seja [])
+    // CENÁRIO A: Dados Existem (mesmo que seja [] ou objeto vazio de módulos)
     if (saved !== null) {
       try {
         return JSON.parse(saved);
       } catch (e) {
-        console.error("Erro ao processar dados salvos:", e);
-        return INITIAL_DATA;
+        console.error("Critical error parsing local data:", e);
+        return DEFAULT_DATA;
       }
     }
     
-    // CENÁRIO B: Primeira visita (saved === null)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_DATA));
-    return INITIAL_DATA;
+    // CENÁRIO B: Primeira Visita (saved === null)
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_DATA));
+    return DEFAULT_DATA;
   });
 
   const [activeView, setActiveView] = useState('dashboard');
@@ -60,7 +60,7 @@ const Index = () => {
   const [editingModule, setEditingModule] = useState<TrainingModule | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  // Sincronização constante com o localStorage
+  // Sincronização de Veracidade Absoluta: Sempre salva o estado atual
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   }, [data]);
@@ -76,7 +76,7 @@ const Index = () => {
   };
 
   const handleUpdateVideo = () => {
-    const url = prompt("Insira a nova URL do vídeo (YouTube ou MP4):", data.mainVideo);
+    const url = prompt("Insira a nova URL do vídeo:", data.mainVideo);
     if (url) setData(prev => ({ ...prev, mainVideo: url }));
   };
 
@@ -91,20 +91,17 @@ const Index = () => {
       const num = parseInt(parts[1], 10);
       return !isNaN(num) && num > max ? num : max;
     }, 0);
-    
-    const nextIdNumber = maxIdNumber + 1;
-    return `MOD-${nextIdNumber.toString().padStart(2, '0')}`;
+    return `MOD-${(maxIdNumber + 1).toString().padStart(2, '0')}`;
   };
 
   const handleSaveNewModule = (newModuleData: Omit<TrainingModule, 'id'>, file: File | null) => {
     const nextId = getNextModuleId(data.modules);
-    
     let audioUrl = newModuleData.audioUrl;
     let docUrl = newModuleData.docUrl;
     
     if (file) {
       const url = URL.createObjectURL(file);
-      if (file.type === 'audio/mp3' || file.type === 'audio/mpeg') {
+      if (file.type.startsWith('audio/')) {
         audioUrl = url;
         docUrl = '';
       } else if (file.type === 'application/pdf') {
@@ -127,10 +124,14 @@ const Index = () => {
 
   const handleDeleteModule = (id: string) => {
     if (confirm(`Deseja remover o módulo ${id} permanentemente?`)) {
-      setData(prev => ({ 
-        ...prev, 
-        modules: prev.modules.filter(m => m.id !== id) 
-      }));
+      setData(prev => {
+        const newData = { 
+          ...prev, 
+          modules: prev.modules.filter(m => m.id !== id) 
+        };
+        // O useEffect tratará de salvar newData (mesmo com modules: []) no localStorage
+        return newData;
+      });
     }
   };
 
@@ -157,8 +158,6 @@ const Index = () => {
     locked: isMaster ? false : mod.locked
   }));
 
-  const nextModuleId = getNextModuleId(data.modules);
-
   return (
     <div className="min-h-screen bg-[#020202] text-[#B0BEC5] font-sans selection:bg-[#00E5FF] selection:text-black overflow-x-hidden">
       <AuthTerminal 
@@ -178,7 +177,7 @@ const Index = () => {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onSave={handleSaveNewModule}
-        nextId={nextModuleId}
+        nextId={getNextModuleId(data.modules)}
       />
 
       <div className="fixed inset-0 pointer-events-none z-0">
