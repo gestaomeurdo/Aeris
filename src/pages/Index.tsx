@@ -11,7 +11,7 @@ import SecurityProtocol from '@/components/SecurityProtocol';
 import FutureVisionPortal from '@/components/FutureVisionPortal';
 import AuthTerminal from '@/components/AuthTerminal';
 import EditModuleModal from '@/components/EditModuleModal';
-import { Bell, Wifi, Plus, Edit3 } from 'lucide-react';
+import { Bell, Wifi, Plus, Edit3, Search } from 'lucide-react';
 import { PortalData, TrainingModule } from '@/types/portal';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -139,18 +139,26 @@ const Index = () => {
 
       <div className="pl-32 pr-12 relative z-10">
         <header className="pt-12 pb-12 flex justify-between items-center border-b border-white/5 mb-8">
-          <div className="space-y-1">
-            <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-black text-white tracking-tighter uppercase">AERIS ACADEMY</h1>
-              {isMaster && (
-                <span className="px-3 py-1 bg-green-500/10 border border-green-500/30 text-[9px] font-black text-green-500 uppercase rounded-full tracking-widest animate-pulse">
-                  Operator: Mike
-                </span>
-              )}
+          <div className="flex items-center gap-8">
+            <div className="space-y-1">
+              <h1 className="text-3xl font-black text-white tracking-tighter uppercase">AERIS <span className="text-[#00E5FF]">ACADEMY</span></h1>
+              <p className="text-[10px] font-mono font-black text-[#00E5FF]/40 uppercase tracking-[0.5em]">System Status: Optimal</p>
             </div>
-            <p className="text-[10px] font-mono font-black text-[#00E5FF]/40 uppercase tracking-[0.5em]">System Status: Optimal</p>
+            <div className="h-8 w-[1px] bg-white/10 hidden md:block" />
+            <span className="text-[10px] font-mono text-[#00E5FF] uppercase tracking-widest font-black hidden md:block">
+              {isMaster ? 'MASTER_NODE' : 'PUBLIC_ACCESS'}
+            </span>
           </div>
+
           <div className="flex items-center gap-6">
+            <div className="relative group hidden lg:block">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-hover:text-[#00E5FF] transition-colors" size={14} />
+              <input 
+                className="bg-white/[0.03] border border-white/5 rounded-full py-2.5 pl-12 pr-6 text-xs w-64 focus:outline-none focus:border-[#00E5FF]/30 transition-all placeholder:text-white/10" 
+                placeholder="Search tactical assets..." 
+              />
+            </div>
+
             {isMaster && (
               <div className="flex gap-4">
                 <button 
