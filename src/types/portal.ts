@@ -1,5 +1,6 @@
 export interface TrainingModule {
-  id: string;
+  id: string; // Ex: MOD-01
+  dbId: string; // UUID do Supabase
   title: string;
   desc: string;
   type: "Leadership" | "Strategy" | "Structure" | "Advanced";
