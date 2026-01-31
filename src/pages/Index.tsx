@@ -10,6 +10,7 @@ import DocGallery from '@/components/DocGallery';
 import SecurityProtocol from '@/components/SecurityProtocol';
 import OperationalStats from '@/components/OperationalStats';
 import AuthTerminal from '@/components/AuthTerminal';
+import EditModuleModal from '@/components/EditModuleModal';
 import { Bell, Wifi, Plus, Edit3 } from 'lucide-react';
 import { PortalData, TrainingModule } from '@/types/portal';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -34,9 +35,10 @@ const Index = () => {
   const [activeView, setActiveView] = useState('dashboard');
   const [isMaster, setIsMaster] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [editingModule, setEditingModule] = useState<TrainingModule | null>(null);
 
   useEffect(() => {
-    const saved = localStorage.getItem('aeris_data_v4');
+    const saved = localStorage.getItem('aeris_data_v5');
     if (saved) {
       try {
         setData(JSON.parse(saved));
@@ -47,7 +49,7 @@ const Index = () => {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('aeris_data_v4', JSON.stringify(data));
+    localStorage.setItem('aeris_data_v5', JSON.stringify(data));
   }, [data]);
 
   const handleUserClick = () => {
@@ -79,6 +81,7 @@ const Index = () => {
         locked: true
       };
       setData(prev => ({ ...prev, modules: [...prev.modules, newModule] }));
+      setEditingModule(newModule);
     }
   };
 
@@ -113,6 +116,13 @@ const Index = () => {
         isOpen={isAuthOpen} 
         onClose={() => setIsAuthOpen(false)} 
         onSuccess={() => setIsMaster(true)} 
+      />
+
+      <EditModuleModal
+        isOpen={!!editingModule}
+        onClose={() => setEditingModule(null)}
+        module={editingModule}
+        onSave={handleUpdateModule}
       />
 
       <div className="fixed inset-0 pointer-events-none z-0">
@@ -189,7 +199,7 @@ const Index = () => {
                   isMaster={isMaster}
                   onDelete={handleDeleteModule}
                   onToggleLock={handleToggleLock}
-                  onUpdateModule={handleUpdateModule}
+                  onEdit={setEditingModule}
                 />
               </motion.div>
             )}
@@ -201,20 +211,32 @@ const Index = () => {
                   isMaster={isMaster}
                   onDelete={handleDeleteModule}
                   onToggleLock={handleToggleLock}
-                  onUpdateModule={handleUpdateModule}
+                  onEdit={setEditingModule}
                 />
               </motion.div>
             )}
 
             {activeView === 'audio' && (
               <motion.div key="audio" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <AudioLibrary modules={modulesToDisplay} />
+                <AudioLibrary 
+                  modules={modulesToDisplay} 
+                  isMaster={isMaster}
+                  onEdit={setEditingModule}
+                  onToggleLock={handleToggleLock}
+                  onDelete={handleDeleteModule}
+                />
               </motion.div>
             )}
 
             {activeView === 'docs' && (
               <motion.div key="docs" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <DocGallery modules={modulesToDisplay} />
+                <DocGallery 
+                  modules={modulesToDisplay} 
+                  isMaster={isMaster}
+                  onEdit={setEditingModule}
+                  onToggleLock={handleToggleLock}
+                  onDelete={handleDeleteModule}
+                />
               </motion.div>
             )}
 
