@@ -39,7 +39,7 @@ const AudioLibrary = ({ modules, isMaster, onEdit, onDelete, onToggleLock }: Aud
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, moduleId: string) => {
     const file = e.target.files?.[0];
-    if (file && file.type === 'audio/mp3') {
+    if (file && (file.type === 'audio/mp3' || file.type === 'audio/mpeg')) {
       // Revoga URL antiga se existir
       if (localAudioMap[moduleId]) {
         URL.revokeObjectURL(localAudioMap[moduleId].url);
@@ -63,35 +63,40 @@ const AudioLibrary = ({ modules, isMaster, onEdit, onDelete, onToggleLock }: Aud
     }
   };
 
-  const handlePlayPause = (id: string, url: string) => {
+  const handlePlayPause = async (id: string, url: string) => {
     if (!audioRef.current || !url) return;
+
+    const audio = audioRef.current;
 
     if (playingId === id) {
       if (isPlaying) {
-        audioRef.current.pause();
+        audio.pause();
         setIsPlaying(false);
       } else {
-        // Tenta tocar
-        audioRef.current.play().catch(error => {
-          console.error("Playback failed:", error);
-          // Se falhar (ex: autoplay bloqueado), apenas define o estado
+        try {
+          await audio.play();
           setIsPlaying(true);
-        });
+        } catch (error) {
+          console.error("Playback failed (user interaction required or interrupted):", error);
+          setIsPlaying(true); // Assume playing state even if browser blocks immediate play
+        }
       }
     } else {
       // Switching track
       setPlayingId(id);
-      audioRef.current.src = url;
-      audioRef.current.load();
+      setIsPlaying(true); 
       
-      audioRef.current.oncanplaythrough = () => {
-        audioRef.current?.play().catch(error => {
+      audio.src = url;
+      audio.load(); 
+      
+      audio.oncanplaythrough = async () => {
+        try {
+          await audio.play();
+        } catch (error) {
           console.error("Playback failed on track switch:", error);
-          setIsPlaying(true); // Define como playing mesmo se o play falhar
-        });
-        audioRef.current.oncanplaythrough = null; // Remove listener
+        }
+        audio.oncanplaythrough = null; 
       };
-      setIsPlaying(true);
     }
   };
 

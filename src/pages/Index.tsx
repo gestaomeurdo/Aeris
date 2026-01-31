@@ -32,6 +32,28 @@ const INITIAL_DATA: PortalData = {
   ]
 };
 
+const LOCAL_STORAGE_KEY = 'aeris_data_v5';
+
+// Helper function to load initial state from localStorage
+const loadInitialData = (): PortalData => {
+  const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+  if (saved) {
+    try {
+      const parsedData: PortalData = JSON.parse(saved);
+      // Revoke old object URLs if they exist (cleanup simulation)
+      parsedData.modules.forEach(mod => {
+        if (mod.audioUrl.startsWith('blob:')) URL.revokeObjectURL(mod.audioUrl);
+        if (mod.docUrl.startsWith('blob:')) URL.revokeObjectURL(mod.docUrl);
+      });
+      return parsedData;
+    } catch (e) {
+      console.error("Matrix corrupt: resetting to initial parameters", e);
+      return INITIAL_DATA;
+    }
+  }
+  return INITIAL_DATA;
+};
+
 const getNextModuleId = (modules: TrainingModule[]) => {
   // Find the highest existing number to ensure uniqueness
   const maxIdNumber = modules.reduce((max, mod) => {
@@ -44,34 +66,17 @@ const getNextModuleId = (modules: TrainingModule[]) => {
 };
 
 const Index = () => {
-  const [data, setData] = useState<PortalData>(INITIAL_DATA);
+  // Initialize state using the function to load from localStorage immediately
+  const [data, setData] = useState<PortalData>(loadInitialData);
   const [activeView, setActiveView] = useState('dashboard');
   const [isMaster, setIsMaster] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [editingModule, setEditingModule] = useState<TrainingModule | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false); // New State for Add Modal
 
+  // Effect to save data whenever it changes
   useEffect(() => {
-    const saved = localStorage.getItem('aeris_data_v5');
-    if (saved) {
-      try {
-        // Revoke old object URLs if they exist in saved data (cleanup simulation)
-        const parsedData: PortalData = JSON.parse(saved);
-        parsedData.modules.forEach(mod => {
-          if (mod.audioUrl.startsWith('blob:')) URL.revokeObjectURL(mod.audioUrl);
-          if (mod.docUrl.startsWith('blob:')) URL.revokeObjectURL(mod.docUrl);
-        });
-        setData(parsedData);
-      } catch (e) {
-        console.error("Matrix corrupt: resetting to initial parameters");
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    // Note: We save the data, but the blob URLs will only be valid for the current session.
-    // This is expected behavior when simulating local file uploads with createObjectURL.
-    localStorage.setItem('aeris_data_v5', JSON.stringify(data));
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
   }, [data]);
 
   const handleUserClick = () => {
@@ -103,7 +108,7 @@ const Index = () => {
     // Process file and create local URL
     if (file) {
       const url = URL.createObjectURL(file);
-      if (file.type === 'audio/mp3') {
+      if (file.type === 'audio/mp3' || file.type === 'audio/mpeg') {
         audioUrl = url;
         docUrl = ''; // Ensure only one asset type is set
       } else if (file.type === 'application/pdf') {
