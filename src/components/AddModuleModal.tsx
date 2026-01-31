@@ -44,8 +44,7 @@ const AddModuleModal = ({ isOpen, onClose, onSave, nextId }: AddModuleModalProps
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !description || !file) {
-      // Using native alert for simplicity, as per existing code style (e.g., in SecurityProtocol)
-      alert("Please fill all required fields and select a file.");
+      alert("Por favor, preencha todos os campos obrigatórios e selecione um arquivo.");
       return;
     }
 
@@ -66,13 +65,16 @@ const AddModuleModal = ({ isOpen, onClose, onSave, nextId }: AddModuleModalProps
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0] || null;
     setFile(selectedFile);
+    
     if (selectedFile) {
-      if (selectedFile.type === 'application/pdf') {
+      const mimeType = selectedFile.type;
+      
+      if (mimeType === 'application/pdf') {
         setFileType('doc');
-      } else if (selectedFile.type === 'audio/mp3') {
+      } else if (mimeType === 'audio/mp3' || mimeType === 'audio/mpeg') {
         setFileType('audio');
       } else {
-        alert("Unsupported file type. Please select .mp3 or .pdf.");
+        alert("Tipo de arquivo não suportado. Por favor, selecione .mp3 ou .pdf.");
         setFile(null);
         setFileType(null);
       }
@@ -165,7 +167,7 @@ const AddModuleModal = ({ isOpen, onClose, onSave, nextId }: AddModuleModalProps
                   <div className="relative">
                     <Input
                       type="file"
-                      accept=".mp3, .pdf"
+                      accept="audio/mpeg, audio/mp3, application/pdf"
                       onChange={handleFileChange}
                       className="w-full bg-white/[0.03] border border-white/10 rounded-2xl py-4 px-6 text-sm text-white focus:border-[#00E5FF]/40 outline-none transition-all file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#00E5FF]/10 file:text-[#00E5FF] hover:file:bg-[#00E5FF]/20"
                     />
