@@ -2,118 +2,121 @@
 
 import React from 'react';
 import AerisLogo from '@/components/AerisLogo';
-import CommandBriefing from '@/components/CommandBriefing';
-import OperationCard from '@/components/OperationCard';
-import { Terminal, Target, Shield, Bell, Cpu, LayoutGrid, User } from 'lucide-react';
+import MissionBriefing from '@/components/MissionBriefing';
+import AudioIntelligence from '@/components/AudioIntelligence';
+import DigitalDoctrine from '@/components/DigitalDoctrine';
+import { Terminal, Target, Shield, Bell, Cpu, LayoutGrid, User, Search, Wifi } from 'lucide-react';
 import { motion } from 'framer-motion';
-
-const operations = [
-  { code: "01", title: "Core Fundamentals", status: 'complete' as const, progress: 100 },
-  { code: "02", title: "Tactical Operations", status: 'active' as const, progress: 45 },
-  { code: "03", title: "Cyber Defense Matrix", status: 'locked' as const, progress: 0 },
-  { code: "04", title: "Elite Leadership", status: 'locked' as const, progress: 0 },
-];
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-[#020B1A] text-[#B0BEC5] font-sans selection:bg-[#00E5FF] selection:text-black overflow-x-hidden pb-20">
-      {/* Background Decorativo Moderno */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#00E5FF]/5 blur-[120px] rounded-full" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#6366F1]/5 blur-[120px] rounded-full" />
+    <div className="min-h-screen bg-[#020617] text-[#B0BEC5] font-sans selection:bg-[#00E5FF] selection:text-black overflow-x-hidden">
+      {/* Background Atmosphere */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-[50%] h-[50%] bg-[#00E5FF]/5 blur-[120px] rounded-full opacity-50" />
+        <div className="absolute bottom-0 right-1/4 w-[50%] h-[50%] bg-[#6366F1]/5 blur-[120px] rounded-full opacity-50" />
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03] mix-blend-overlay" />
       </div>
       
-      {/* Navegação Flutuante Lateral */}
-      <nav className="fixed left-6 top-1/2 -translate-y-1/2 w-16 bg-white/[0.02] backdrop-blur-2xl border border-white/5 rounded-2xl flex flex-col items-center py-8 gap-8 z-50 shadow-2xl">
-        <button className="group relative p-3 text-[#00E5FF] transition-all duration-300">
-          <LayoutGrid className="w-5 h-5 group-hover:scale-110" />
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 bg-[#00E5FF] rounded-r-full shadow-[0_0_10px_#00E5FF]" />
-        </button>
-        <button className="group p-3 text-white/20 hover:text-white transition-all">
-          <Target className="w-5 h-5 group-hover:scale-110" />
-        </button>
-        <button className="group p-3 text-white/20 hover:text-white transition-all">
-          <Terminal className="w-5 h-5 group-hover:scale-110" />
-        </button>
-        <div className="w-6 h-[1px] bg-white/5" />
-        <button className="group p-3 text-white/20 hover:text-white transition-all mt-auto">
-          <User className="w-5 h-5 group-hover:scale-110" />
-        </button>
+      {/* HUD Navigation Sidebar */}
+      <nav className="fixed left-6 top-1/2 -translate-y-1/2 w-20 bg-black/40 backdrop-blur-3xl border border-white/5 rounded-[32px] flex flex-col items-center py-10 gap-10 z-50 shadow-2xl">
+        <div className="mb-4">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#00E5FF] to-[#6366F1] flex items-center justify-center p-2.5 shadow-[0_0_20px_rgba(0,229,255,0.3)]">
+            <AerisLogo />
+          </div>
+        </div>
+        
+        <div className="flex flex-col gap-6">
+          <button className="group relative p-4 text-[#00E5FF] transition-all duration-300">
+            <LayoutGrid className="w-6 h-6 group-hover:scale-110" />
+            <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-1.5 h-6 bg-[#00E5FF] rounded-r-full shadow-[0_0_15px_#00E5FF]" />
+          </button>
+          <button className="group p-4 text-white/20 hover:text-white transition-all">
+            <Target className="w-6 h-6 group-hover:scale-110" />
+          </button>
+          <button className="group p-4 text-white/20 hover:text-white transition-all">
+            <Terminal className="w-6 h-6 group-hover:scale-110" />
+          </button>
+          <button className="group p-4 text-white/20 hover:text-white transition-all">
+            <Shield className="w-6 h-6 group-hover:scale-110" />
+          </button>
+        </div>
+
+        <div className="mt-auto flex flex-col gap-6">
+          <button className="group p-4 text-white/20 hover:text-white transition-all">
+            <User className="w-6 h-6 group-hover:scale-110" />
+          </button>
+        </div>
       </nav>
 
+      {/* Main Content Dashboard */}
       <div className="pl-32 pr-12">
-        <header className="pt-20 pb-16 flex flex-col items-center">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1, ease: "circOut" }}
-          >
-            <AerisLogo />
-          </motion.div>
-          
-          <div className="mt-12 flex items-center gap-12 text-[9px] font-mono text-white/30 uppercase tracking-[0.5em] font-black">
-            <div className="flex items-center gap-3">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#00E5FF] shadow-[0_0_12px_#00E5FF]" />
-              NEURAL_LINK: OPTIMAL
+        <header className="pt-12 pb-12 flex justify-between items-center border-b border-white/5 mb-16">
+          <div className="flex items-center gap-12">
+            <div className="space-y-1">
+              <p className="text-[10px] font-mono font-black text-white/30 uppercase tracking-[0.5em]">Command Center v9.0</p>
+              <h1 className="text-3xl font-black text-white tracking-tighter uppercase">OPERATOR DASHBOARD</h1>
             </div>
-            <div className="w-1.5 h-1.5 rounded-full bg-white/10" />
-            <div className="flex items-center gap-3">
-              RANK: CYBER_ELITE
+            <div className="hidden md:flex items-center gap-8 px-8 py-3 bg-white/[0.03] rounded-2xl border border-white/5">
+              <div className="flex items-center gap-3">
+                <Wifi className="w-4 h-4 text-[#00E5FF]" />
+                <span className="text-[10px] font-mono font-black text-white/60 tracking-widest">NET: ACTIVE</span>
+              </div>
+              <div className="w-[1px] h-4 bg-white/10" />
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]" />
+                <span className="text-[10px] font-mono font-black text-white/60 tracking-widest">SENSORS: OPTIMAL</span>
+              </div>
             </div>
+          </div>
+
+          <div className="flex items-center gap-6">
+            <div className="relative group">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-hover:text-[#00E5FF] transition-colors" />
+              <input 
+                type="text" 
+                placeholder="PROCURAR MISSÃO..." 
+                className="bg-white/5 border border-white/10 rounded-2xl py-3 pl-12 pr-6 text-[10px] font-mono font-black text-white placeholder:text-white/20 focus:outline-none focus:border-[#00E5FF]/40 focus:ring-1 focus:ring-[#00E5FF]/20 transition-all w-64"
+              />
+            </div>
+            <button className="relative p-3 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all">
+              <Bell className="w-5 h-5 text-white/40" />
+              <span className="absolute top-3 right-3 w-2 h-2 bg-red-500 rounded-full border-2 border-[#020617]" />
+            </button>
           </div>
         </header>
 
-        <main className="max-w-7xl mx-auto space-y-32">
-          {/* Main Briefing Section */}
-          <section className="space-y-10">
-            <div className="flex justify-between items-end">
-              <div className="space-y-3">
-                <span className="text-[10px] font-mono text-[#00E5FF] uppercase tracking-[0.4em] font-black pl-1">INTELLIGENCE NODE</span>
-                <h2 className="text-5xl font-bold text-white tracking-tighter uppercase">MISSION BRIEFING</h2>
-              </div>
-              <div className="flex items-center gap-4 bg-white/[0.03] backdrop-blur-xl px-6 py-3 border border-white/5 rounded-full shadow-lg">
-                <Cpu className="w-4 h-4 text-[#00E5FF]" />
-                <span className="text-[10px] font-mono font-black text-white/80 uppercase tracking-widest">UPLINK_STABLE_V7.2</span>
-              </div>
-            </div>
-            <CommandBriefing />
-          </section>
+        <main className="max-w-7xl mx-auto space-y-32 pb-32">
+          {/* Main Content Components */}
+          <MissionBriefing />
+          
+          <AudioIntelligence />
+          
+          <DigitalDoctrine />
 
-          {/* Operations Grid */}
-          <section className="space-y-12">
-            <div className="flex items-center justify-between">
-              <div className="space-y-3">
-                <h3 className="text-3xl font-bold text-white tracking-tighter uppercase">NEURAL MODULES</h3>
-                <p className="text-[10px] font-mono text-white/20 uppercase tracking-[0.3em] font-black">ACTIVE SYNCHRONIZATION THREADS</p>
+          {/* HUD Footer Decor */}
+          <footer className="pt-20 flex flex-col items-center gap-10 opacity-30">
+            <div className="flex items-center gap-20">
+              <div className="flex flex-col items-center gap-2">
+                <span className="text-[9px] font-black text-white/40 tracking-[0.4em] uppercase">Security Matrix</span>
+                <div className="flex gap-1">
+                  {[...Array(12)].map((_, i) => (
+                    <div key={i} className={`h-1 w-4 rounded-full ${i < 8 ? 'bg-[#00E5FF]' : 'bg-white/10'}`} />
+                  ))}
+                </div>
               </div>
-              <div className="flex items-center gap-4 px-6 py-3 bg-white/[0.03] border border-white/5 rounded-xl">
-                <Shield className="w-4 h-4 text-[#00E5FF]" />
-                <span className="text-[10px] font-black text-white/40 tracking-[0.2em] uppercase">Security Level: Omega</span>
+              <div className="flex flex-col items-center gap-2">
+                <span className="text-[9px] font-black text-white/40 tracking-[0.4em] uppercase">Neural Uplink</span>
+                <div className="flex gap-1">
+                  {[...Array(12)].map((_, i) => (
+                    <div key={i} className={`h-1 w-4 rounded-full ${i < 10 ? 'bg-[#6366F1]' : 'bg-white/10'}`} />
+                  ))}
+                </div>
               </div>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-              {operations.map((op, idx) => (
-                <OperationCard 
-                  key={op.code}
-                  code={op.code}
-                  title={op.title}
-                  status={op.status}
-                  progress={op.progress}
-                />
-              ))}
+            <div className="text-[9px] font-mono font-black text-white/20 tracking-[1em] uppercase">
+              // AERIS ACADEMY TERMINAL // END OF LINE //
             </div>
-          </section>
-
-          <footer className="pt-24 border-t border-white/5 flex flex-col items-center gap-8 opacity-20 hover:opacity-100 transition-opacity duration-700">
-            <div className="flex gap-20 text-[9px] font-mono text-white/40 uppercase tracking-[0.6em] font-black">
-              <span>AERIS_ACADEMY_v4.2</span>
-              <span className="text-[#00E5FF]/20">/ /</span>
-              <span>CYBER_COMMAND</span>
-              <span className="text-[#00E5FF]/20">/ /</span>
-              <span>2024</span>
-            </div>
-            <Bell className="w-4 h-4 text-[#00E5FF]/40 animate-pulse" />
           </footer>
         </main>
       </div>
