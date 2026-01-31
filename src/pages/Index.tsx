@@ -248,8 +248,8 @@ const Index = () => {
               </motion.div>
             )}
 
-            {activeView === 'stats' && (
-              <motion.div key="stats" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            {activeView === 'future' && (
+              <motion.div key="future" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                 <FutureVisionPortal />
               </motion.div>
             )}
