@@ -144,7 +144,8 @@ const FutureVisionPortal = ({ onExit }: FutureVisionPortalProps) => {
                     {/* Conteúdo Inferior */}
                     <div className="transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
                       <div className="flex items-center gap-2 mb-2">
-                         {item.category.includes("Video") ? <Play fill="cyan" size={14} className="text-cyan-400" /> : <FileText size={14} className="text-cyan-400" />}
+                         {/* CORREÇÃO APLICADA AQUI: Usando cat.category */}
+                         {cat.category.includes("Video") ? <Play fill="cyan" size={14} className="text-cyan-400" /> : <FileText size={14} className="text-cyan-400" />}
                          <span className="text-[9px] font-black text-cyan-300 uppercase tracking-widest glitch-text-sm">{item.type}</span>
                       </div>
                       <h4 className="text-base font-black uppercase italic leading-tight mb-3 tracking-tighter text-white group-hover:text-cyan-50">{item.title}</h4>
