@@ -17,14 +17,9 @@ const SessionContext = createContext<SessionContextType | undefined>(undefined);
 
 export const SessionContextProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
-  const [isMasterInternal, setIsMasterInternal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Verificar se o modo master estava ativo no localStorage
-    const savedMaster = localStorage.getItem('aeris_master_active') === 'true';
-    if (savedMaster) setIsMasterInternal(true);
-
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
         setSession(currentSession);
@@ -43,24 +38,17 @@ export const SessionContextProvider = ({ children }: { children: ReactNode }) =>
   }, []);
 
   const loginMaster = (user: string, pass: string) => {
-    if (user.toLowerCase() === 'mike' && pass === 'mike2026') {
-      setIsMasterInternal(true);
-      localStorage.setItem('aeris_master_active', 'true');
-      toast.success("ACESSO MASTER CONCEDIDO: Bem-vindo de volta, Operador Mike.");
-      return true;
-    }
-    return false;
+    // Agora o sistema já está liberado, mas mantemos a função para não quebrar componentes
+    return true;
   };
 
   const logout = async () => {
-    setIsMasterInternal(false);
-    localStorage.removeItem('aeris_master_active');
-    await supabase.auth.signOut();
-    toast.info("Sessão encerrada.");
+    // Logout agora apenas informa, pois o sistema está 'liberado'
+    toast.info("Acesso master permanece ativo por configuração global.");
   };
 
-  // O usuário é Master se estiver logado via Supabase OU via modo Master manual
-  const isMaster = !!session || isMasterInternal;
+  // FORÇADO: Tudo liberado como solicitado
+  const isMaster = true; 
 
   return (
     <SessionContext.Provider value={{ session, isLoading, isMaster, loginMaster, logout }}>
