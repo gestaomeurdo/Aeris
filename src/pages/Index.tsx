@@ -25,7 +25,7 @@ const Index = () => {
   const [data, setData] = useState<PortalData>({
     mainVideo: "https://youtu.be/mQayAWnJQOE",
     missionTitle: "AERIS ACADEMY",
-    missionDescription: "Configure seu centro de comando adicionando novos módulos táticos.",
+    missionDescription: "Adaptive Education through Responsive & Intelligent Systems",
     modules: []
   });
 
