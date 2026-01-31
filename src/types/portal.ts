@@ -2,6 +2,7 @@ export interface TrainingModule {
   id: string;
   title: string;
   desc: string;
+  type: "Leadership" | "Strategy" | "Structure" | "Advanced";
   audioUrl: string;
   docUrl: string;
   progress: number;
