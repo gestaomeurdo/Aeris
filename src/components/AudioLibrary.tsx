@@ -2,90 +2,109 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Headphones, Play, Pause, Radio, Edit3, Lock, Unlock, Trash2 } from 'lucide-react';
+import { Headset, Lock, Edit3, Trash2, Play, Pause } from 'lucide-react';
 import { TrainingModule } from '@/types/portal';
-import WaveformVisualizer from './WaveformVisualizer';
 
 interface AudioLibraryProps {
   modules: TrainingModule[];
-  isMaster?: boolean;
-  onEdit?: (m: TrainingModule) => void;
-  onToggleLock?: (id: string) => void;
-  onDelete?: (id: string) => void;
+  isMaster: boolean;
+  onEdit: (module: TrainingModule) => void;
+  onDelete: (id: string) => void;
+  onToggleLock: (id: string) => void;
 }
 
-const AudioLibrary = ({ modules, isMaster, onEdit, onToggleLock, onDelete }: AudioLibraryProps) => {
-  const [currentIdx, setCurrentIdx] = React.useState<number | null>(null);
-  const audioModules = modules.filter(m => m.audioUrl || isMaster);
+const AudioLibrary = ({ modules, isMaster, onEdit, onDelete, onToggleLock }: AudioLibraryProps) => {
+  // Filtra módulos que possuem URL de áudio
+  const audioModules = modules.filter(m => m.audioUrl);
+  
+  // Estado simplificado para simular a reprodução
+  const [playingId, setPlayingId] = React.useState<string | null>(null);
+
+  const handlePlayPause = (id: string) => {
+    // Se já estiver tocando, pausa. Senão, começa a tocar.
+    setPlayingId(playingId === id ? null : id);
+  };
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-12">
       <div className="flex items-center gap-4">
-        <Radio className="w-6 h-6 text-[#00E5FF]" />
-        <h2 className="text-4xl font-black text-white uppercase tracking-tighter">AURAL INTELLIGENCE <span className="font-light text-white/20">FEED</span></h2>
+        <Headset className="w-6 h-6 text-[#00E5FF]" />
+        <h2 className="text-4xl font-black text-white uppercase tracking-tighter">TACTICAL <span className="font-light text-white/20">AUDIO HUB</span></h2>
       </div>
 
-      <div className="grid grid-cols-1 gap-4">
-        {audioModules.map((mod, idx) => (
-          <motion.div
-            key={mod.id}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: idx * 0.1 }}
-            className={`group flex items-center gap-8 p-6 bg-white/[0.02] border ${mod.locked ? 'border-white/5 opacity-50' : 'border-[#00E5FF]/40 bg-[#00E5FF]/5'} rounded-3xl hover:bg-white/[0.05] transition-all relative`}
-          >
-            <div className="w-16 h-16 bg-black/40 rounded-2xl flex items-center justify-center border border-white/10">
-              <Headphones className={currentIdx === idx ? 'text-[#00E5FF]' : 'text-white/20'} />
-            </div>
+      {/* Audio List */}
+      <div className="grid grid-cols-1 gap-6">
+        {audioModules.length === 0 ? (
+          <p className="text-white/50 italic">No audio assets available in the current database.</p>
+        ) : (
+          audioModules.map((mod, i) => (
+            <motion.div
+              key={mod.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05 }}
+              className={`p-6 rounded-2xl border transition-all ${
+                mod.locked && !isMaster 
+                  ? 'bg-zinc-900/50 border-white/5 opacity-50 cursor-not-allowed' 
+                  : playingId === mod.id 
+                    ? 'bg-[#00E5FF]/10 border-[#00E5FF]/40 shadow-[0_0_20px_rgba(0,229,255,0.2)]' 
+                    : 'bg-black/40 border-white/10 hover:border-[#00E5FF]/20'
+              }`}
+            >
+              <div className="flex justify-between items-start">
+                <div className="flex items-center gap-4">
+                  <button 
+                    onClick={() => handlePlayPause(mod.id)}
+                    disabled={mod.locked && !isMaster}
+                    className={`p-3 rounded-full transition-colors ${
+                      playingId === mod.id 
+                        ? 'bg-[#00E5FF] text-black' 
+                        : 'bg-white/10 text-[#00E5FF] hover:bg-white/20'
+                    } ${mod.locked && !isMaster ? 'opacity-30' : ''}`}
+                  >
+                    {playingId === mod.id ? <Pause size={18} fill="black" /> : <Play size={18} fill="#00E5FF" />}
+                  </button>
+                  <div className="space-y-1">
+                    <h3 className="text-xl font-black text-white uppercase tracking-tighter">{mod.title}</h3>
+                    <p className="text-xs font-mono text-white/50">{mod.desc}</p>
+                  </div>
+                </div>
 
-            <div className="flex-1 space-y-1">
-              <span className="text-[8px] font-mono font-black text-[#00E5FF]/40 uppercase tracking-widest">{mod.id} // {mod.locked ? 'ENCRYPTED' : 'SIGNAL_ACTIVE'}</span>
-              <h3 className="text-xl font-bold text-white uppercase">{mod.title}</h3>
-              <p className="text-xs text-white/40 max-w-2xl line-clamp-1">{mod.desc}</p>
-            </div>
-
-            <div className="hidden md:block w-32">
-              <WaveformVisualizer active={currentIdx === idx} />
-            </div>
-
-            <div className="flex items-center gap-6">
-              {isMaster && (
-                <div className="flex items-center gap-2 border-r border-white/10 pr-6 mr-2">
-                   <button 
-                     onClick={() => onEdit?.(mod)}
-                     className="p-3 bg-white/5 hover:bg-[#00E5FF]/20 rounded-xl text-white/40 hover:text-[#00E5FF] transition-all"
-                   >
-                     <Edit3 size={16} />
-                   </button>
-                   <button 
-                     onClick={() => onToggleLock?.(mod.id)}
-                     className="p-3 bg-white/5 hover:bg-[#00E5FF]/20 rounded-xl text-white/40 hover:text-[#00E5FF] transition-all"
-                   >
-                     {mod.locked ? <Lock size={16} /> : <Unlock size={16} />}
-                   </button>
-                   <button 
-                     onClick={() => onDelete?.(mod.id)}
-                     className="p-3 bg-red-500/10 hover:bg-red-500/20 rounded-xl text-red-500/40 hover:text-red-500 transition-all"
-                   >
-                     <Trash2 size={16} />
-                   </button>
+                <div className="flex items-center gap-3">
+                  <span className={`text-[9px] font-mono font-black px-3 py-1 rounded-full ${mod.locked ? 'bg-red-900/30 text-red-400' : 'bg-green-900/30 text-green-400'}`}>
+                    {mod.locked ? 'LOCKED' : 'ACTIVE'}
+                  </span>
+                  
+                  {isMaster && (
+                    <>
+                      <button onClick={() => onEdit(mod)} className="p-2 text-white/50 hover:text-[#00E5FF] transition-colors">
+                        <Edit3 size={16} />
+                      </button>
+                      <button onClick={() => onToggleLock(mod.id)} className="p-2 text-white/50 hover:text-yellow-400 transition-colors">
+                        <Lock size={16} />
+                      </button>
+                      <button onClick={() => onDelete(mod.id)} className="p-2 text-white/50 hover:text-red-400 transition-colors">
+                        <Trash2 size={16} />
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+              
+              {/* Simplified Audio Player Placeholder (Progress Bar) */}
+              {playingId === mod.id && (
+                <div className="mt-4 h-1 bg-white/10 rounded-full overflow-hidden">
+                  <motion.div 
+                    initial={{ width: '0%' }}
+                    animate={{ width: '100%' }}
+                    transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                    className="h-full bg-[#00E5FF] shadow-[0_0_10px_#00E5FF]"
+                  />
                 </div>
               )}
-              
-              <div className="text-right">
-                <p className="text-[8px] font-mono text-white/20 uppercase">Sync</p>
-                <p className="text-xs font-mono text-white/60">{mod.progress}%</p>
-              </div>
-              <button 
-                onClick={() => setCurrentIdx(currentIdx === idx ? null : idx)}
-                disabled={mod.locked && !isMaster}
-                className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${currentIdx === idx ? 'bg-[#00E5FF] text-black shadow-[0_0_20px_rgba(0,229,255,0.4)]' : 'bg-white/5 text-white/40 hover:text-white disabled:opacity-20'}`}
-              >
-                {currentIdx === idx ? <Pause className="fill-current" /> : <Play className="fill-current ml-1" />}
-              </button>
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          ))
+        )}
       </div>
     </div>
   );
