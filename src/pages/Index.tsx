@@ -7,11 +7,11 @@ import MissionBriefing from '@/components/MissionBriefing';
 import OperationsCenter from '@/components/OperationsCenter';
 import AudioLibrary from '@/components/AudioLibrary';
 import DocGallery from '@/components/DocGallery';
-import FutureVisionPortal from '@/components/FutureVisionPortal';
 import EditModuleModal from '@/components/EditModuleModal';
 import OperationalStats from '@/components/OperationalStats';
 import AddModuleModal from '@/components/AddModuleModal';
-import { Database, Trash2, Loader2 } from 'lucide-react';
+import EditMainBriefingModal from '@/components/EditMainBriefingModal';
+import { Database, Loader2, Settings2 } from 'lucide-react';
 import { PortalData, TrainingModule } from '@/types/portal';
 import { AnimatePresence, motion } from 'framer-motion';
 import { supabase } from "@/integrations/supabase/client";
@@ -30,8 +30,22 @@ const Index = () => {
   const [activeView, setActiveView] = useState('dashboard');
   const [editingModule, setEditingModule] = useState<TrainingModule | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditMainModalOpen, setIsEditMainModalOpen] = useState(false);
 
-  useEffect(() => { fetchModules(); }, []);
+  useEffect(() => { 
+    // Carregar configurações do briefing principal do localStorage
+    const savedBriefing = localStorage.getItem('aeris_main_briefing');
+    if (savedBriefing) {
+      const parsed = JSON.parse(savedBriefing);
+      setData(prev => ({
+        ...prev,
+        mainVideo: parsed.video,
+        missionTitle: parsed.title,
+        missionDescription: parsed.description
+      }));
+    }
+    fetchModules(); 
+  }, []);
 
   const fetchModules = async () => {
     setIsLoading(true);
@@ -57,6 +71,17 @@ const Index = () => {
       setData(prev => ({ ...prev, modules: mappedModules }));
     }
     setIsLoading(false);
+  };
+
+  const handleUpdateMainBriefing = (newData: { title: string; video: string; description: string }) => {
+    setData(prev => ({
+      ...prev,
+      missionTitle: newData.title,
+      mainVideo: newData.video,
+      missionDescription: newData.description
+    }));
+    localStorage.setItem('aeris_main_briefing', JSON.stringify(newData));
+    toast.success("Briefing principal atualizado localmente");
   };
 
   const uploadFile = async (file: File) => {
@@ -148,6 +173,18 @@ const Index = () => {
     <div className="min-h-screen bg-[#020202] text-[#B0BEC5] font-sans overflow-x-hidden">
       <EditModuleModal isOpen={!!editingModule} onClose={() => setEditingModule(null)} module={editingModule} onSave={handleUpdateModule} />
       <AddModuleModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} onSave={handleSaveNewModule} nextId={`MOD-${(data.modules.length + 1).toString().padStart(2, '0')}`} />
+      
+      <EditMainBriefingModal 
+        isOpen={isEditMainModalOpen} 
+        onClose={() => setIsEditMainModalOpen(false)} 
+        currentData={{
+          title: data.missionTitle,
+          video: data.mainVideo,
+          description: data.missionDescription
+        }}
+        onSave={handleUpdateMainBriefing}
+      />
+
       <div className="fixed inset-0 pointer-events-none z-0"><div className="absolute inset-0 bg-grid-pattern opacity-5" /></div>
       <TacticalSidebar activeView={activeView} onViewChange={setActiveView} isMaster={isMaster} onUserClick={() => setIsMaster(!isMaster)} />
       <div className="pl-36 pr-12 relative z-10">
@@ -168,7 +205,18 @@ const Index = () => {
               <motion.div key={activeView} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                 {activeView === 'dashboard' && (
                   <div className="space-y-32">
-                    <MissionBriefing title={data.missionTitle} videoUrl={data.mainVideo} description={data.missionDescription} />
+                    <div className="relative group">
+                      {isMaster && (
+                        <button 
+                          onClick={() => setIsEditMainModalOpen(true)}
+                          className="absolute -top-12 right-0 z-20 flex items-center gap-2 bg-white/5 hover:bg-[#00E5FF]/20 border border-white/10 hover:border-[#00E5FF]/40 px-4 py-2 rounded-xl transition-all"
+                        >
+                          <Settings2 className="w-4 h-4 text-[#00E5FF]" />
+                          <span className="text-[10px] font-black text-white uppercase tracking-widest">Editar Briefing</span>
+                        </button>
+                      )}
+                      <MissionBriefing title={data.missionTitle} videoUrl={data.mainVideo} description={data.missionDescription} />
+                    </div>
                     <OperationsCenter modules={data.modules} isMaster={isMaster} onDelete={handleDeleteModule} onToggleLock={handleToggleLock} onEdit={setEditingModule} />
                     <OperationalStats />
                   </div>
