@@ -23,8 +23,8 @@ const MissionBriefing = ({ title, videoUrl, description, onEdit }: MissionBriefi
   const embedUrl = getEmbedUrl(videoUrl);
 
   return (
-    <section className="relative space-y-8 md:space-y-10">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 px-2">
+    <section className="relative space-y-6 md:space-y-10 px-1 md:px-2">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div className="space-y-2 max-w-3xl">
           <div className="flex items-center gap-2">
             <div className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
@@ -49,20 +49,17 @@ const MissionBriefing = ({ title, videoUrl, description, onEdit }: MissionBriefi
         </div>
       </div>
 
-      {/* Descrição movida para cima do vídeo */}
-      <div className="px-2">
-        <div className="bg-white/[0.02] backdrop-blur-xl border border-white/10 p-5 md:p-8 rounded-3xl max-w-4xl">
-          <div className="flex items-center gap-2 mb-3">
-            <AlignLeft className="w-3.5 h-3.5 text-[#00E5FF]" />
-            <span className="text-[9px] font-black text-white/40 uppercase tracking-widest">Intelligence Brief / Protocol Data</span>
-          </div>
-          <p className="text-sm md:text-base text-white/80 leading-relaxed">
-            {description}
-          </p>
+      <div className="bg-white/[0.02] backdrop-blur-xl border border-white/10 p-5 md:p-8 rounded-2xl md:rounded-3xl max-w-4xl">
+        <div className="flex items-center gap-2 mb-3">
+          <AlignLeft className="w-3.5 h-3.5 text-[#00E5FF]" />
+          <span className="text-[9px] font-black text-white/40 uppercase tracking-widest">Intelligence Brief / Protocol Data</span>
         </div>
+        <p className="text-sm md:text-base text-white/80 leading-relaxed">
+          {description}
+        </p>
       </div>
 
-      <div className="relative aspect-video rounded-3xl md:rounded-[40px] overflow-hidden border border-white/10 shadow-2xl bg-black">
+      <div className="relative aspect-video rounded-2xl md:rounded-[40px] overflow-hidden border border-white/10 shadow-2xl bg-black">
         {embedUrl ? (
           <iframe src={embedUrl} className="w-full h-full border-none" allowFullScreen />
         ) : (
@@ -70,8 +67,6 @@ const MissionBriefing = ({ title, videoUrl, description, onEdit }: MissionBriefi
             <span className="text-[10px] font-mono uppercase tracking-widest">No Link Detected</span>
           </div>
         )}
-        
-        {/* Efeito de vinheta sutil apenas para estética */}
         <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/20 to-transparent" />
       </div>
     </section>
