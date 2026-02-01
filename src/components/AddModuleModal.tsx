@@ -136,6 +136,7 @@ const AddModuleModal = ({ isOpen, onClose, onSave, nextId, availablePodcasts }: 
                           ))}
                         </SelectContent>
                       </Select>
+                      <p className="text-[9px] text-white/20 mt-1 italic">* Caso queira subir um NOVO podcast, use o campo MP3 abaixo.</p>
                     </div>
                   )}
 
