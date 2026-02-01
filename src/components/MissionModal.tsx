@@ -22,16 +22,28 @@ const MissionModal = ({ isOpen, onClose, module, initialView = 'video' }: Missio
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
 
+  // Sincroniza a visão ativa com o clique externo toda vez que o modal abre
   useEffect(() => {
     if (isOpen && module) {
-      if (initialView === 'doc' && module.docUrl) setActiveView('doc');
-      else if (initialView === 'video' && module.videoUrl) setActiveView('video');
-      else if (initialView === 'audio' && module.audioUrl) setActiveView('audio');
-      else setActiveView(module.videoUrl ? 'video' : (module.docUrl ? 'doc' : 'audio'));
+      // Prioridade absoluta para o que o usuário clicou lá fora
+      if (initialView === 'audio' && (module.audioUrl || module.audiobookUrl)) {
+        setActiveView('audio');
+      } else if (initialView === 'doc' && module.docUrl) {
+        setActiveView('doc');
+      } else if (initialView === 'video' && module.videoUrl) {
+        setActiveView('video');
+      } else {
+        // Fallback inteligente se o que foi pedido não existir
+        const fallback = module.videoUrl ? 'video' : (module.docUrl ? 'doc' : 'audio');
+        setActiveView(fallback);
+      }
     } else if (!isOpen) {
       setIsPlayingPodcast(false);
       setIsPlayingAudiobook(false);
-      if (audioRef.current) audioRef.current.pause();
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = "";
+      }
     }
   }, [isOpen, module, initialView]);
 
@@ -112,7 +124,6 @@ const MissionModal = ({ isOpen, onClose, module, initialView = 'video' }: Missio
                   <iframe src={module.docUrl} className="w-full h-full border-none bg-white/[0.05]" />
                 ) : activeView === 'audio' && (hasAudio || hasAudiobook) ? (
                   <div className="relative w-full h-full flex items-center justify-center p-8 md:p-20">
-                    {/* Background Blur Cover */}
                     <img src={coverUrl} className="absolute inset-0 w-full h-full object-cover opacity-20 blur-3xl" alt="" />
                     
                     <div className="relative z-10 w-full max-w-4xl flex flex-col md:flex-row items-center gap-12 bg-black/40 backdrop-blur-xl p-10 md:p-16 rounded-[40px] border border-white/10 shadow-2xl">
@@ -190,10 +201,7 @@ const MissionModal = ({ isOpen, onClose, module, initialView = 'video' }: Missio
                       )}
                       {(hasAudio || hasAudiobook) && (
                         <button 
-                          onClick={() => {
-                            setActiveView('audio');
-                            if (!isPlayingPodcast && !isPlayingAudiobook) toggleAudio(hasAudio ? 'podcast' : 'audiobook');
-                          }}
+                          onClick={() => setActiveView('audio')}
                           className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[9px] font-black uppercase transition-all ${activeView === 'audio' ? 'bg-[#00E5FF] text-black shadow-[0_0_20px_rgba(0,229,255,0.4)]' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
                         >
                           <Headphones size={14} /> Audio Player
@@ -212,7 +220,6 @@ const MissionModal = ({ isOpen, onClose, module, initialView = 'video' }: Missio
                                 {isPlayingAudiobook ? <Pause size={14} /> : <Play size={14} />}
                               </button>
                            </div>
-                           <p className="text-[9px] text-white/40 leading-tight">Narração técnica completa do manual operacional.</p>
                         </div>
                       )}
 
@@ -224,7 +231,6 @@ const MissionModal = ({ isOpen, onClose, module, initialView = 'video' }: Missio
                                 {isPlayingPodcast ? <Pause size={14} /> : <Play size={14} />}
                               </button>
                            </div>
-                           <p className="text-[9px] text-white/40 leading-tight">Discussão tática sobre os pontos chave deste capítulo.</p>
                         </div>
                       )}
                    </div>

@@ -16,11 +16,11 @@ interface DocGalleryProps {
 
 const DocGallery = ({ modules, isMaster, onEdit, onToggleLock, onDelete }: DocGalleryProps) => {
   const [selectedModule, setSelectedModule] = useState<TrainingModule | null>(null);
-  const [modalView, setModalView] = useState<'video' | 'doc'>('doc');
+  const [modalView, setModalView] = useState<'video' | 'doc' | 'audio'>('doc');
   
   const docModules = modules.filter(m => m.category === 'module');
 
-  const openModule = (mod: TrainingModule, view: 'video' | 'doc') => {
+  const openModule = (mod: TrainingModule, view: 'video' | 'doc' | 'audio') => {
     setModalView(view);
     setSelectedModule(mod);
   };
@@ -76,13 +76,13 @@ const DocGallery = ({ modules, isMaster, onEdit, onToggleLock, onDelete }: DocGa
                     <button onClick={() => hasDoc && openModule(mod, 'doc')} disabled={!hasDoc} className={`flex flex-col items-center justify-center gap-1 py-3 rounded-xl text-[8px] font-black uppercase tracking-widest transition-all ${hasDoc ? 'bg-[#00E5FF]/10 text-[#00E5FF] border border-[#00E5FF]/20 hover:bg-[#00E5FF] hover:text-black' : 'opacity-20 grayscale'}`}>
                       <FileText size={12} /> PDF
                     </button>
-                    <button onClick={() => hasAudiobook && openModule(mod, 'doc')} disabled={!hasAudiobook} className={`flex flex-col items-center justify-center gap-1 py-3 rounded-xl text-[8px] font-black uppercase tracking-widest transition-all ${hasAudiobook ? 'bg-purple-500/10 text-purple-500 border border-purple-500/20 hover:bg-purple-500 hover:text-white' : 'opacity-20 grayscale'}`}>
+                    <button onClick={() => hasAudiobook && openModule(mod, 'audio')} disabled={!hasAudiobook} className={`flex flex-col items-center justify-center gap-1 py-3 rounded-xl text-[8px] font-black uppercase tracking-widest transition-all ${hasAudiobook ? 'bg-purple-500/10 text-purple-500 border border-purple-500/20 hover:bg-purple-500 hover:text-white' : 'opacity-20 grayscale'}`}>
                       <BookOpen size={12} /> AUDIOBOOK
                     </button>
                     <button onClick={() => hasVideo && openModule(mod, 'video')} disabled={!hasVideo} className={`flex flex-col items-center justify-center gap-1 py-3 rounded-xl text-[8px] font-black uppercase tracking-widest transition-all ${hasVideo ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20 hover:bg-amber-500 hover:text-black' : 'opacity-20 grayscale'}`}>
                       <Video size={12} /> VIDEO
                     </button>
-                    <button onClick={() => hasAudio && openModule(mod, 'doc')} disabled={!hasAudio} className={`flex flex-col items-center justify-center gap-1 py-3 rounded-xl text-[8px] font-black uppercase tracking-widest transition-all ${hasAudio ? 'bg-green-500/10 text-green-500 border border-green-500/20 hover:bg-green-500 hover:text-white' : 'opacity-20 grayscale'}`}>
+                    <button onClick={() => hasAudio && openModule(mod, 'audio')} disabled={!hasAudio} className={`flex flex-col items-center justify-center gap-1 py-3 rounded-xl text-[8px] font-black uppercase tracking-widest transition-all ${hasAudio ? 'bg-green-500/10 text-green-500 border border-green-500/20 hover:bg-green-500 hover:text-white' : 'opacity-20 grayscale'}`}>
                       <Podcast size={12} /> PODCAST
                     </button>
                   </div>
