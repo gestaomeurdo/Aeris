@@ -16,7 +16,14 @@ interface DocGalleryProps {
 
 const DocGallery = ({ modules, isMaster, onEdit, onToggleLock, onDelete }: DocGalleryProps) => {
   const [selectedModule, setSelectedModule] = useState<TrainingModule | null>(null);
+  const [modalView, setModalView] = useState<'video' | 'doc'>('doc');
+  
   const docModules = modules.filter(m => m.category === 'module');
+
+  const openModule = (mod: TrainingModule, view: 'video' | 'doc') => {
+    setModalView(view);
+    setSelectedModule(mod);
+  };
 
   return (
     <div className="space-y-10">
@@ -66,16 +73,16 @@ const DocGallery = ({ modules, isMaster, onEdit, onToggleLock, onDelete }: DocGa
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 gap-2">
-                    <button onClick={() => hasDoc && setSelectedModule(mod)} disabled={!hasDoc} className={`flex flex-col items-center justify-center gap-1 py-3 rounded-xl text-[8px] font-black uppercase tracking-widest transition-all ${hasDoc ? 'bg-[#00E5FF]/10 text-[#00E5FF] border border-[#00E5FF]/20 hover:bg-[#00E5FF] hover:text-black' : 'opacity-20 grayscale'}`}>
+                    <button onClick={() => hasDoc && openModule(mod, 'doc')} disabled={!hasDoc} className={`flex flex-col items-center justify-center gap-1 py-3 rounded-xl text-[8px] font-black uppercase tracking-widest transition-all ${hasDoc ? 'bg-[#00E5FF]/10 text-[#00E5FF] border border-[#00E5FF]/20 hover:bg-[#00E5FF] hover:text-black' : 'opacity-20 grayscale'}`}>
                       <FileText size={12} /> PDF
                     </button>
-                    <button onClick={() => hasAudiobook && setSelectedModule(mod)} disabled={!hasAudiobook} className={`flex flex-col items-center justify-center gap-1 py-3 rounded-xl text-[8px] font-black uppercase tracking-widest transition-all ${hasAudiobook ? 'bg-purple-500/10 text-purple-500 border border-purple-500/20 hover:bg-purple-500 hover:text-white' : 'opacity-20 grayscale'}`}>
+                    <button onClick={() => hasAudiobook && openModule(mod, 'doc')} disabled={!hasAudiobook} className={`flex flex-col items-center justify-center gap-1 py-3 rounded-xl text-[8px] font-black uppercase tracking-widest transition-all ${hasAudiobook ? 'bg-purple-500/10 text-purple-500 border border-purple-500/20 hover:bg-purple-500 hover:text-white' : 'opacity-20 grayscale'}`}>
                       <BookOpen size={12} /> AUDIOBOOK
                     </button>
-                    <button onClick={() => hasVideo && setSelectedModule(mod)} disabled={!hasVideo} className={`flex flex-col items-center justify-center gap-1 py-3 rounded-xl text-[8px] font-black uppercase tracking-widest transition-all ${hasVideo ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20 hover:bg-amber-500 hover:text-black' : 'opacity-20 grayscale'}`}>
+                    <button onClick={() => hasVideo && openModule(mod, 'video')} disabled={!hasVideo} className={`flex flex-col items-center justify-center gap-1 py-3 rounded-xl text-[8px] font-black uppercase tracking-widest transition-all ${hasVideo ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20 hover:bg-amber-500 hover:text-black' : 'opacity-20 grayscale'}`}>
                       <Video size={12} /> VIDEO
                     </button>
-                    <button onClick={() => hasAudio && setSelectedModule(mod)} disabled={!hasAudio} className={`flex flex-col items-center justify-center gap-1 py-3 rounded-xl text-[8px] font-black uppercase tracking-widest transition-all ${hasAudio ? 'bg-green-500/10 text-green-500 border border-green-500/20 hover:bg-green-500 hover:text-white' : 'opacity-20 grayscale'}`}>
+                    <button onClick={() => hasAudio && openModule(mod, 'doc')} disabled={!hasAudio} className={`flex flex-col items-center justify-center gap-1 py-3 rounded-xl text-[8px] font-black uppercase tracking-widest transition-all ${hasAudio ? 'bg-green-500/10 text-green-500 border border-green-500/20 hover:bg-green-500 hover:text-white' : 'opacity-20 grayscale'}`}>
                       <Podcast size={12} /> PODCAST
                     </button>
                   </div>
@@ -93,7 +100,7 @@ const DocGallery = ({ modules, isMaster, onEdit, onToggleLock, onDelete }: DocGa
         })}
       </div>
 
-      <MissionModal isOpen={!!selectedModule} onClose={() => setSelectedModule(null)} module={selectedModule} />
+      <MissionModal isOpen={!!selectedModule} onClose={() => setSelectedModule(null)} module={selectedModule} initialView={modalView} />
     </div>
   );
 };

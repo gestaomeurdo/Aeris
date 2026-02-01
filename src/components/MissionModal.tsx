@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Headphones, FileText, Play, Pause, ChevronLeft, Video, BookOpen, Database, Radio, Eye } from 'lucide-react';
+import { X, Headphones, FileText, Play, Pause, ChevronLeft, Video, BookOpen, Database, Radio } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrainingModule } from '@/types/portal';
 import WaveformVisualizer from './WaveformVisualizer';
@@ -10,12 +10,13 @@ interface MissionModalProps {
   isOpen: boolean;
   onClose: () => void;
   module: TrainingModule | null;
+  initialView?: 'video' | 'doc';
 }
 
-const MissionModal = ({ isOpen, onClose, module }: MissionModalProps) => {
+const MissionModal = ({ isOpen, onClose, module, initialView = 'video' }: MissionModalProps) => {
   const [isPlayingPodcast, setIsPlayingPodcast] = useState(false);
   const [isPlayingAudiobook, setIsPlayingAudiobook] = useState(false);
-  const [activeView, setActiveView] = useState<'video' | 'doc'>('video');
+  const [activeView, setActiveView] = useState<'video' | 'doc'>(initialView);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
@@ -24,10 +25,20 @@ const MissionModal = ({ isOpen, onClose, module }: MissionModalProps) => {
       setIsPlayingAudiobook(false);
       if (audioRef.current) audioRef.current.pause();
     } else if (module) {
-      // Prioriza vídeo se existir, senão mostra PDF
-      setActiveView(module.videoUrl ? 'video' : 'doc');
+      // Respeita a intenção inicial do clique
+      const canShowVideo = !!module.videoUrl;
+      const canShowDoc = !!module.docUrl;
+
+      if (initialView === 'doc' && canShowDoc) {
+        setActiveView('doc');
+      } else if (initialView === 'video' && canShowVideo) {
+        setActiveView('video');
+      } else {
+        // Fallback caso a mídia solicitada não exista
+        setActiveView(canShowVideo ? 'video' : 'doc');
+      }
     }
-  }, [isOpen, module]);
+  }, [isOpen, module, initialView]);
 
   if (!module) return null;
 
@@ -82,12 +93,12 @@ const MissionModal = ({ isOpen, onClose, module }: MissionModalProps) => {
             </div>
 
             <div className="flex-1 relative flex flex-col md:flex-row bg-[#020617]">
-              {/* Main Content Area (Video or PDF) */}
+              {/* Main Content Area */}
               <div className="flex-1 relative bg-black">
                 {activeView === 'video' && hasVideo ? (
                   <iframe src={embedUrl} className="w-full h-full border-none" allowFullScreen />
-                ) : (hasDoc && (activeView === 'doc' || !hasVideo)) ? (
-                  <iframe src={module.docUrl} className="w-full h-full border-none opacity-90" />
+                ) : (hasDoc && activeView === 'doc') ? (
+                  <iframe src={module.docUrl} className="w-full h-full border-none bg-white/[0.05]" />
                 ) : (
                   <div className="w-full h-full flex flex-col items-center justify-center gap-6 text-white/5">
                     <Database className="w-32 h-32" />
@@ -100,7 +111,6 @@ const MissionModal = ({ isOpen, onClose, module }: MissionModalProps) => {
               <div className="w-full md:w-80 bg-black/40 border-l border-white/5 p-6 space-y-6 overflow-y-auto">
                    <h3 className="text-[10px] font-mono font-black text-white/20 uppercase tracking-widest border-b border-white/5 pb-2">Operational Uplinks</h3>
                    
-                   {/* Toggle Video/Doc */}
                    <div className="space-y-3">
                       {hasVideo && (
                         <button 
@@ -124,7 +134,7 @@ const MissionModal = ({ isOpen, onClose, module }: MissionModalProps) => {
 
                    {hasAudiobook && (
                      <div className="p-4 bg-purple-500/5 rounded-2xl border border-purple-500/10 space-y-4">
-                        <div className="flex items-center gap-2 text-purple-500"><BookOpen size={14} /><span className="text-[9px] font-black uppercase">Audiobook Narrated</span></div>
+                        <div className="flex items-center gap-2 text-purple-500"><BookOpen size={14} /><span className="text-[9px] font-black uppercase">Audiobook</span></div>
                         <div className="flex flex-col items-center gap-4">
                            <button onClick={() => toggleAudio('audiobook')} className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center text-black">
                              {isPlayingAudiobook ? <Pause size={20} fill="black" /> : <Play size={20} fill="black" className="ml-1" />}
@@ -136,7 +146,7 @@ const MissionModal = ({ isOpen, onClose, module }: MissionModalProps) => {
 
                    {hasAudio && (
                      <div className="p-4 bg-green-500/5 rounded-2xl border border-green-500/10 space-y-4">
-                        <div className="flex items-center gap-2 text-green-500"><Radio size={14} /><span className="text-[9px] font-black uppercase">Podcast Discussion</span></div>
+                        <div className="flex items-center gap-2 text-green-500"><Radio size={14} /><span className="text-[9px] font-black uppercase">Podcast</span></div>
                         <div className="flex flex-col items-center gap-4">
                            <button onClick={() => toggleAudio('podcast')} className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-black">
                              {isPlayingPodcast ? <Pause size={20} fill="black" /> : <Play size={20} fill="black" className="ml-1" />}

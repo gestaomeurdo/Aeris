@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { Activity, Layers, PlusCircle } from 'lucide-react';
 import { TrainingModule } from '@/types/portal';
 import MissionModal from './MissionModal';
-import MissionBanner from './MissionBanner'; // Importando o novo componente
+import MissionBanner from './MissionBanner';
 
 interface OperationsCenterProps {
   modules: TrainingModule[];
@@ -17,6 +17,12 @@ interface OperationsCenterProps {
 
 const OperationsCenter = ({ modules, isMaster, onDelete, onToggleLock, onEdit }: OperationsCenterProps) => {
   const [selectedModule, setSelectedModule] = useState<TrainingModule | null>(null);
+  const [modalView, setModalView] = useState<'video' | 'doc'>('video');
+
+  const handleSelectModule = (mod: TrainingModule) => {
+    setModalView(mod.videoUrl ? 'video' : 'doc');
+    setSelectedModule(mod);
+  };
 
   // Filtra apenas módulos que são 'module' (não 'podcast')
   const missionModules = modules.filter(m => m.category === 'module');
@@ -39,7 +45,7 @@ const OperationsCenter = ({ modules, isMaster, onDelete, onToggleLock, onEdit }:
             key={mod.id} 
             mod={mod} 
             index={i} 
-            onSelect={setSelectedModule} 
+            onSelect={handleSelectModule} 
             onEdit={onEdit}
             isMaster={isMaster}
             onDelete={onDelete}
@@ -48,7 +54,7 @@ const OperationsCenter = ({ modules, isMaster, onDelete, onToggleLock, onEdit }:
         ))}
       </div>
 
-      <MissionModal isOpen={!!selectedModule} onClose={() => setSelectedModule(null)} module={selectedModule} />
+      <MissionModal isOpen={!!selectedModule} onClose={() => setSelectedModule(null)} module={selectedModule} initialView={modalView} />
     </section>
   );
 };
