@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { X, Save, FileText, Headphones, Upload, Zap, Database, Radio, Image, Video, Link as LinkIcon } from 'lucide-react';
+import { X, Save, FileText, Headphones, Upload, Zap, Database, Radio, Image, Video, BookOpen } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrainingModule } from '@/types/portal';
 import { Label } from '@/components/ui/label';
@@ -13,7 +13,7 @@ interface AddModuleModalProps {
   isOpen: boolean;
   onClose: () => void;
   availablePodcasts: TrainingModule[];
-  onSave: (newModule: Omit<TrainingModule, 'id' | 'dbId' | 'progress' | 'coverUrl' | 'videoUrl'> & { videoUrl: string }, files: { audio?: File, doc?: File, cover?: File }) => void;
+  onSave: (newModule: Omit<TrainingModule, 'id' | 'dbId' | 'progress' | 'coverUrl' | 'videoUrl' | 'audiobookUrl'> & { videoUrl: string, audiobookUrl: string }, files: { audio?: File, audiobook?: File, doc?: File, cover?: File }) => void;
   nextId: string;
 }
 
@@ -25,6 +25,7 @@ const AddModuleModal = ({ isOpen, onClose, onSave, nextId, availablePodcasts }: 
   const [videoUrl, setVideoUrl] = useState('');
   const [selectedPodcastUrl, setSelectedPodcastUrl] = useState<string>('');
   const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [audiobookFile, setAudiobookFile] = useState<File | null>(null);
   const [docFile, setDocFile] = useState<File | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
 
@@ -35,6 +36,7 @@ const AddModuleModal = ({ isOpen, onClose, onSave, nextId, availablePodcasts }: 
       setVideoUrl('');
       setSelectedPodcastUrl('');
       setAudioFile(null);
+      setAudiobookFile(null);
       setDocFile(null);
       setCoverFile(null);
       setCategory('module');
@@ -50,12 +52,14 @@ const AddModuleModal = ({ isOpen, onClose, onSave, nextId, availablePodcasts }: 
       desc: description,
       type,
       category,
-      audioUrl: selectedPodcastUrl, // Usa a URL do podcast selecionado se houver
+      audioUrl: selectedPodcastUrl, 
+      audiobookUrl: '',
       docUrl: '', 
       videoUrl,
       locked: false,
     }, { 
       audio: audioFile || undefined, 
+      audiobook: audiobookFile || undefined,
       doc: docFile || undefined,
       cover: coverFile || undefined
     });
@@ -94,33 +98,13 @@ const AddModuleModal = ({ isOpen, onClose, onSave, nextId, availablePodcasts }: 
                 <div className="space-y-3">
                   <Label className="text-[10px] font-mono font-black text-white/40 uppercase tracking-[0.2em] pl-1">Destino do Asset</Label>
                   <div className="grid grid-cols-2 gap-4">
-                    <button
-                      type="button"
-                      onClick={() => setCategory('module')}
-                      className={`flex flex-col items-center gap-3 p-6 rounded-2xl border transition-all duration-500 ${
-                        category === 'module' 
-                        ? 'bg-[#00E5FF]/10 border-[#00E5FF] shadow-[0_0_20px_rgba(0,229,255,0.2)]' 
-                        : 'bg-white/5 border-white/10 opacity-40 grayscale hover:grayscale-0 hover:opacity-100'
-                      }`}
-                    >
+                    <button type="button" onClick={() => setCategory('module')} className={`flex flex-col items-center gap-3 p-6 rounded-2xl border transition-all duration-500 ${category === 'module' ? 'bg-[#00E5FF]/10 border-[#00E5FF] shadow-[0_0_20px_rgba(0,229,255,0.2)]' : 'bg-white/5 border-white/10 opacity-40 grayscale hover:grayscale-0 hover:opacity-100'}`}>
                       <Database className={`w-8 h-8 ${category === 'module' ? 'text-[#00E5FF]' : 'text-white'}`} />
-                      <div className="text-center">
-                        <span className={`block text-[10px] font-black uppercase tracking-widest ${category === 'module' ? 'text-[#00E5FF]' : 'text-white'}`}>Módulo Técnico</span>
-                      </div>
+                      <span className={`block text-[10px] font-black uppercase tracking-widest ${category === 'module' ? 'text-[#00E5FF]' : 'text-white'}`}>Módulo Técnico</span>
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => setCategory('podcast')}
-                      className={`flex flex-col items-center gap-3 p-6 rounded-2xl border transition-all duration-500 ${
-                        category === 'podcast' 
-                        ? 'bg-[#00E5FF]/10 border-[#00E5FF] shadow-[0_0_20px_rgba(0,229,255,0.2)]' 
-                        : 'bg-white/5 border-white/10 opacity-40 grayscale hover:grayscale-0 hover:opacity-100'
-                      }`}
-                    >
+                    <button type="button" onClick={() => setCategory('podcast')} className={`flex flex-col items-center gap-3 p-6 rounded-2xl border transition-all duration-500 ${category === 'podcast' ? 'bg-[#00E5FF]/10 border-[#00E5FF] shadow-[0_0_20px_rgba(0,229,255,0.2)]' : 'bg-white/5 border-white/10 opacity-40 grayscale hover:grayscale-0 hover:opacity-100'}`}>
                       <Radio className={`w-8 h-8 ${category === 'podcast' ? 'text-[#00E5FF]' : 'text-white'}`} />
-                      <div className="text-center">
-                        <span className={`block text-[10px] font-black uppercase tracking-widest ${category === 'podcast' ? 'text-[#00E5FF]' : 'text-white'}`}>Audio Hub</span>
-                      </div>
+                      <span className={`block text-[10px] font-black uppercase tracking-widest ${category === 'podcast' ? 'text-[#00E5FF]' : 'text-white'}`}>Audio Hub</span>
                     </button>
                   </div>
                 </div>
@@ -143,7 +127,7 @@ const AddModuleModal = ({ isOpen, onClose, onSave, nextId, availablePodcasts }: 
                       </Label>
                       <Select value={selectedPodcastUrl} onValueChange={setSelectedPodcastUrl}>
                         <SelectTrigger className="bg-white/[0.03] border-white/10 rounded-2xl py-6 text-white">
-                          <SelectValue placeholder="Selecione um podcast do Audio Hub..." />
+                          <SelectValue placeholder="Selecione um podcast..." />
                         </SelectTrigger>
                         <SelectContent className="bg-[#020617] border-white/10 text-white">
                           <SelectItem value="none">Nenhum vinculado</SelectItem>
@@ -157,37 +141,42 @@ const AddModuleModal = ({ isOpen, onClose, onSave, nextId, availablePodcasts }: 
 
                   <div className="space-y-2">
                     <Label className="text-[10px] font-mono font-black text-white/40 uppercase tracking-[0.2em] pl-1 flex items-center gap-2">
-                      <Video size={12} className="text-[#00E5FF]" /> YouTube Video Link (Optional)
+                      <Video size={12} className="text-[#00E5FF]" /> YouTube Video Link
                     </Label>
-                    <Input value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} placeholder="https://www.youtube.com/watch?v=..." className="bg-white/[0.03] border-white/10 rounded-2xl py-6 text-white font-mono text-xs" />
+                    <Input value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} placeholder="https://..." className="bg-white/[0.03] border-white/10 rounded-2xl py-6 text-white font-mono text-xs" />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 bg-white/[0.02] border border-white/5 rounded-[24px]">
+                <div className="grid grid-cols-2 gap-4 p-6 bg-white/[0.02] border border-white/5 rounded-[24px]">
                   <div className="space-y-2">
-                    <Label className="flex items-center gap-1 text-[9px] font-mono font-black text-[#00E5FF] uppercase tracking-widest pl-1">
+                    <Label className="flex items-center gap-1 text-[9px] font-mono font-black text-[#00E5FF] uppercase tracking-widest">
                       <Image className="w-3 h-3" /> Cover
                     </Label>
-                    <Input type="file" accept="image/*" onChange={(e) => setCoverFile(e.target.files?.[0] || null)} className="bg-white/[0.03] border-white/10 text-xs file:bg-[#00E5FF]/20 file:text-[#00E5FF] file:border-0 rounded-xl" />
+                    <Input type="file" accept="image/*" onChange={(e) => setCoverFile(e.target.files?.[0] || null)} className="bg-white/[0.03] border-white/10 text-xs rounded-xl" />
                   </div>
                   <div className="space-y-2">
-                    <Label className="flex items-center gap-1 text-[9px] font-mono font-black text-[#00E5FF] uppercase tracking-widest pl-1">
-                      <Headphones className="w-3 h-3" /> VOX (.mp3)
+                    <Label className="flex items-center gap-1 text-[9px] font-mono font-black text-[#00E5FF] uppercase tracking-widest">
+                      <FileText className="w-3 h-3" /> PDF Intel
                     </Label>
-                    <Input type="file" accept=".mp3" onChange={(e) => setAudioFile(e.target.files?.[0] || null)} className="bg-white/[0.03] border-white/10 text-xs file:bg-[#00E5FF]/20 file:text-[#00E5FF] file:border-0 rounded-xl" />
+                    <Input type="file" accept=".pdf" onChange={(e) => setDocFile(e.target.files?.[0] || null)} className="bg-white/[0.03] border-white/10 text-xs rounded-xl" />
                   </div>
                   <div className="space-y-2">
-                    <Label className="flex items-center gap-1 text-[9px] font-mono font-black text-[#00E5FF] uppercase tracking-widest pl-1">
-                      <FileText className="w-3 h-3" /> INTEL (.pdf)
+                    <Label className="flex items-center gap-1 text-[9px] font-mono font-black text-amber-500 uppercase tracking-widest">
+                      <Headphones className="w-3 h-3" /> Podcast MP3
                     </Label>
-                    <Input type="file" accept=".pdf" onChange={(e) => setDocFile(e.target.files?.[0] || null)} className="bg-white/[0.03] border-white/10 text-xs file:bg-[#00E5FF]/20 file:text-[#00E5FF] file:border-0 rounded-xl" />
+                    <Input type="file" accept=".mp3" onChange={(e) => setAudioFile(e.target.files?.[0] || null)} className="bg-white/[0.03] border-white/10 text-xs rounded-xl" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-1 text-[9px] font-mono font-black text-purple-500 uppercase tracking-widest">
+                      <BookOpen className="w-3 h-3" /> Audiobook MP3
+                    </Label>
+                    <Input type="file" accept=".mp3" onChange={(e) => setAudiobookFile(e.target.files?.[0] || null)} className="bg-white/[0.03] border-white/10 text-xs rounded-xl" />
                   </div>
                 </div>
               </div>
 
-              <button type="submit" className="w-full py-6 bg-[#00E5FF] text-black font-black uppercase text-xs rounded-2xl shadow-[0_0_40px_rgba(0,229,255,0.3)] hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3">
-                <Upload size={18} />
-                Confirm Mission Uplink
+              <button type="submit" className="w-full py-6 bg-[#00E5FF] text-black font-black uppercase text-xs rounded-2xl shadow-[0_0_40px_rgba(0,229,255,0.3)] hover:scale-[1.02] transition-all flex items-center justify-center gap-3">
+                <Upload size={18} /> Confirm Mission Uplink
               </button>
             </form>
           </motion.div>

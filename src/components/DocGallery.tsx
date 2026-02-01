@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, Podcast, Video, ShieldAlert, Edit3, Lock, Trash2, Database } from 'lucide-react';
+import { FileText, Podcast, Video, ShieldAlert, Edit3, Lock, Trash2, Database, BookOpen } from 'lucide-react';
 import { TrainingModule } from '@/types/portal';
 import MissionModal from './MissionModal';
 
@@ -30,6 +30,7 @@ const DocGallery = ({ modules, isMaster, onEdit, onToggleLock, onDelete }: DocGa
           const isLocked = mod.locked && !isMaster;
           const hasDoc = !!mod.docUrl;
           const hasAudio = !!mod.audioUrl;
+          const hasAudiobook = !!mod.audiobookUrl;
           const hasVideo = !!mod.videoUrl;
 
           return (
@@ -40,7 +41,6 @@ const DocGallery = ({ modules, isMaster, onEdit, onToggleLock, onDelete }: DocGa
               transition={{ delay: idx * 0.1 }}
               className={`relative bg-black/60 border ${isLocked ? 'border-red-500/20 opacity-60' : 'border-[#00E5FF]/30 shadow-[0_0_30px_rgba(0,229,255,0.05)]'} rounded-3xl overflow-hidden group flex flex-col transition-all hover:bg-black/80 hover:border-[#00E5FF]/60`}
             >
-              {/* Card Header */}
               <div className="p-6 space-y-4">
                 <div className="flex justify-between items-start">
                   <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${isLocked ? 'bg-red-500/10' : 'bg-[#00E5FF]/10 border border-[#00E5FF]/20'}`}>
@@ -58,58 +58,30 @@ const DocGallery = ({ modules, isMaster, onEdit, onToggleLock, onDelete }: DocGa
                 </div>
               </div>
 
-              {/* Action Grid */}
-              <div className="mt-auto p-6 pt-0 space-y-3">
+              <div className="mt-auto p-6 pt-0 space-y-2">
                 {isLocked ? (
                   <div className="flex items-center justify-center gap-2 py-8 bg-red-500/5 border border-dashed border-red-500/20 rounded-2xl">
                     <Lock size={14} className="text-red-500/40" />
                     <span className="text-[9px] font-mono font-black text-red-500/40 uppercase tracking-widest">Access Restricted</span>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 gap-2">
-                    <button 
-                      onClick={() => hasDoc && setSelectedModule(mod)}
-                      disabled={!hasDoc}
-                      className={`flex items-center gap-3 w-full py-3.5 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${
-                        hasDoc 
-                        ? 'bg-[#00E5FF]/10 text-[#00E5FF] border border-[#00E5FF]/20 hover:bg-[#00E5FF] hover:text-black shadow-[0_0_20px_rgba(0,229,255,0.1)]' 
-                        : 'bg-white/5 text-white/10 border border-white/5 cursor-not-allowed'
-                      }`}
-                    >
-                      <FileText size={14} />
-                      TECHNICAL PDF
+                  <div className="grid grid-cols-2 gap-2">
+                    <button onClick={() => hasDoc && setSelectedModule(mod)} disabled={!hasDoc} className={`flex flex-col items-center justify-center gap-1 py-3 rounded-xl text-[8px] font-black uppercase tracking-widest transition-all ${hasDoc ? 'bg-[#00E5FF]/10 text-[#00E5FF] border border-[#00E5FF]/20 hover:bg-[#00E5FF] hover:text-black' : 'opacity-20 grayscale'}`}>
+                      <FileText size={12} /> PDF
                     </button>
-
-                    <button 
-                      onClick={() => hasAudio && setSelectedModule(mod)}
-                      disabled={!hasAudio}
-                      className={`flex items-center gap-3 w-full py-3.5 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${
-                        hasAudio 
-                        ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20 hover:bg-amber-500 hover:text-black' 
-                        : 'bg-white/5 text-white/10 border border-white/5 cursor-not-allowed'
-                      }`}
-                    >
-                      <Podcast size={14} />
-                      PODCAST
+                    <button onClick={() => hasAudiobook && setSelectedModule(mod)} disabled={!hasAudiobook} className={`flex flex-col items-center justify-center gap-1 py-3 rounded-xl text-[8px] font-black uppercase tracking-widest transition-all ${hasAudiobook ? 'bg-purple-500/10 text-purple-500 border border-purple-500/20 hover:bg-purple-500 hover:text-white' : 'opacity-20 grayscale'}`}>
+                      <BookOpen size={12} /> AUDIOBOOK
                     </button>
-
-                    <button 
-                      onClick={() => hasVideo && setSelectedModule(mod)}
-                      disabled={!hasVideo}
-                      className={`flex items-center gap-3 w-full py-3.5 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${
-                        hasVideo 
-                        ? 'bg-purple-500/10 text-purple-500 border border-purple-500/20 hover:bg-purple-500 hover:text-white' 
-                        : 'bg-white/5 text-white/10 border border-white/5 cursor-not-allowed'
-                      }`}
-                    >
-                      <Video size={14} />
-                      TACTICAL VIDEO
+                    <button onClick={() => hasVideo && setSelectedModule(mod)} disabled={!hasVideo} className={`flex flex-col items-center justify-center gap-1 py-3 rounded-xl text-[8px] font-black uppercase tracking-widest transition-all ${hasVideo ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20 hover:bg-amber-500 hover:text-black' : 'opacity-20 grayscale'}`}>
+                      <Video size={12} /> VIDEO
+                    </button>
+                    <button onClick={() => hasAudio && setSelectedModule(mod)} disabled={!hasAudio} className={`flex flex-col items-center justify-center gap-1 py-3 rounded-xl text-[8px] font-black uppercase tracking-widest transition-all ${hasAudio ? 'bg-green-500/10 text-green-500 border border-green-500/20 hover:bg-green-500 hover:text-white' : 'opacity-20 grayscale'}`}>
+                      <Podcast size={12} /> PODCAST
                     </button>
                   </div>
                 )}
               </div>
 
-              {/* Master Controls */}
               {isMaster && (
                 <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                    <button onClick={(e) => { e.stopPropagation(); onEdit?.(mod); }} className="p-2 bg-black/60 border border-white/10 rounded-lg text-white/40 hover:text-[#00E5FF]"><Edit3 size={14} /></button>

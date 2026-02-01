@@ -71,6 +71,7 @@ const Index = () => {
         type: m.type as any,
         category: (m.category as any) || 'module',
         audioUrl: m.audio_url || '',
+        audiobookUrl: m.audiobook_url || '',
         docUrl: m.doc_url || '',
         videoUrl: m.video_url || '',
         coverUrl: m.cover_url || '',
@@ -94,17 +95,18 @@ const Index = () => {
     return publicUrl;
   };
 
-  const handleSaveNewModule = async (newModuleData: Omit<TrainingModule, 'id' | 'dbId' | 'progress' | 'coverUrl' | 'videoUrl'> & { videoUrl: string }, files: { audio?: File, doc?: File, cover?: File }) => {
+  const handleSaveNewModule = async (newModuleData: Omit<TrainingModule, 'id' | 'dbId' | 'progress' | 'coverUrl' | 'videoUrl'> & { videoUrl: string }, files: { audio?: File, audiobook?: File, doc?: File, cover?: File }) => {
     if (!isMaster) return;
     const nextId = `ASSET-${(data.modules.length + 1).toString().padStart(2, '0')}`;
     const toastId = toast.loading("Implantando assets...");
     try {
-      let audioUrl = newModuleData.audioUrl; // Pode vir do seletor de podcast
+      let audioUrl = newModuleData.audioUrl; 
+      let audiobookUrl = '';
       let docUrl = '';
       let coverUrl = '';
       
-      // Se houver upload de arquivo, ele sobrescreve a seleção do podcast
       if (files.audio) audioUrl = await uploadFile(files.audio, 'audio');
+      if (files.audiobook) audiobookUrl = await uploadFile(files.audiobook, 'audio');
       if (files.doc) docUrl = await uploadFile(files.doc, 'docs');
       if (files.cover) coverUrl = await uploadFile(files.cover, 'covers'); 
       
@@ -115,6 +117,7 @@ const Index = () => {
           type: newModuleData.type, 
           category: newModuleData.category,
           audio_url: audioUrl, 
+          audiobook_url: audiobookUrl,
           doc_url: docUrl, 
           cover_url: coverUrl, 
           video_url: newModuleData.videoUrl,
@@ -129,15 +132,17 @@ const Index = () => {
     }
   };
 
-  const handleUpdateModule = async (updated: TrainingModule, files: { audio?: File, doc?: File, cover?: File }) => {
+  const handleUpdateModule = async (updated: TrainingModule, files: { audio?: File, audiobook?: File, doc?: File, cover?: File }) => {
     if (!isMaster || !updated.dbId) return;
     const toastId = toast.loading("Atualizando...");
     try {
       let audioUrl = updated.audioUrl;
+      let audiobookUrl = updated.audiobookUrl;
       let docUrl = updated.docUrl;
       let coverUrl = updated.coverUrl; 
       
       if (files.audio) audioUrl = await uploadFile(files.audio, 'audio');
+      if (files.audiobook) audiobookUrl = await uploadFile(files.audiobook, 'audio');
       if (files.doc) docUrl = await uploadFile(files.doc, 'docs');
       if (files.cover) coverUrl = await uploadFile(files.cover, 'covers'); 
       
@@ -147,6 +152,7 @@ const Index = () => {
           progress: updated.progress, 
           locked: updated.locked,
           audio_url: audioUrl, 
+          audiobook_url: audiobookUrl,
           doc_url: docUrl, 
           cover_url: coverUrl,
           video_url: updated.videoUrl
