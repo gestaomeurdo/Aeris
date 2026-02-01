@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Headphones, FileText, Play, Pause, ChevronLeft, Video, BookOpen, Database, Radio } from 'lucide-react';
+import { X, Headphones, FileText, Play, Pause, ChevronLeft, Video, BookOpen, Database, Radio, Eye } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrainingModule } from '@/types/portal';
 import WaveformVisualizer from './WaveformVisualizer';
@@ -15,6 +15,7 @@ interface MissionModalProps {
 const MissionModal = ({ isOpen, onClose, module }: MissionModalProps) => {
   const [isPlayingPodcast, setIsPlayingPodcast] = useState(false);
   const [isPlayingAudiobook, setIsPlayingAudiobook] = useState(false);
+  const [activeView, setActiveView] = useState<'video' | 'doc'>('video');
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
@@ -22,8 +23,11 @@ const MissionModal = ({ isOpen, onClose, module }: MissionModalProps) => {
       setIsPlayingPodcast(false);
       setIsPlayingAudiobook(false);
       if (audioRef.current) audioRef.current.pause();
+    } else if (module) {
+      // Prioriza vídeo se existir, senão mostra PDF
+      setActiveView(module.videoUrl ? 'video' : 'doc');
     }
-  }, [isOpen]);
+  }, [isOpen, module]);
 
   if (!module) return null;
 
@@ -78,10 +82,11 @@ const MissionModal = ({ isOpen, onClose, module }: MissionModalProps) => {
             </div>
 
             <div className="flex-1 relative flex flex-col md:flex-row bg-[#020617]">
+              {/* Main Content Area (Video or PDF) */}
               <div className="flex-1 relative bg-black">
-                {hasVideo ? (
+                {activeView === 'video' && hasVideo ? (
                   <iframe src={embedUrl} className="w-full h-full border-none" allowFullScreen />
-                ) : hasDoc ? (
+                ) : (hasDoc && (activeView === 'doc' || !hasVideo)) ? (
                   <iframe src={module.docUrl} className="w-full h-full border-none opacity-90" />
                 ) : (
                   <div className="w-full h-full flex flex-col items-center justify-center gap-6 text-white/5">
@@ -91,15 +96,31 @@ const MissionModal = ({ isOpen, onClose, module }: MissionModalProps) => {
                 )}
               </div>
 
+              {/* Sidebar Controls */}
               <div className="w-full md:w-80 bg-black/40 border-l border-white/5 p-6 space-y-6 overflow-y-auto">
-                   <h3 className="text-[10px] font-mono font-black text-white/20 uppercase tracking-widest border-b border-white/5 pb-2">Secondary Uplinks</h3>
+                   <h3 className="text-[10px] font-mono font-black text-white/20 uppercase tracking-widest border-b border-white/5 pb-2">Operational Uplinks</h3>
                    
-                   {hasDoc && hasVideo && (
-                     <div className="p-4 bg-white/5 rounded-2xl border border-white/10 space-y-4">
-                        <div className="flex items-center gap-2 text-[#00E5FF]"><FileText size={14} /><span className="text-[9px] font-black uppercase">Technical PDF</span></div>
-                        <a href={module.docUrl} target="_blank" rel="noreferrer" className="block w-full py-3 bg-[#00E5FF]/10 text-[#00E5FF] text-center text-[9px] font-black rounded-lg">Download PDF</a>
-                     </div>
-                   )}
+                   {/* Toggle Video/Doc */}
+                   <div className="space-y-3">
+                      {hasVideo && (
+                        <button 
+                          onClick={() => setActiveView('video')}
+                          className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[9px] font-black uppercase transition-all ${activeView === 'video' ? 'bg-[#00E5FF] text-black shadow-[0_0_20px_rgba(0,229,255,0.4)]' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
+                        >
+                          <Video size={14} /> Video Briefing
+                        </button>
+                      )}
+                      {hasDoc && (
+                        <button 
+                          onClick={() => setActiveView('doc')}
+                          className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[9px] font-black uppercase transition-all ${activeView === 'doc' ? 'bg-[#00E5FF] text-black shadow-[0_0_20px_rgba(0,229,255,0.4)]' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
+                        >
+                          <FileText size={14} /> Technical Manual
+                        </button>
+                      )}
+                   </div>
+
+                   <div className="h-px bg-white/5 w-full" />
 
                    {hasAudiobook && (
                      <div className="p-4 bg-purple-500/5 rounded-2xl border border-purple-500/10 space-y-4">
