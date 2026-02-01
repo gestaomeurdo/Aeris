@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { X, Save, FileText, Headphones, Upload, Zap, Shield, Database, Radio, Image } from 'lucide-react';
+import { X, Save, FileText, Headphones, Upload, Zap, Database, Radio, Image, Video } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrainingModule } from '@/types/portal';
 import { Label } from '@/components/ui/label';
@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 interface AddModuleModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (newModule: Omit<TrainingModule, 'id' | 'dbId' | 'progress' | 'coverUrl'>, files: { audio?: File, doc?: File, cover?: File }) => void;
+  onSave: (newModule: Omit<TrainingModule, 'id' | 'dbId' | 'progress' | 'coverUrl' | 'videoUrl'> & { videoUrl: string }, files: { audio?: File, doc?: File, cover?: File }) => void;
   nextId: string;
 }
 
@@ -20,14 +20,16 @@ const AddModuleModal = ({ isOpen, onClose, onSave, nextId }: AddModuleModalProps
   const [category, setCategory] = useState<"module" | "podcast">('module');
   const [type, setType] = useState<TrainingModule['type']>('Advanced');
   const [description, setDescription] = useState('');
+  const [videoUrl, setVideoUrl] = useState('');
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [docFile, setDocFile] = useState<File | null>(null);
-  const [coverFile, setCoverFile] = useState<File | null>(null); // Novo estado para a capa
+  const [coverFile, setCoverFile] = useState<File | null>(null);
 
   useEffect(() => {
     if (isOpen) {
       setTitle('');
       setDescription('');
+      setVideoUrl('');
       setAudioFile(null);
       setDocFile(null);
       setCoverFile(null);
@@ -46,11 +48,12 @@ const AddModuleModal = ({ isOpen, onClose, onSave, nextId }: AddModuleModalProps
       category,
       audioUrl: '', 
       docUrl: '', 
+      videoUrl, // Passando a URL do vídeo
       locked: false,
     }, { 
       audio: audioFile || undefined, 
       doc: docFile || undefined,
-      cover: coverFile || undefined // Passando o arquivo de capa
+      cover: coverFile || undefined
     });
     onClose();
   };
@@ -84,7 +87,6 @@ const AddModuleModal = ({ isOpen, onClose, onSave, nextId }: AddModuleModalProps
             <form onSubmit={handleSubmit} className="p-10 space-y-8 max-h-[75vh] overflow-y-auto custom-scrollbar">
               <div className="space-y-6">
                 
-                {/* CATEGORY SELECTOR - SEPARAÇÃO CLARA */}
                 <div className="space-y-3">
                   <Label className="text-[10px] font-mono font-black text-white/40 uppercase tracking-[0.2em] pl-1">Destino do Asset</Label>
                   <div className="grid grid-cols-2 gap-4">
@@ -100,7 +102,6 @@ const AddModuleModal = ({ isOpen, onClose, onSave, nextId }: AddModuleModalProps
                       <Database className={`w-8 h-8 ${category === 'module' ? 'text-[#00E5FF]' : 'text-white'}`} />
                       <div className="text-center">
                         <span className={`block text-[10px] font-black uppercase tracking-widest ${category === 'module' ? 'text-[#00E5FF]' : 'text-white'}`}>Módulo Técnico</span>
-                        <span className="text-[8px] text-white/20 uppercase">Manuals & Ops</span>
                       </div>
                     </button>
                     <button
@@ -115,7 +116,6 @@ const AddModuleModal = ({ isOpen, onClose, onSave, nextId }: AddModuleModalProps
                       <Radio className={`w-8 h-8 ${category === 'podcast' ? 'text-[#00E5FF]' : 'text-white'}`} />
                       <div className="text-center">
                         <span className={`block text-[10px] font-black uppercase tracking-widest ${category === 'podcast' ? 'text-[#00E5FF]' : 'text-white'}`}>Audio Hub</span>
-                        <span className="text-[8px] text-white/20 uppercase">Podcasts & Vox</span>
                       </div>
                     </button>
                   </div>
@@ -131,24 +131,31 @@ const AddModuleModal = ({ isOpen, onClose, onSave, nextId }: AddModuleModalProps
                     <Label className="text-[10px] font-mono font-black text-white/40 uppercase tracking-[0.2em] pl-1">Briefing Data</Label>
                     <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="ENTER_TACTICAL_DATA" className="bg-white/[0.03] border-white/10 rounded-2xl py-4 text-white h-24 resize-none" />
                   </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-mono font-black text-white/40 uppercase tracking-[0.2em] pl-1 flex items-center gap-2">
+                      <Video size={12} className="text-[#00E5FF]" /> YouTube Video Link (Optional)
+                    </Label>
+                    <Input value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} placeholder="https://www.youtube.com/watch?v=..." className="bg-white/[0.03] border-white/10 rounded-2xl py-6 text-white font-mono text-xs" />
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 bg-white/[0.02] border border-white/5 rounded-[24px]">
                   <div className="space-y-2">
                     <Label className="flex items-center gap-1 text-[9px] font-mono font-black text-[#00E5FF] uppercase tracking-widest pl-1">
-                      <Image className="w-3 h-3" /> Upload Cover (.jpg/.png)
+                      <Image className="w-3 h-3" /> Cover
                     </Label>
-                    <Input type="file" accept=".jpg, .jpeg, .png" onChange={(e) => setCoverFile(e.target.files?.[0] || null)} className="bg-white/[0.03] border-white/10 text-xs file:bg-[#00E5FF]/20 file:text-[#00E5FF] file:border-0 rounded-xl" />
+                    <Input type="file" accept="image/*" onChange={(e) => setCoverFile(e.target.files?.[0] || null)} className="bg-white/[0.03] border-white/10 text-xs file:bg-[#00E5FF]/20 file:text-[#00E5FF] file:border-0 rounded-xl" />
                   </div>
                   <div className="space-y-2">
                     <Label className="flex items-center gap-1 text-[9px] font-mono font-black text-[#00E5FF] uppercase tracking-widest pl-1">
-                      <Headphones className="w-3 h-3" /> Upload VOX (.mp3)
+                      <Headphones className="w-3 h-3" /> VOX (.mp3)
                     </Label>
                     <Input type="file" accept=".mp3" onChange={(e) => setAudioFile(e.target.files?.[0] || null)} className="bg-white/[0.03] border-white/10 text-xs file:bg-[#00E5FF]/20 file:text-[#00E5FF] file:border-0 rounded-xl" />
                   </div>
                   <div className="space-y-2">
                     <Label className="flex items-center gap-1 text-[9px] font-mono font-black text-[#00E5FF] uppercase tracking-widest pl-1">
-                      <FileText className="w-3 h-3" /> Upload INTEL (.pdf)
+                      <FileText className="w-3 h-3" /> INTEL (.pdf)
                     </Label>
                     <Input type="file" accept=".pdf" onChange={(e) => setDocFile(e.target.files?.[0] || null)} className="bg-white/[0.03] border-white/10 text-xs file:bg-[#00E5FF]/20 file:text-[#00E5FF] file:border-0 rounded-xl" />
                   </div>

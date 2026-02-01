@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, ExternalLink, ShieldAlert, Edit3, Lock, Unlock, Trash2, Database } from 'lucide-react';
+import { FileText, Headphones, Video, ShieldAlert, Edit3, Lock, Trash2, Database } from 'lucide-react';
 import { TrainingModule } from '@/types/portal';
 import MissionModal from './MissionModal';
 
@@ -16,19 +16,21 @@ interface DocGalleryProps {
 
 const DocGallery = ({ modules, isMaster, onEdit, onToggleLock, onDelete }: DocGalleryProps) => {
   const [selectedModule, setSelectedModule] = useState<TrainingModule | null>(null);
-  const docModules = modules.filter(m => m.docUrl || isMaster);
+  const docModules = modules.filter(m => m.category === 'module');
 
   return (
     <div className="space-y-10">
       <div className="flex items-center gap-4">
         <Database className="w-6 h-6 text-[#00E5FF]" />
-        <h2 className="text-4xl font-black text-white uppercase tracking-tighter">TECHNICAL <span className="font-light text-white/20">MANUALS</span></h2>
+        <h2 className="text-4xl font-black text-white uppercase tracking-tighter">TECHNICAL <span className="font-light text-white/20">RESOURCES</span></h2>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {docModules.map((mod, idx) => {
           const isLocked = mod.locked && !isMaster;
           const hasDoc = !!mod.docUrl;
+          const hasAudio = !!mod.audioUrl;
+          const hasVideo = !!mod.videoUrl;
 
           return (
             <motion.div
@@ -36,13 +38,13 @@ const DocGallery = ({ modules, isMaster, onEdit, onToggleLock, onDelete }: DocGa
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.1 }}
-              onClick={() => !isLocked && hasDoc && setSelectedModule(mod)}
-              className={`relative aspect-[3/4.5] bg-black/60 border ${isLocked ? 'border-red-500/20 opacity-60' : 'border-[#00E5FF]/30 shadow-[0_0_30px_rgba(0,229,255,0.05)]'} rounded-3xl overflow-hidden group p-8 flex flex-col justify-between transition-all hover:bg-black/80 hover:border-[#00E5FF]/60 cursor-pointer`}
+              className={`relative bg-black/60 border ${isLocked ? 'border-red-500/20 opacity-60' : 'border-[#00E5FF]/30 shadow-[0_0_30px_rgba(0,229,255,0.05)]'} rounded-3xl overflow-hidden group flex flex-col transition-all hover:bg-black/80 hover:border-[#00E5FF]/60`}
             >
-              <div className="space-y-6">
+              {/* Card Header */}
+              <div className="p-6 space-y-4">
                 <div className="flex justify-between items-start">
-                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${isLocked ? 'bg-red-500/10' : 'bg-[#00E5FF]/10 border border-[#00E5FF]/20'}`}>
-                    {isLocked ? <ShieldAlert className="text-red-500" /> : <FileText className="text-[#00E5FF]" />}
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${isLocked ? 'bg-red-500/10' : 'bg-[#00E5FF]/10 border border-[#00E5FF]/20'}`}>
+                    {isLocked ? <ShieldAlert className="text-red-500 w-6 h-6" /> : <Database className="text-[#00E5FF] w-6 h-6" />}
                   </div>
                   <div className="text-right">
                     <span className="block text-[8px] font-mono text-[#00E5FF] font-black uppercase tracking-widest">Asset ID</span>
@@ -50,38 +52,59 @@ const DocGallery = ({ modules, isMaster, onEdit, onToggleLock, onDelete }: DocGa
                   </div>
                 </div>
 
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <div className="h-[1px] w-4 bg-[#00E5FF]" />
-                    <span className="text-[9px] font-mono font-black text-[#00E5FF] uppercase tracking-widest">Technical Intel</span>
-                  </div>
-                  <h3 className="text-xl font-black text-white uppercase leading-[1.1] tracking-tight group-hover:text-[#00E5FF] transition-colors">{mod.title}</h3>
-                  <p className="text-[10px] text-white/30 leading-relaxed font-medium uppercase tracking-wider">{mod.type} Category</p>
+                <div className="space-y-2">
+                  <h3 className="text-xl font-black text-white uppercase leading-tight tracking-tight group-hover:text-[#00E5FF] transition-colors line-clamp-2">{mod.title}</h3>
+                  <p className="text-[10px] text-white/30 uppercase tracking-wider font-mono">{mod.type}</p>
                 </div>
               </div>
 
-              <div className="space-y-6">
-                <div className="bg-white/5 p-4 rounded-xl border border-white/5">
-                  <p className="text-[10px] text-white/40 leading-relaxed italic line-clamp-3">
-                    {mod.desc || "Classified technical document. Access restricted to authorized operators only."}
-                  </p>
-                </div>
-
+              {/* Action Grid */}
+              <div className="mt-auto p-6 pt-0 space-y-3">
                 {isLocked ? (
-                  <div className="flex items-center justify-center gap-2 py-4 bg-red-500/10 border border-red-500/20 rounded-2xl">
-                    <Lock size={14} className="text-red-500" />
-                    <span className="text-[10px] font-mono font-black text-red-500 uppercase tracking-widest">Protocol Locked</span>
+                  <div className="flex items-center justify-center gap-2 py-8 bg-red-500/5 border border-dashed border-red-500/20 rounded-2xl">
+                    <Lock size={14} className="text-red-500/40" />
+                    <span className="text-[9px] font-mono font-black text-red-500/40 uppercase tracking-widest">Access Restricted</span>
                   </div>
-                ) : hasDoc ? (
-                  <button 
-                    className="w-full py-4 bg-[#00E5FF] text-black rounded-2xl flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest hover:scale-[1.02] active:scale-98 transition-all shadow-[0_0_30px_rgba(0,229,255,0.2)]"
-                  >
-                    <FileText size={14} />
-                    Open Document
-                  </button>
                 ) : (
-                  <div className="py-4 text-center border border-dashed border-white/10 rounded-2xl">
-                    <span className="text-[9px] font-mono text-white/20 uppercase">No Data Stream</span>
+                  <div className="grid grid-cols-1 gap-2">
+                    <button 
+                      onClick={() => hasDoc && setSelectedModule(mod)}
+                      disabled={!hasDoc}
+                      className={`flex items-center gap-3 w-full py-3.5 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${
+                        hasDoc 
+                        ? 'bg-[#00E5FF]/10 text-[#00E5FF] border border-[#00E5FF]/20 hover:bg-[#00E5FF] hover:text-black shadow-[0_0_20px_rgba(0,229,255,0.1)]' 
+                        : 'bg-white/5 text-white/10 border border-white/5 cursor-not-allowed'
+                      }`}
+                    >
+                      <FileText size={14} />
+                      Read Intelligence PDF
+                    </button>
+
+                    <button 
+                      onClick={() => hasAudio && setSelectedModule(mod)}
+                      disabled={!hasAudio}
+                      className={`flex items-center gap-3 w-full py-3.5 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${
+                        hasAudio 
+                        ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20 hover:bg-amber-500 hover:text-black' 
+                        : 'bg-white/5 text-white/10 border border-white/5 cursor-not-allowed'
+                      }`}
+                    >
+                      <Headphones size={14} />
+                      Audiobook Stream
+                    </button>
+
+                    <button 
+                      onClick={() => hasVideo && setSelectedModule(mod)}
+                      disabled={!hasVideo}
+                      className={`flex items-center gap-3 w-full py-3.5 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${
+                        hasVideo 
+                        ? 'bg-purple-500/10 text-purple-500 border border-purple-500/20 hover:bg-purple-500 hover:text-white' 
+                        : 'bg-white/5 text-white/10 border border-white/5 cursor-not-allowed'
+                      }`}
+                    >
+                      <Video size={14} />
+                      Watch Tactical Video
+                    </button>
                   </div>
                 )}
               </div>

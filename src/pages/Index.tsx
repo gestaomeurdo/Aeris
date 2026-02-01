@@ -72,6 +72,7 @@ const Index = () => {
         category: (m.category as any) || 'module',
         audioUrl: m.audio_url || '',
         docUrl: m.doc_url || '',
+        videoUrl: m.video_url || '', // Lendo do banco
         coverUrl: m.cover_url || '',
         progress: m.progress,
         locked: m.locked
@@ -93,7 +94,7 @@ const Index = () => {
     return publicUrl;
   };
 
-  const handleSaveNewModule = async (newModuleData: Omit<TrainingModule, 'id' | 'dbId' | 'progress' | 'coverUrl'>, files: { audio?: File, doc?: File, cover?: File }) => {
+  const handleSaveNewModule = async (newModuleData: Omit<TrainingModule, 'id' | 'dbId' | 'progress' | 'coverUrl' | 'videoUrl'> & { videoUrl: string }, files: { audio?: File, doc?: File, cover?: File }) => {
     if (!isMaster) return;
     const nextId = `ASSET-${(data.modules.length + 1).toString().padStart(2, '0')}`;
     const toastId = toast.loading("Implantando assets...");
@@ -105,8 +106,17 @@ const Index = () => {
       if (files.doc) docUrl = await uploadFile(files.doc, 'docs');
       if (files.cover) coverUrl = await uploadFile(files.cover, 'covers'); 
       const { error } = await supabase.from('training_modules').insert([{
-          module_id: nextId, title: newModuleData.title, desc_text: newModuleData.desc, type: newModuleData.type, category: newModuleData.category,
-          audio_url: audioUrl, doc_url: docUrl, cover_url: coverUrl, progress: 0, locked: false
+          module_id: nextId, 
+          title: newModuleData.title, 
+          desc_text: newModuleData.desc, 
+          type: newModuleData.type, 
+          category: newModuleData.category,
+          audio_url: audioUrl, 
+          doc_url: docUrl, 
+          cover_url: coverUrl, 
+          video_url: newModuleData.videoUrl, // Salvando URL
+          progress: 0, 
+          locked: false
       }]);
       if (error) throw error;
       toast.success("Asset implantado com sucesso", { id: toastId });
@@ -127,8 +137,14 @@ const Index = () => {
       if (files.doc) docUrl = await uploadFile(files.doc, 'docs');
       if (files.cover) coverUrl = await uploadFile(files.cover, 'covers'); 
       const { error } = await supabase.from('training_modules').update({
-          title: updated.title, desc_text: updated.desc, progress: updated.progress, locked: updated.locked,
-          audio_url: audioUrl, doc_url: docUrl, cover_url: coverUrl 
+          title: updated.title, 
+          desc_text: updated.desc, 
+          progress: updated.progress, 
+          locked: updated.locked,
+          audio_url: audioUrl, 
+          doc_url: docUrl, 
+          cover_url: coverUrl,
+          video_url: updated.videoUrl // Atualizando URL
       }).eq('id', updated.dbId);
       if (error) throw error;
       setEditingModule(null);

@@ -4,10 +4,11 @@ export interface TrainingModule {
   title: string;
   desc: string;
   type: "Leadership" | "Strategy" | "Structure" | "Advanced";
-  category: "module" | "podcast"; // Nova separação clara
+  category: "module" | "podcast"; 
   audioUrl: string;
   docUrl: string;
-  coverUrl: string; // Novo campo para a capa
+  videoUrl: string; // Novo campo
+  coverUrl: string; 
   progress: number;
   locked: boolean;
 }
