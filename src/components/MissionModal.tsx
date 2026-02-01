@@ -16,27 +16,26 @@ interface MissionModalProps {
 const MissionModal = ({ isOpen, onClose, module, initialView = 'video' }: MissionModalProps) => {
   const [isPlayingPodcast, setIsPlayingPodcast] = useState(false);
   const [isPlayingAudiobook, setIsPlayingAudiobook] = useState(false);
+  // Sincroniza a visão ativa com a intenção inicial toda vez que o modal abre ou o módulo muda
   const [activeView, setActiveView] = useState<'video' | 'doc'>(initialView);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    if (!isOpen) {
+    if (isOpen && module) {
+      // Quando o modal abre, forçamos a visão para o que foi solicitado (initialView)
+      // ou para o que estiver disponível como prioridade
+      if (initialView === 'doc' && module.docUrl) {
+        setActiveView('doc');
+      } else if (initialView === 'video' && module.videoUrl) {
+        setActiveView('video');
+      } else {
+        // Fallback inteligente apenas se o que foi pedido não existir
+        setActiveView(module.videoUrl ? 'video' : 'doc');
+      }
+    } else if (!isOpen) {
       setIsPlayingPodcast(false);
       setIsPlayingAudiobook(false);
       if (audioRef.current) audioRef.current.pause();
-    } else if (module) {
-      // Respeita a intenção inicial do clique
-      const canShowVideo = !!module.videoUrl;
-      const canShowDoc = !!module.docUrl;
-
-      if (initialView === 'doc' && canShowDoc) {
-        setActiveView('doc');
-      } else if (initialView === 'video' && canShowVideo) {
-        setActiveView('video');
-      } else {
-        // Fallback caso a mídia solicitada não exista
-        setActiveView(canShowVideo ? 'video' : 'doc');
-      }
     }
   }, [isOpen, module, initialView]);
 
@@ -93,21 +92,19 @@ const MissionModal = ({ isOpen, onClose, module, initialView = 'video' }: Missio
             </div>
 
             <div className="flex-1 relative flex flex-col md:flex-row bg-[#020617]">
-              {/* Main Content Area */}
               <div className="flex-1 relative bg-black">
                 {activeView === 'video' && hasVideo ? (
                   <iframe src={embedUrl} className="w-full h-full border-none" allowFullScreen />
-                ) : (hasDoc && activeView === 'doc') ? (
+                ) : (activeView === 'doc' && hasDoc) ? (
                   <iframe src={module.docUrl} className="w-full h-full border-none bg-white/[0.05]" />
                 ) : (
                   <div className="w-full h-full flex flex-col items-center justify-center gap-6 text-white/5">
                     <Database className="w-32 h-32" />
-                    <p className="text-xs font-mono font-black uppercase tracking-[1em]">Restricted Data Stream</p>
+                    <p className="text-xs font-mono font-black uppercase tracking-[1em]">No Stream Available</p>
                   </div>
                 )}
               </div>
 
-              {/* Sidebar Controls */}
               <div className="w-full md:w-80 bg-black/40 border-l border-white/5 p-6 space-y-6 overflow-y-auto">
                    <h3 className="text-[10px] font-mono font-black text-white/20 uppercase tracking-widest border-b border-white/5 pb-2">Operational Uplinks</h3>
                    
