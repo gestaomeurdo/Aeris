@@ -101,25 +101,57 @@ const MissionModal = ({ isOpen, onClose, module, initialView = 'video' }: Missio
       {isOpen && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[200] flex items-center justify-center bg-black/95 backdrop-blur-2xl">
           <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 1.05, opacity: 0 }} className="relative w-full h-full flex flex-col overflow-hidden">
+            
+            {/* CABEÇALHO */}
             <div className="h-16 md:h-20 px-4 md:px-8 flex items-center justify-between border-b border-white/5 bg-black/60 z-50">
-              <div className="flex items-center gap-4 md:gap-6">
-                <button onClick={onClose} className="p-2 md:p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-all group">
+              <div className="flex items-center gap-4 md:gap-6 overflow-hidden">
+                <button onClick={onClose} className="flex-shrink-0 p-2 md:p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-all group">
                   <ChevronLeft className="w-4 h-4 md:w-5 md:h-5 text-white/40 group-hover:text-white" />
                 </button>
-                <div className="space-y-0.5">
-                  <span className="text-[8px] md:text-[9px] font-mono font-black text-[#00E5FF] uppercase tracking-[0.3em]">MISSION_INTEL // {module.id}</span>
-                  <h2 className="text-sm md:text-xl font-black text-white uppercase tracking-tighter truncate max-w-[150px] md:max-w-none">{module.title}</h2>
+                <div className="space-y-0.5 overflow-hidden">
+                  <span className="block text-[8px] md:text-[9px] font-mono font-black text-[#00E5FF] uppercase tracking-[0.3em]">MISSION_INTEL // {module.id}</span>
+                  <h2 className="text-xs md:text-xl font-black text-white uppercase tracking-tighter truncate">{module.title}</h2>
                 </div>
               </div>
-              <button onClick={onClose} className="p-2 md:p-3 bg-red-500/10 text-red-500 rounded-xl transition-all"><X className="w-4 h-4 md:w-5 md:h-5" /></button>
+              <button onClick={onClose} className="flex-shrink-0 p-2 md:p-3 bg-red-500/10 text-red-500 rounded-xl transition-all"><X className="w-4 h-4 md:w-5 md:h-5" /></button>
             </div>
 
+            {/* BARRA DE NAVEGAÇÃO MOBILE (TABS) */}
+            {isMobile && (
+              <div className="flex bg-black/40 border-b border-white/5 p-2 gap-2">
+                {hasVideo && (
+                  <button 
+                    onClick={() => setActiveView('video')}
+                    className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-[10px] font-black uppercase transition-all ${activeView === 'video' ? 'bg-[#00E5FF] text-black shadow-[0_0_15px_rgba(0,229,255,0.3)]' : 'bg-white/5 text-white/40'}`}
+                  >
+                    <Video size={14} /> Vídeo
+                  </button>
+                )}
+                {hasDoc && (
+                  <button 
+                    onClick={() => setActiveView('doc')}
+                    className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-[10px] font-black uppercase transition-all ${activeView === 'doc' ? 'bg-[#00E5FF] text-black shadow-[0_0_15px_rgba(0,229,255,0.3)]' : 'bg-white/5 text-white/40'}`}
+                  >
+                    <FileText size={14} /> Manual
+                  </button>
+                )}
+                {(hasAudio || hasAudiobook) && (
+                  <button 
+                    onClick={() => setActiveView('audio')}
+                    className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-[10px] font-black uppercase transition-all ${activeView === 'audio' ? 'bg-[#00E5FF] text-black shadow-[0_0_15px_rgba(0,229,255,0.3)]' : 'bg-white/5 text-white/40'}`}
+                  >
+                    <Headphones size={14} /> Áudio
+                  </button>
+                )}
+              </div>
+            )}
+
             <div className="flex-1 relative flex flex-col md:flex-row bg-[#020617] overflow-hidden">
-              {/* MAIN DISPLAY AREA */}
+              {/* ÁREA DE EXIBIÇÃO PRINCIPAL */}
               <div className="flex-1 relative bg-black flex items-center justify-center overflow-hidden">
                 {activeView === 'video' && hasVideo ? (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <iframe src={embedUrl} className="w-full aspect-video md:h-full md:aspect-auto border-none" allowFullScreen />
+                  <div className="w-full h-full flex items-center justify-center p-2 md:p-0">
+                    <iframe src={embedUrl} className="w-full aspect-video md:h-full md:aspect-auto border-none rounded-xl md:rounded-none" allowFullScreen />
                   </div>
                 ) : activeView === 'doc' && hasDoc ? (
                   <iframe src={module.docUrl} className="w-full h-full border-none bg-white/[0.05]" />
@@ -185,40 +217,41 @@ const MissionModal = ({ isOpen, onClose, module, initialView = 'video' }: Missio
                 )}
               </div>
 
-              {/* SIDEBAR CONTROLS */}
-              <div className="w-full md:w-72 lg:w-80 bg-black/40 border-t md:border-t-0 md:border-l border-white/5 p-4 md:p-6 space-y-4 md:space-y-6 overflow-y-auto">
-                   <h3 className="text-[8px] md:text-[10px] font-mono font-black text-white/20 uppercase tracking-widest border-b border-white/5 pb-2">Operational Uplinks</h3>
+              {/* BARRA LATERAL (APENAS DESKTOP) */}
+              {!isMobile && (
+                <div className="w-72 lg:w-80 bg-black/40 border-l border-white/5 p-6 space-y-6 overflow-y-auto">
+                   <h3 className="text-[10px] font-mono font-black text-white/20 uppercase tracking-widest border-b border-white/5 pb-2">Operational Uplinks</h3>
                    
-                   <div className="grid grid-cols-3 md:grid-cols-1 gap-2 md:gap-3">
+                   <div className="flex flex-col gap-3">
                       {hasVideo && (
                         <button 
                           onClick={() => setActiveView('video')}
-                          className={`flex items-center justify-center md:justify-start gap-2 md:gap-3 px-2 md:px-4 py-3 rounded-xl text-[8px] md:text-[9px] font-black uppercase transition-all ${activeView === 'video' ? 'bg-[#00E5FF] text-black shadow-[0_0_20px_rgba(0,229,255,0.4)]' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
+                          className={`flex items-center gap-3 px-4 py-3 rounded-xl text-[9px] font-black uppercase transition-all ${activeView === 'video' ? 'bg-[#00E5FF] text-black shadow-[0_0_20px_rgba(0,229,255,0.4)]' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
                         >
-                          <Video size={isMobile ? 12 : 14} /> <span className="hidden xs:inline">Video</span>
+                          <Video size={14} /> Video
                         </button>
                       )}
                       {hasDoc && (
                         <button 
                           onClick={() => setActiveView('doc')}
-                          className={`flex items-center justify-center md:justify-start gap-2 md:gap-3 px-2 md:px-4 py-3 rounded-xl text-[8px] md:text-[9px] font-black uppercase transition-all ${activeView === 'doc' ? 'bg-[#00E5FF] text-black shadow-[0_0_20px_rgba(0,229,255,0.4)]' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
+                          className={`flex items-center gap-3 px-4 py-3 rounded-xl text-[9px] font-black uppercase transition-all ${activeView === 'doc' ? 'bg-[#00E5FF] text-black shadow-[0_0_20px_rgba(0,229,255,0.4)]' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
                         >
-                          <FileText size={isMobile ? 12 : 14} /> <span className="hidden xs:inline">Manual</span>
+                          <FileText size={14} /> Manual
                         </button>
                       )}
                       {(hasAudio || hasAudiobook) && (
                         <button 
                           onClick={() => setActiveView('audio')}
-                          className={`flex items-center justify-center md:justify-start gap-2 md:gap-3 px-2 md:px-4 py-3 rounded-xl text-[8px] md:text-[9px] font-black uppercase transition-all ${activeView === 'audio' ? 'bg-[#00E5FF] text-black shadow-[0_0_20px_rgba(0,229,255,0.4)]' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
+                          className={`flex items-center gap-3 px-4 py-3 rounded-xl text-[9px] font-black uppercase transition-all ${activeView === 'audio' ? 'bg-[#00E5FF] text-black shadow-[0_0_20px_rgba(0,229,255,0.4)]' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
                         >
-                          <Headphones size={isMobile ? 12 : 14} /> <span className="hidden xs:inline">Audio</span>
+                          <Headphones size={14} /> Audio
                         </button>
                       )}
                    </div>
 
-                   <div className="hidden md:block h-px bg-white/5 w-full" />
+                   <div className="h-px bg-white/5 w-full" />
 
-                   <div className="hidden md:flex flex-col gap-4">
+                   <div className="flex flex-col gap-4">
                       {hasAudiobook && (
                         <div className={`p-4 rounded-2xl border transition-all ${isPlayingAudiobook ? 'bg-purple-500/10 border-purple-500/40' : 'bg-white/[0.02] border-white/5'}`}>
                            <div className="flex items-center justify-between">
@@ -241,7 +274,8 @@ const MissionModal = ({ isOpen, onClose, module, initialView = 'video' }: Missio
                         </div>
                       )}
                    </div>
-              </div>
+                </div>
+              )}
             </div>
             <audio 
               ref={audioRef} 
