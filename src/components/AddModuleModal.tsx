@@ -1,26 +1,29 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { X, Save, FileText, Headphones, Upload, Zap, Database, Radio, Image, Video } from 'lucide-react';
+import { X, Save, FileText, Headphones, Upload, Zap, Database, Radio, Image, Video, Link as LinkIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrainingModule } from '@/types/portal';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface AddModuleModalProps {
   isOpen: boolean;
   onClose: () => void;
+  availablePodcasts: TrainingModule[];
   onSave: (newModule: Omit<TrainingModule, 'id' | 'dbId' | 'progress' | 'coverUrl' | 'videoUrl'> & { videoUrl: string }, files: { audio?: File, doc?: File, cover?: File }) => void;
   nextId: string;
 }
 
-const AddModuleModal = ({ isOpen, onClose, onSave, nextId }: AddModuleModalProps) => {
+const AddModuleModal = ({ isOpen, onClose, onSave, nextId, availablePodcasts }: AddModuleModalProps) => {
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState<"module" | "podcast">('module');
   const [type, setType] = useState<TrainingModule['type']>('Advanced');
   const [description, setDescription] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
+  const [selectedPodcastUrl, setSelectedPodcastUrl] = useState<string>('');
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [docFile, setDocFile] = useState<File | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
@@ -30,6 +33,7 @@ const AddModuleModal = ({ isOpen, onClose, onSave, nextId }: AddModuleModalProps
       setTitle('');
       setDescription('');
       setVideoUrl('');
+      setSelectedPodcastUrl('');
       setAudioFile(null);
       setDocFile(null);
       setCoverFile(null);
@@ -46,9 +50,9 @@ const AddModuleModal = ({ isOpen, onClose, onSave, nextId }: AddModuleModalProps
       desc: description,
       type,
       category,
-      audioUrl: '', 
+      audioUrl: selectedPodcastUrl, // Usa a URL do podcast selecionado se houver
       docUrl: '', 
-      videoUrl, // Passando a URL do vídeo
+      videoUrl,
       locked: false,
     }, { 
       audio: audioFile || undefined, 
@@ -132,6 +136,25 @@ const AddModuleModal = ({ isOpen, onClose, onSave, nextId }: AddModuleModalProps
                     <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="ENTER_TACTICAL_DATA" className="bg-white/[0.03] border-white/10 rounded-2xl py-4 text-white h-24 resize-none" />
                   </div>
 
+                  {category === 'module' && (
+                    <div className="space-y-2">
+                      <Label className="text-[10px] font-mono font-black text-[#00E5FF] uppercase tracking-[0.2em] pl-1 flex items-center gap-2">
+                        <Headphones size={12} /> Vincular Podcast Existente
+                      </Label>
+                      <Select value={selectedPodcastUrl} onValueChange={setSelectedPodcastUrl}>
+                        <SelectTrigger className="bg-white/[0.03] border-white/10 rounded-2xl py-6 text-white">
+                          <SelectValue placeholder="Selecione um podcast do Audio Hub..." />
+                        </SelectTrigger>
+                        <SelectContent className="bg-[#020617] border-white/10 text-white">
+                          <SelectItem value="none">Nenhum vinculado</SelectItem>
+                          {availablePodcasts.map(p => (
+                            <SelectItem key={p.dbId} value={p.audioUrl}>{p.title}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
                   <div className="space-y-2">
                     <Label className="text-[10px] font-mono font-black text-white/40 uppercase tracking-[0.2em] pl-1 flex items-center gap-2">
                       <Video size={12} className="text-[#00E5FF]" /> YouTube Video Link (Optional)
@@ -162,7 +185,7 @@ const AddModuleModal = ({ isOpen, onClose, onSave, nextId }: AddModuleModalProps
                 </div>
               </div>
 
-              <button type="submit" className="w-full py-6 bg-[#00E5FF] text-black font-black uppercase text-xs rounded-2xl shadow-[0_0_40px_rgba(0,229,255,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3">
+              <button type="submit" className="w-full py-6 bg-[#00E5FF] text-black font-black uppercase text-xs rounded-2xl shadow-[0_0_40px_rgba(0,229,255,0.3)] hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3">
                 <Upload size={18} />
                 Confirm Mission Uplink
               </button>

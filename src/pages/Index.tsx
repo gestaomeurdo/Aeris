@@ -72,7 +72,7 @@ const Index = () => {
         category: (m.category as any) || 'module',
         audioUrl: m.audio_url || '',
         docUrl: m.doc_url || '',
-        videoUrl: m.video_url || '', // Lendo do banco
+        videoUrl: m.video_url || '',
         coverUrl: m.cover_url || '',
         progress: m.progress,
         locked: m.locked
@@ -99,12 +99,15 @@ const Index = () => {
     const nextId = `ASSET-${(data.modules.length + 1).toString().padStart(2, '0')}`;
     const toastId = toast.loading("Implantando assets...");
     try {
-      let audioUrl = '';
+      let audioUrl = newModuleData.audioUrl; // Pode vir do seletor de podcast
       let docUrl = '';
       let coverUrl = '';
+      
+      // Se houver upload de arquivo, ele sobrescreve a seleção do podcast
       if (files.audio) audioUrl = await uploadFile(files.audio, 'audio');
       if (files.doc) docUrl = await uploadFile(files.doc, 'docs');
       if (files.cover) coverUrl = await uploadFile(files.cover, 'covers'); 
+      
       const { error } = await supabase.from('training_modules').insert([{
           module_id: nextId, 
           title: newModuleData.title, 
@@ -114,7 +117,7 @@ const Index = () => {
           audio_url: audioUrl, 
           doc_url: docUrl, 
           cover_url: coverUrl, 
-          video_url: newModuleData.videoUrl, // Salvando URL
+          video_url: newModuleData.videoUrl,
           progress: 0, 
           locked: false
       }]);
@@ -133,9 +136,11 @@ const Index = () => {
       let audioUrl = updated.audioUrl;
       let docUrl = updated.docUrl;
       let coverUrl = updated.coverUrl; 
+      
       if (files.audio) audioUrl = await uploadFile(files.audio, 'audio');
       if (files.doc) docUrl = await uploadFile(files.doc, 'docs');
       if (files.cover) coverUrl = await uploadFile(files.cover, 'covers'); 
+      
       const { error } = await supabase.from('training_modules').update({
           title: updated.title, 
           desc_text: updated.desc, 
@@ -144,7 +149,7 @@ const Index = () => {
           audio_url: audioUrl, 
           doc_url: docUrl, 
           cover_url: coverUrl,
-          video_url: updated.videoUrl // Atualizando URL
+          video_url: updated.videoUrl
       }).eq('id', updated.dbId);
       if (error) throw error;
       setEditingModule(null);
@@ -187,8 +192,20 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-[#020202] text-[#B0BEC5] font-sans overflow-x-hidden">
-      <EditModuleModal isOpen={!!editingModule} onClose={() => setEditingModule(null)} module={editingModule} onSave={handleUpdateModule} />
-      <AddModuleModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} onSave={handleSaveNewModule} nextId={`ASSET-${(data.modules.length + 1).toString().padStart(2, '0')}`} />
+      <EditModuleModal 
+        isOpen={!!editingModule} 
+        onClose={() => setEditingModule(null)} 
+        module={editingModule} 
+        availablePodcasts={podcastModules}
+        onSave={handleUpdateModule} 
+      />
+      <AddModuleModal 
+        isOpen={isAddModalOpen} 
+        onClose={() => setIsAddModalOpen(false)} 
+        availablePodcasts={podcastModules}
+        onSave={handleSaveNewModule} 
+        nextId={`ASSET-${(data.modules.length + 1).toString().padStart(2, '0')}`} 
+      />
       <EditMainBriefingModal isOpen={isEditMainModalOpen} onClose={() => setIsEditMainModalOpen(false)} currentData={{ title: data.missionTitle, video: data.mainVideo, description: data.missionDescription }} onSave={(newData) => { if (!isMaster) return; setData(prev => ({ ...prev, missionTitle: newData.title, mainVideo: newData.video, missionDescription: newData.description })); localStorage.setItem('aeris_main_briefing', JSON.stringify(newData)); toast.success("Briefing atualizado"); }} />
       <AuthTerminal isOpen={isAuthTerminalOpen} onClose={() => setIsAuthTerminalOpen(false)} onSuccess={() => {}} />
 

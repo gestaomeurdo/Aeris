@@ -1,17 +1,19 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { X, Save, FileAudio, FileText, Image as ImageIcon, Video } from 'lucide-react';
+import { X, Save, FileAudio, FileText, Image as ImageIcon, Video, Headphones } from 'lucide-react';
 import { TrainingModule } from '@/types/portal';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface EditModuleModalProps {
   isOpen: boolean;
   onClose: () => void;
   module: TrainingModule | null;
+  availablePodcasts: TrainingModule[];
   onSave: (module: TrainingModule, files: { audio?: File, doc?: File, cover?: File }) => void;
 }
 
-const EditModuleModal = ({ isOpen, onClose, module, onSave }: EditModuleModalProps) => {
+const EditModuleModal = ({ isOpen, onClose, module, availablePodcasts, onSave }: EditModuleModalProps) => {
   const [formData, setFormData] = useState<TrainingModule | null>(null);
   const [files, setFiles] = useState<{ audio?: File, doc?: File, cover?: File }>({});
 
@@ -67,6 +69,28 @@ const EditModuleModal = ({ isOpen, onClose, module, onSave }: EditModuleModalPro
             />
           </div>
 
+          {formData.category === 'module' && (
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-[#00E5FF] uppercase tracking-widest ml-1 flex items-center gap-2">
+                <Headphones size={12} /> Vincular Podcast Existente
+              </label>
+              <Select 
+                value={formData.audioUrl || "none"} 
+                onValueChange={(val) => setFormData({ ...formData, audioUrl: val === "none" ? "" : val })}
+              >
+                <SelectTrigger className="bg-white/[0.03] border-white/10 rounded-2xl py-6 text-white">
+                  <SelectValue placeholder="Selecione um podcast do Audio Hub..." />
+                </SelectTrigger>
+                <SelectContent className="bg-[#020617] border-white/10 text-white">
+                  <SelectItem value="none">Nenhum vinculado</SelectItem>
+                  {availablePodcasts.map(p => (
+                    <SelectItem key={p.dbId} value={p.audioUrl}>{p.title}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
           <div className="space-y-2">
             <label className="text-[10px] font-black text-white/40 uppercase tracking-widest ml-1 flex items-center gap-2">
               <Video size={12} className="text-[#00E5FF]" /> Link do Vídeo (YouTube)
@@ -82,7 +106,7 @@ const EditModuleModal = ({ isOpen, onClose, module, onSave }: EditModuleModalPro
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-white/40 uppercase tracking-widest ml-1">Atualizar Áudio</label>
+              <label className="text-[10px] font-black text-white/40 uppercase tracking-widest ml-1">Substituir Áudio (Upload)</label>
               <div className="relative group">
                 <input 
                   type="file" 
@@ -93,7 +117,7 @@ const EditModuleModal = ({ isOpen, onClose, module, onSave }: EditModuleModalPro
                 <div className="flex items-center gap-3 bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-4 group-hover:border-white/20 transition-all">
                   <FileAudio className="w-4 h-4 text-[#00E5FF]" />
                   <span className="text-[11px] text-white/60 truncate">
-                    {files.audio ? files.audio.name : 'Substituir áudio...'}
+                    {files.audio ? files.audio.name : 'Substituir arquivo mp3...'}
                   </span>
                 </div>
               </div>
@@ -112,24 +136,6 @@ const EditModuleModal = ({ isOpen, onClose, module, onSave }: EditModuleModalPro
                   <FileText className="w-4 h-4 text-amber-500" />
                   <span className="text-[11px] text-white/60 truncate">
                     {files.doc ? files.doc.name : 'Substituir PDF...'}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-2 md:col-span-2">
-              <label className="text-[10px] font-black text-white/40 uppercase tracking-widest ml-1">Atualizar Capa</label>
-              <div className="relative group">
-                <input 
-                  type="file" 
-                  accept="image/*"
-                  onChange={(e) => setFiles({ ...files, cover: e.target.files?.[0] })}
-                  className="absolute inset-0 opacity-0 cursor-pointer z-10"
-                />
-                <div className="flex items-center gap-3 bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-4 group-hover:border-white/20 transition-all">
-                  <ImageIcon className="w-4 h-4 text-purple-500" />
-                  <span className="text-[11px] text-white/60 truncate">
-                    {files.cover ? files.cover.name : 'Substituir imagem...'}
                   </span>
                 </div>
               </div>
