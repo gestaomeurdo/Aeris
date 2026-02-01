@@ -5,6 +5,7 @@ import { X, Headphones, FileText, Play, Pause, ChevronLeft, Video, BookOpen, Dat
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrainingModule } from '@/types/portal';
 import WaveformVisualizer from './WaveformVisualizer';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface MissionModalProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ interface MissionModalProps {
 }
 
 const MissionModal = ({ isOpen, onClose, module, initialView = 'video' }: MissionModalProps) => {
+  const isMobile = useIsMobile();
   const [isPlayingPodcast, setIsPlayingPodcast] = useState(false);
   const [isPlayingAudiobook, setIsPlayingAudiobook] = useState(false);
   const [activeView, setActiveView] = useState<'video' | 'doc' | 'audio'>(initialView);
@@ -161,7 +163,11 @@ const MissionModal = ({ isOpen, onClose, module, initialView = 'video' }: Missio
                                 onClick={() => toggleAudio(isPlayingAudiobook ? 'audiobook' : 'podcast')}
                                 className="w-16 h-16 md:w-20 md:h-20 bg-[#00E5FF] text-black rounded-full flex items-center justify-center hover:scale-105 transition-all shadow-[0_0_30px_rgba(0,229,255,0.4)]"
                               >
-                                { (isPlayingPodcast || isPlayingAudiobook) ? <Pause size={28} md:size={32} fill="black" /> : <Play size={28} md:size={32} fill="black" className="ml-1" /> }
+                                { (isPlayingPodcast || isPlayingAudiobook) ? (
+                                  <Pause size={isMobile ? 28 : 32} fill="black" />
+                                ) : (
+                                  <Play size={isMobile ? 28 : 32} fill="black" className="ml-1" />
+                                ) }
                               </button>
                               <div className="hidden sm:block">
                                 <WaveformVisualizer active={isPlayingPodcast || isPlayingAudiobook} />
@@ -189,7 +195,7 @@ const MissionModal = ({ isOpen, onClose, module, initialView = 'video' }: Missio
                           onClick={() => setActiveView('video')}
                           className={`flex items-center justify-center md:justify-start gap-2 md:gap-3 px-2 md:px-4 py-3 rounded-xl text-[8px] md:text-[9px] font-black uppercase transition-all ${activeView === 'video' ? 'bg-[#00E5FF] text-black shadow-[0_0_20px_rgba(0,229,255,0.4)]' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
                         >
-                          <Video size={12} md:size={14} /> <span className="hidden xs:inline">Video</span>
+                          <Video size={isMobile ? 12 : 14} /> <span className="hidden xs:inline">Video</span>
                         </button>
                       )}
                       {hasDoc && (
@@ -197,7 +203,7 @@ const MissionModal = ({ isOpen, onClose, module, initialView = 'video' }: Missio
                           onClick={() => setActiveView('doc')}
                           className={`flex items-center justify-center md:justify-start gap-2 md:gap-3 px-2 md:px-4 py-3 rounded-xl text-[8px] md:text-[9px] font-black uppercase transition-all ${activeView === 'doc' ? 'bg-[#00E5FF] text-black shadow-[0_0_20px_rgba(0,229,255,0.4)]' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
                         >
-                          <FileText size={12} md:size={14} /> <span className="hidden xs:inline">Manual</span>
+                          <FileText size={isMobile ? 12 : 14} /> <span className="hidden xs:inline">Manual</span>
                         </button>
                       )}
                       {(hasAudio || hasAudiobook) && (
@@ -205,7 +211,7 @@ const MissionModal = ({ isOpen, onClose, module, initialView = 'video' }: Missio
                           onClick={() => setActiveView('audio')}
                           className={`flex items-center justify-center md:justify-start gap-2 md:gap-3 px-2 md:px-4 py-3 rounded-xl text-[8px] md:text-[9px] font-black uppercase transition-all ${activeView === 'audio' ? 'bg-[#00E5FF] text-black shadow-[0_0_20px_rgba(0,229,255,0.4)]' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
                         >
-                          <Headphones size={12} md:size={14} /> <span className="hidden xs:inline">Audio</span>
+                          <Headphones size={isMobile ? 12 : 14} /> <span className="hidden xs:inline">Audio</span>
                         </button>
                       )}
                    </div>
