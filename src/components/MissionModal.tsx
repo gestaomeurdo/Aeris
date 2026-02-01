@@ -103,102 +103,144 @@ const MissionModal = ({ isOpen, onClose, module, initialView = 'video' }: Missio
           initial={{ opacity: 0 }} 
           animate={{ opacity: 1 }} 
           exit={{ opacity: 0 }} 
-          className="fixed inset-0 z-[200] flex flex-col bg-black h-[100dvh] overflow-hidden"
+          className="fixed inset-0 z-[500] flex flex-col bg-[#020617] h-[100dvh] overflow-hidden"
         >
-          {/* HEADER (FIXED) */}
-          <header className="flex-shrink-0 h-16 flex items-center justify-between px-4 border-b border-white/10 bg-[#020617] z-50">
+          {/* HEADER FIXO */}
+          <div className="flex-shrink-0 h-16 flex items-center justify-between px-4 border-b border-white/10 bg-[#020617]">
             <div className="flex items-center gap-3 overflow-hidden">
-              <button onClick={onClose} className="p-2 bg-white/5 rounded-xl active:scale-95 transition-transform">
+              <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-xl transition-colors">
                 <ChevronLeft className="w-5 h-5 text-white/60" />
               </button>
               <div className="overflow-hidden">
                 <span className="block text-[8px] font-mono text-[#00E5FF] uppercase tracking-widest leading-none mb-1">MODULE // {module.id}</span>
-                <h2 className="text-xs font-black text-white uppercase truncate max-w-[200px]">{module.title}</h2>
+                <h2 className="text-xs font-black text-white uppercase truncate max-w-[180px]">{module.title}</h2>
               </div>
             </div>
             <button onClick={onClose} className="p-2 bg-red-500/10 text-red-500 rounded-xl active:scale-95 transition-transform"><X className="w-5 h-5" /></button>
-          </header>
+          </div>
 
-          {/* MAIN CONTENT AREA (SCROLLABLE) */}
-          <main className="flex-1 relative bg-[#020617] overflow-y-auto custom-scrollbar flex flex-col md:flex-row">
-            <div className="flex-1 relative bg-black min-h-0 flex flex-col">
-              {activeView === 'video' && hasVideo ? (
-                <div className="w-full h-full bg-black flex items-center justify-center">
-                  <iframe src={embedUrl} className="w-full h-full aspect-video md:aspect-auto border-none" allowFullScreen />
+          {/* TABS DE NAVEGAÇÃO (FIXO NO TOPO ABAIXO DO HEADER NO MOBILE) */}
+          {isMobile && (
+            <div className="flex-shrink-0 flex p-2 bg-black/40 border-b border-white/5 gap-2">
+              {hasVideo && (
+                <button 
+                  onClick={() => setActiveView('video')} 
+                  className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-[10px] font-black uppercase transition-all ${activeView === 'video' ? 'bg-[#00E5FF] text-black shadow-lg' : 'bg-white/5 text-white/40'}`}
+                >
+                  <Video size={14} /> Vídeo
+                </button>
+              )}
+              {hasDoc && (
+                <button 
+                  onClick={() => setActiveView('doc')} 
+                  className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-[10px] font-black uppercase transition-all ${activeView === 'doc' ? 'bg-[#00E5FF] text-black shadow-lg' : 'bg-white/5 text-white/40'}`}
+                >
+                  <FileText size={14} /> Manual
+                </button>
+              )}
+              {(hasAudio || hasAudiobook) && (
+                <button 
+                  onClick={() => setActiveView('audio')} 
+                  className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-[10px] font-black uppercase transition-all ${activeView === 'audio' ? 'bg-[#00E5FF] text-black shadow-lg' : 'bg-white/5 text-white/40'}`}
+                >
+                  <Headphones size={14} /> Áudio
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* ÁREA DE CONTEÚDO PRINCIPAL (ROLÁVEL) */}
+          <div className="flex-1 relative flex flex-col md:flex-row bg-[#020617] overflow-hidden">
+            <div className="flex-1 relative bg-black min-h-0 flex flex-col overflow-y-auto custom-scrollbar">
+              
+              {activeView === 'video' && hasVideo && (
+                <div className="w-full aspect-video bg-black flex items-center justify-center">
+                  <iframe src={embedUrl} className="w-full h-full border-none" allowFullScreen />
                 </div>
-              ) : activeView === 'doc' && hasDoc ? (
-                <div className="w-full h-full relative flex flex-col">
-                   <iframe src={module.docUrl} className="flex-1 w-full border-none bg-white/[0.05]" />
-                   {isMobile && (
-                     <div className="p-4 bg-black/40 border-t border-white/5">
-                        <a 
-                          href={module.docUrl} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="w-full p-4 bg-[#00E5FF] text-black rounded-2xl shadow-xl flex items-center justify-center gap-2 font-black text-[10px] uppercase"
-                        >
-                          <ExternalLink size={16} /> Abrir PDF em Nova Aba
-                        </a>
-                     </div>
-                   )}
-                </div>
-              ) : activeView === 'audio' && (hasAudio || hasAudiobook) ? (
-                <div className="w-full flex-1 flex flex-col items-center p-6 md:p-12">
-                   {/* Cover Image - Adjusted size for mobile */}
-                   <div className="relative w-32 h-32 md:w-64 md:h-64 mb-8 flex-shrink-0">
-                      <img src={coverUrl} className="w-full h-full object-cover rounded-3xl shadow-2xl border border-white/10" alt="" />
-                      {(isPlayingPodcast || isPlayingAudiobook) && (
-                        <div className="absolute -bottom-2 -right-2 bg-[#00E5FF] p-2 md:p-3 rounded-2xl shadow-[0_0_20px_#00E5FF]">
-                          <Activity size={18} className="text-black animate-pulse" />
-                        </div>
-                      )}
+              )}
+
+              {activeView === 'doc' && hasDoc && (
+                <div className="w-full h-full flex flex-col">
+                   <iframe src={module.docUrl} className="flex-1 w-full min-h-[60vh] border-none bg-white/[0.05]" />
+                   <div className="p-6 bg-black/60 border-t border-white/10">
+                      <a 
+                        href={module.docUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="w-full p-4 bg-[#00E5FF] text-black rounded-2xl shadow-xl flex items-center justify-center gap-3 font-black text-xs uppercase"
+                      >
+                        <ExternalLink size={18} /> Ver Documento em Tela Cheia
+                      </a>
                    </div>
-                   
-                   <div className="text-center space-y-6 w-full max-w-sm">
-                      <div className="space-y-1">
-                        <span className="text-[9px] font-mono text-[#00E5FF] uppercase tracking-widest">{isPlayingAudiobook ? 'AUDIOBOOK' : 'PODCAST'} MODE</span>
-                        <h3 className="text-lg md:text-3xl font-black text-white uppercase tracking-tighter">{module.title}</h3>
+                </div>
+              )}
+
+              {activeView === 'audio' && (hasAudio || hasAudiobook) && (
+                <div className="w-full flex flex-col items-center p-8 md:p-12 space-y-8">
+                   {/* Player Card */}
+                   <div className="w-full max-w-sm bg-white/[0.03] border border-white/10 rounded-[32px] p-6 space-y-6">
+                      <div className="relative aspect-square w-full">
+                        <img src={coverUrl} className="w-full h-full object-cover rounded-2xl shadow-2xl border border-white/10" alt="" />
+                        {(isPlayingPodcast || isPlayingAudiobook) && (
+                          <div className="absolute -bottom-2 -right-2 bg-[#00E5FF] p-3 rounded-xl shadow-[0_0_20px_#00E5FF]">
+                            <Activity size={20} className="text-black animate-pulse" />
+                          </div>
+                        )}
                       </div>
 
-                      <div className="space-y-3">
+                      <div className="text-center space-y-2">
+                         <span className="text-[9px] font-mono text-[#00E5FF] uppercase tracking-widest">{isPlayingAudiobook ? 'AUDIOBOOK' : 'PODCAST'} ACTIVE</span>
+                         <h3 className="text-xl font-black text-white uppercase leading-tight">{module.title}</h3>
+                      </div>
+
+                      <div className="space-y-4">
                         <div className="flex items-center gap-3">
-                           <span className="text-[9px] font-mono text-white/40 w-10 text-left">{formatTime(currentTime)}</span>
+                           <span className="text-[10px] font-mono text-white/40 w-10">{formatTime(currentTime)}</span>
                            <div className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
-                              <motion.div className="h-full bg-[#00E5FF]" animate={{ width: `${(currentTime / duration) * 100 || 0}%` }} transition={{ type: 'spring', bounce: 0, duration: 0.2 }} />
+                              <motion.div className="h-full bg-[#00E5FF]" animate={{ width: `${(currentTime / duration) * 100 || 0}%` }} transition={{ duration: 0.1 }} />
                            </div>
-                           <span className="text-[9px] font-mono text-white/40 w-10 text-right">{formatTime(duration)}</span>
+                           <span className="text-[10px] font-mono text-white/40 w-10">{formatTime(duration)}</span>
                         </div>
                         
                         <div className="flex items-center justify-center gap-6">
                            <button 
                             onClick={() => toggleAudio(hasAudiobook ? 'audiobook' : 'podcast')}
-                            className="w-14 h-14 bg-[#00E5FF] text-black rounded-full flex items-center justify-center active:scale-90 transition-transform shadow-[0_0_20px_rgba(0,229,255,0.3)]"
+                            className="w-16 h-16 bg-[#00E5FF] text-black rounded-full flex items-center justify-center active:scale-95 transition-transform shadow-xl"
                            >
-                              {(isPlayingPodcast || isPlayingAudiobook) ? <Pause size={24} fill="black" /> : <Play size={24} fill="black" className="ml-1" />}
+                              {(isPlayingPodcast || isPlayingAudiobook) ? <Pause size={28} fill="black" /> : <Play size={28} fill="black" className="ml-1" />}
                            </button>
                         </div>
                       </div>
 
-                      {/* Source Selection Mobile */}
-                      {isMobile && (hasAudio && hasAudiobook) && (
-                        <div className="grid grid-cols-2 gap-2 pt-4">
-                           <button onClick={() => toggleAudio('podcast')} className={`p-3 rounded-xl border text-[9px] font-black uppercase tracking-widest transition-all ${isPlayingPodcast ? 'bg-[#00E5FF]/10 border-[#00E5FF] text-[#00E5FF]' : 'bg-white/5 border-white/5 text-white/40'}`}>Podcast</button>
-                           <button onClick={() => toggleAudio('audiobook')} className={`p-3 rounded-xl border text-[9px] font-black uppercase tracking-widest transition-all ${isPlayingAudiobook ? 'bg-purple-500/10 border-purple-500 text-purple-400' : 'bg-white/5 border-white/5 text-white/40'}`}>Audiobook</button>
-                        </div>
-                      )}
+                      {/* Botões de Seleção de Áudio Simplificados */}
+                      <div className="grid grid-cols-2 gap-2">
+                        {hasAudio && (
+                          <button onClick={() => toggleAudio('podcast')} className={`p-3 rounded-xl border text-[9px] font-black uppercase transition-all ${isPlayingPodcast ? 'bg-[#00E5FF]/20 border-[#00E5FF] text-[#00E5FF]' : 'bg-white/5 border-white/5 text-white/40'}`}>Podcast</button>
+                        )}
+                        {hasAudiobook && (
+                          <button onClick={() => toggleAudio('audiobook')} className={`p-3 rounded-xl border text-[9px] font-black uppercase transition-all ${isPlayingAudiobook ? 'bg-purple-500/20 border-purple-500 text-purple-400' : 'bg-white/5 border-white/5 text-white/40'}`}>Audiobook</button>
+                        )}
+                      </div>
+                   </div>
+
+                   {/* Waveform apenas para efeito visual */}
+                   <div className="opacity-40">
+                      <WaveformVisualizer active={isPlayingPodcast || isPlayingAudiobook} />
                    </div>
                 </div>
-              ) : (
-                <div className="flex-1 flex flex-col items-center justify-center text-white/10 gap-4">
+              )}
+
+              {!hasVideo && !hasDoc && !hasAudio && !hasAudiobook && (
+                <div className="flex-1 flex flex-col items-center justify-center text-white/10 gap-4 py-20">
                    <Database size={48} />
                    <span className="text-[10px] font-mono uppercase tracking-[0.5em]">No Data Link</span>
                 </div>
               )}
             </div>
 
-            {/* SIDEBAR (DESKTOP) */}
+            {/* SIDEBAR (DESKTOP APENAS) */}
             {!isMobile && (
-              <aside className="w-80 bg-black/40 border-l border-white/5 p-6 space-y-6">
+              <aside className="w-80 bg-black/40 border-l border-white/5 p-6 flex flex-col gap-6">
                 <h3 className="text-[10px] font-mono font-black text-white/20 uppercase tracking-widest border-b border-white/5 pb-3">Available Sources</h3>
                 <div className="flex flex-col gap-3">
                    {hasVideo && (
@@ -219,33 +261,7 @@ const MissionModal = ({ isOpen, onClose, module, initialView = 'video' }: Missio
                 </div>
               </aside>
             )}
-          </main>
-
-          {/* FOOTER NAVIGATION (MOBILE) */}
-          {isMobile && (
-            <footer className="flex-shrink-0 p-4 bg-[#020617] border-t border-white/10 pb-8">
-              <div className="flex bg-white/5 p-1 rounded-2xl gap-1">
-                {hasVideo && (
-                  <button onClick={() => setActiveView('video')} className={`flex-1 flex flex-col items-center gap-1 py-3 rounded-xl transition-all ${activeView === 'video' ? 'bg-[#00E5FF] text-black' : 'text-white/40'}`}>
-                    <Video size={18} />
-                    <span className="text-[8px] font-black uppercase">Vídeo</span>
-                  </button>
-                )}
-                {hasDoc && (
-                  <button onClick={() => setActiveView('doc')} className={`flex-1 flex flex-col items-center gap-1 py-3 rounded-xl transition-all ${activeView === 'doc' ? 'bg-[#00E5FF] text-black' : 'text-white/40'}`}>
-                    <FileText size={18} />
-                    <span className="text-[8px] font-black uppercase">Manual</span>
-                  </button>
-                )}
-                {(hasAudio || hasAudiobook) && (
-                  <button onClick={() => setActiveView('audio')} className={`flex-1 flex flex-col items-center gap-1 py-3 rounded-xl transition-all ${activeView === 'audio' ? 'bg-[#00E5FF] text-black' : 'text-white/40'}`}>
-                    <Headphones size={18} />
-                    <span className="text-[8px] font-black uppercase">Áudio</span>
-                  </button>
-                )}
-              </div>
-            </footer>
-          )}
+          </div>
 
           <audio ref={audioRef} onTimeUpdate={handleTimeUpdate} onEnded={() => { setIsPlayingPodcast(false); setIsPlayingAudiobook(false); }} />
         </motion.div>
