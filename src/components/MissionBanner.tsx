@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Target, CheckCircle, Lock, ChevronRight, Edit3, Trash2, Unlock, ShieldAlert } from 'lucide-react';
+import { Target, CheckCircle, FileText, Podcast, Video, ChevronRight, Edit3, Trash2, ShieldAlert } from 'lucide-react';
 import { TrainingModule } from '@/types/portal';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -16,7 +16,7 @@ interface MissionBannerProps {
   onToggleLock?: (id: string) => void;
 }
 
-const MissionBanner = ({ mod, index, isMaster, onSelect, onEdit, onDelete, onToggleLock }: MissionBannerProps) => {
+const MissionBanner = ({ mod, index, isMaster, onSelect, onEdit, onDelete }: MissionBannerProps) => {
   const isMobile = useIsMobile();
   const isLocked = mod.locked && !isMaster;
   const isComplete = mod.progress === 100;
@@ -56,15 +56,22 @@ const MissionBanner = ({ mod, index, isMaster, onSelect, onEdit, onDelete, onTog
         </div>
       </div>
 
-      <div className="w-full md:flex-1 space-y-2 relative z-10 px-0 md:px-8 md:border-x md:border-white/5 md:mx-4">
-        <h3 className={`text-base md:text-xl font-black uppercase tracking-tighter leading-tight transition-colors ${isLocked ? 'text-white/30' : 'text-white group-hover:text-[#00E5FF]'}`}>
-          {mod.title}
-        </h3>
-        <div className="flex items-center gap-3">
-          <div className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
-            <motion.div initial={{ width: 0 }} whileInView={{ width: `${mod.progress}%` }} transition={{ duration: 1.5 }} className={`h-full ${isComplete ? 'bg-green-500' : 'bg-amber-500'}`} />
+      {/* Conteúdo Central com Atalhos */}
+      <div className="w-full md:flex-1 flex flex-col md:flex-row items-center gap-4 md:gap-8 px-0 md:px-8 md:border-x md:border-white/5 md:mx-4 relative z-10">
+        <div className="flex-1 space-y-1 w-full text-left">
+          <h3 className={`text-base md:text-xl font-black uppercase tracking-tighter leading-tight transition-colors ${isLocked ? 'text-white/30' : 'text-white group-hover:text-[#00E5FF]'}`}>
+            {mod.title}
+          </h3>
+          <div className="flex items-center gap-3">
+             {/* Indicadores de Mídia Disponível */}
+             <div className="flex items-center gap-2">
+                {mod.docUrl && <FileText size={12} className="text-[#00E5FF]/40" />}
+                {mod.audioUrl && <Podcast size={12} className="text-amber-500/40" />}
+                {mod.videoUrl && <Video size={12} className="text-purple-500/40" />}
+             </div>
+             <div className="flex-1 h-0.5 bg-white/5 rounded-full" />
+             <span className="text-[8px] font-mono text-white/20 uppercase">{mod.type}</span>
           </div>
-          <span className={`text-[9px] font-mono font-bold ${isComplete ? 'text-green-500' : 'text-amber-500'}`}>{mod.progress}%</span>
         </div>
       </div>
 
@@ -77,7 +84,7 @@ const MissionBanner = ({ mod, index, isMaster, onSelect, onEdit, onDelete, onTog
         )}
         <button
           className={`flex items-center gap-2 px-6 py-3 md:px-8 md:py-4 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all ${
-            isLocked ? 'bg-gray-700/50 text-gray-500' : 'bg-amber-500 text-black shadow-lg'
+            isLocked ? 'bg-gray-700/50 text-gray-500' : 'bg-amber-500 text-black shadow-lg hover:scale-105'
           }`}
         >
           {isComplete ? 'COMPLETE' : 'ENGAGE'}

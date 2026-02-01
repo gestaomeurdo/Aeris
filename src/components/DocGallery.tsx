@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, Headphones, Video, ShieldAlert, Edit3, Lock, Trash2, Database } from 'lucide-react';
+import { FileText, Podcast, Video, ShieldAlert, Edit3, Lock, Trash2, Database } from 'lucide-react';
 import { TrainingModule } from '@/types/portal';
 import MissionModal from './MissionModal';
 
@@ -77,7 +77,7 @@ const DocGallery = ({ modules, isMaster, onEdit, onToggleLock, onDelete }: DocGa
                       }`}
                     >
                       <FileText size={14} />
-                      Read Intelligence PDF
+                      Intelligence PDF
                     </button>
 
                     <button 
@@ -89,8 +89,8 @@ const DocGallery = ({ modules, isMaster, onEdit, onToggleLock, onDelete }: DocGa
                         : 'bg-white/5 text-white/10 border border-white/5 cursor-not-allowed'
                       }`}
                     >
-                      <Headphones size={14} />
-                      Audiobook Stream
+                      <Podcast size={14} />
+                      Vincular Podcast
                     </button>
 
                     <button 
@@ -103,7 +103,7 @@ const DocGallery = ({ modules, isMaster, onEdit, onToggleLock, onDelete }: DocGa
                       }`}
                     >
                       <Video size={14} />
-                      Watch Tactical Video
+                      Tactical Video
                     </button>
                   </div>
                 )}
