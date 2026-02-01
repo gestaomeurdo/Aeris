@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Headphones, FileText, Play, Pause, ChevronLeft, Video, BookOpen, Database } from 'lucide-react';
+import { X, Headphones, FileText, Play, Pause, ChevronLeft, Video, BookOpen, Database, Radio } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrainingModule } from '@/types/portal';
 import WaveformVisualizer from './WaveformVisualizer';
@@ -35,7 +35,7 @@ const MissionModal = ({ isOpen, onClose, module }: MissionModalProps) => {
         audioRef.current.pause();
         setIsPlayingPodcast(false);
         setIsPlayingAudiobook(false);
-      } else {
+      } else if (url) {
         audioRef.current.src = url;
         audioRef.current.play().catch(e => console.error("Audio playback blocked:", e));
         setIsPlayingPodcast(type === 'podcast');
@@ -101,18 +101,6 @@ const MissionModal = ({ isOpen, onClose, module }: MissionModalProps) => {
                      </div>
                    )}
 
-                   {hasAudio && (
-                     <div className="p-4 bg-green-500/5 rounded-2xl border border-green-500/10 space-y-4">
-                        <div className="flex items-center gap-2 text-green-500"><Headphones size={14} /><span className="text-[9px] font-black uppercase">Podcast Stream</span></div>
-                        <div className="flex flex-col items-center gap-4">
-                           <button onClick={() => toggleAudio('podcast')} className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-black">
-                             {isPlayingPodcast ? <Pause size={20} fill="black" /> : <Play size={20} fill="black" className="ml-1" />}
-                           </button>
-                           <WaveformVisualizer active={isPlayingPodcast} />
-                        </div>
-                     </div>
-                   )}
-
                    {hasAudiobook && (
                      <div className="p-4 bg-purple-500/5 rounded-2xl border border-purple-500/10 space-y-4">
                         <div className="flex items-center gap-2 text-purple-500"><BookOpen size={14} /><span className="text-[9px] font-black uppercase">Audiobook Narrated</span></div>
@@ -121,6 +109,18 @@ const MissionModal = ({ isOpen, onClose, module }: MissionModalProps) => {
                              {isPlayingAudiobook ? <Pause size={20} fill="black" /> : <Play size={20} fill="black" className="ml-1" />}
                            </button>
                            <WaveformVisualizer active={isPlayingAudiobook} />
+                        </div>
+                     </div>
+                   )}
+
+                   {hasAudio && (
+                     <div className="p-4 bg-green-500/5 rounded-2xl border border-green-500/10 space-y-4">
+                        <div className="flex items-center gap-2 text-green-500"><Radio size={14} /><span className="text-[9px] font-black uppercase">Podcast Discussion</span></div>
+                        <div className="flex flex-col items-center gap-4">
+                           <button onClick={() => toggleAudio('podcast')} className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-black">
+                             {isPlayingPodcast ? <Pause size={20} fill="black" /> : <Play size={20} fill="black" className="ml-1" />}
+                           </button>
+                           <WaveformVisualizer active={isPlayingPodcast} />
                         </div>
                      </div>
                    )}

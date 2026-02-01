@@ -13,7 +13,7 @@ interface AddModuleModalProps {
   isOpen: boolean;
   onClose: () => void;
   availablePodcasts: TrainingModule[];
-  onSave: (newModule: Omit<TrainingModule, 'id' | 'dbId' | 'progress' | 'coverUrl' | 'videoUrl' | 'audiobookUrl'> & { videoUrl: string, audiobookUrl: string }, files: { audio?: File, audiobook?: File, doc?: File, cover?: File }) => void;
+  onSave: (newModule: Omit<TrainingModule, 'id' | 'dbId' | 'progress' | 'coverUrl' | 'videoUrl' | 'audiobookUrl' | 'audioUrl'> & { videoUrl: string, audiobookUrl: string, audioUrl: string }, files: { audio?: File, audiobook?: File, doc?: File, cover?: File }) => void;
   nextId: string;
 }
 
@@ -52,7 +52,7 @@ const AddModuleModal = ({ isOpen, onClose, onSave, nextId, availablePodcasts }: 
       desc: description,
       type,
       category,
-      audioUrl: selectedPodcastUrl, 
+      audioUrl: selectedPodcastUrl === 'none' ? '' : selectedPodcastUrl, 
       audiobookUrl: '',
       docUrl: '', 
       videoUrl,
@@ -112,18 +112,18 @@ const AddModuleModal = ({ isOpen, onClose, onSave, nextId, availablePodcasts }: 
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label className="text-[10px] font-mono font-black text-white/40 uppercase tracking-[0.2em] pl-1">Module Title</Label>
-                    <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="DESIGNATE_IDENTIFIER" className="bg-white/[0.03] border-white/10 rounded-2xl py-6 text-white font-bold" />
+                    <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ex: CAPÍTULO 01 - LIDERANÇA" className="bg-white/[0.03] border-white/10 rounded-2xl py-6 text-white font-bold" />
                   </div>
 
                   <div className="space-y-2">
                     <Label className="text-[10px] font-mono font-black text-white/40 uppercase tracking-[0.2em] pl-1">Briefing Data</Label>
-                    <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="ENTER_TACTICAL_DATA" className="bg-white/[0.03] border-white/10 rounded-2xl py-4 text-white h-24 resize-none" />
+                    <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Resumo técnico..." className="bg-white/[0.03] border-white/10 rounded-2xl py-4 text-white h-24 resize-none" />
                   </div>
 
                   {category === 'module' && (
                     <div className="space-y-2">
                       <Label className="text-[10px] font-mono font-black text-[#00E5FF] uppercase tracking-[0.2em] pl-1 flex items-center gap-2">
-                        <Headphones size={12} /> Vincular Podcast Existente
+                        <Radio size={12} /> Vincular Podcast do Hub
                       </Label>
                       <Select value={selectedPodcastUrl} onValueChange={setSelectedPodcastUrl}>
                         <SelectTrigger className="bg-white/[0.03] border-white/10 rounded-2xl py-6 text-white">
@@ -136,13 +136,12 @@ const AddModuleModal = ({ isOpen, onClose, onSave, nextId, availablePodcasts }: 
                           ))}
                         </SelectContent>
                       </Select>
-                      <p className="text-[9px] text-white/20 mt-1 italic">* Caso queira subir um NOVO podcast, use o campo MP3 abaixo.</p>
                     </div>
                   )}
 
                   <div className="space-y-2">
                     <Label className="text-[10px] font-mono font-black text-white/40 uppercase tracking-[0.2em] pl-1 flex items-center gap-2">
-                      <Video size={12} className="text-[#00E5FF]" /> YouTube Video Link
+                      <Video size={12} className="text-[#00E5FF]" /> Link do Vídeo (YouTube)
                     </Label>
                     <Input value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} placeholder="https://..." className="bg-white/[0.03] border-white/10 rounded-2xl py-6 text-white font-mono text-xs" />
                   </div>
@@ -151,19 +150,19 @@ const AddModuleModal = ({ isOpen, onClose, onSave, nextId, availablePodcasts }: 
                 <div className="grid grid-cols-2 gap-4 p-6 bg-white/[0.02] border border-white/5 rounded-[24px]">
                   <div className="space-y-2">
                     <Label className="flex items-center gap-1 text-[9px] font-mono font-black text-[#00E5FF] uppercase tracking-widest">
-                      <Image className="w-3 h-3" /> Cover
+                      <Image className="w-3 h-3" /> Cover Art
                     </Label>
                     <Input type="file" accept="image/*" onChange={(e) => setCoverFile(e.target.files?.[0] || null)} className="bg-white/[0.03] border-white/10 text-xs rounded-xl" />
                   </div>
                   <div className="space-y-2">
                     <Label className="flex items-center gap-1 text-[9px] font-mono font-black text-[#00E5FF] uppercase tracking-widest">
-                      <FileText className="w-3 h-3" /> PDF Intel
+                      <FileText className="w-3 h-3" /> Manual PDF
                     </Label>
                     <Input type="file" accept=".pdf" onChange={(e) => setDocFile(e.target.files?.[0] || null)} className="bg-white/[0.03] border-white/10 text-xs rounded-xl" />
                   </div>
                   <div className="space-y-2">
-                    <Label className="flex items-center gap-1 text-[9px] font-mono font-black text-amber-500 uppercase tracking-widest">
-                      <Headphones className="w-3 h-3" /> Podcast MP3
+                    <Label className="flex items-center gap-1 text-[9px] font-mono font-black text-green-500 uppercase tracking-widest">
+                      <Radio className="w-3 h-3" /> Novo Podcast Hub
                     </Label>
                     <Input type="file" accept=".mp3" onChange={(e) => setAudioFile(e.target.files?.[0] || null)} className="bg-white/[0.03] border-white/10 text-xs rounded-xl" />
                   </div>
@@ -177,7 +176,7 @@ const AddModuleModal = ({ isOpen, onClose, onSave, nextId, availablePodcasts }: 
               </div>
 
               <button type="submit" className="w-full py-6 bg-[#00E5FF] text-black font-black uppercase text-xs rounded-2xl shadow-[0_0_40px_rgba(0,229,255,0.3)] hover:scale-[1.02] transition-all flex items-center justify-center gap-3">
-                <Upload size={18} /> Confirm Mission Uplink
+                <Upload size={18} /> Confirmar Implantação
               </button>
             </form>
           </motion.div>
