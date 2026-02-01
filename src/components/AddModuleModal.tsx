@@ -125,15 +125,22 @@ const AddModuleModal = ({ isOpen, onClose, onSave, nextId, availablePodcasts }: 
                       <Label className="text-[10px] font-mono font-black text-[#00E5FF] uppercase tracking-[0.2em] pl-1 flex items-center gap-2">
                         <Radio size={12} /> Vincular Podcast do Hub
                       </Label>
-                      <Select value={selectedPodcastUrl} onValueChange={setSelectedPodcastUrl}>
+                      <Select 
+                        value={selectedPodcastUrl || "none"} 
+                        onValueChange={(val) => setSelectedPodcastUrl(val)}
+                      >
                         <SelectTrigger className="bg-white/[0.03] border-white/10 rounded-2xl py-6 text-white">
-                          <SelectValue placeholder="Selecione um podcast..." />
+                          <SelectValue placeholder="Selecione um podcast do Hub..." />
                         </SelectTrigger>
-                        <SelectContent className="bg-[#020617] border-white/10 text-white">
+                        <SelectContent className="bg-[#020617] border-white/10 text-white z-[200]">
                           <SelectItem value="none">Nenhum vinculado</SelectItem>
-                          {availablePodcasts.map(p => (
-                            <SelectItem key={p.dbId} value={p.audioUrl}>{p.title}</SelectItem>
-                          ))}
+                          {availablePodcasts.length > 0 ? (
+                            availablePodcasts.map(p => (
+                              <SelectItem key={p.dbId} value={p.audioUrl}>{p.title}</SelectItem>
+                            ))
+                          ) : (
+                            <div className="p-4 text-[10px] text-white/20 italic">Nenhum podcast disponível no Hub</div>
+                          )}
                         </SelectContent>
                       </Select>
                     </div>

@@ -69,11 +69,15 @@ const EditModuleModal = ({ isOpen, onClose, module, availablePodcasts, onSave }:
               <SelectTrigger className="bg-white/[0.03] border-white/10 rounded-2xl py-6 text-white">
                 <SelectValue placeholder="Selecione um podcast do Hub..." />
               </SelectTrigger>
-              <SelectContent className="bg-[#020617] border-white/10 text-white">
+              <SelectContent className="bg-[#020617] border-white/10 text-white z-[200]">
                 <SelectItem value="none">Nenhum vinculado</SelectItem>
-                {availablePodcasts.map(p => (
-                  <SelectItem key={p.dbId} value={p.audioUrl}>{p.title}</SelectItem>
-                ))}
+                {availablePodcasts.length > 0 ? (
+                  availablePodcasts.map(p => (
+                    <SelectItem key={p.dbId} value={p.audioUrl}>{p.title}</SelectItem>
+                  ))
+                ) : (
+                  <div className="p-4 text-[10px] text-white/20 italic">Nenhum podcast disponível no Hub</div>
+                )}
               </SelectContent>
             </Select>
             <p className="text-[9px] text-white/20 mt-1 italic">* Isso vincula o áudio que já está no Audio Hub a este capítulo.</p>
