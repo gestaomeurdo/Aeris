@@ -77,7 +77,7 @@ const DocGallery = ({ modules, isMaster, onEdit, onToggleLock, onDelete }: DocGa
                       }`}
                     >
                       <FileText size={14} />
-                      Intelligence PDF
+                      TECHNICAL PDF
                     </button>
 
                     <button 
@@ -90,7 +90,7 @@ const DocGallery = ({ modules, isMaster, onEdit, onToggleLock, onDelete }: DocGa
                       }`}
                     >
                       <Podcast size={14} />
-                      Vincular Podcast
+                      PODCAST
                     </button>
 
                     <button 
@@ -103,7 +103,7 @@ const DocGallery = ({ modules, isMaster, onEdit, onToggleLock, onDelete }: DocGa
                       }`}
                     >
                       <Video size={14} />
-                      Tactical Video
+                      TACTICAL VIDEO
                     </button>
                   </div>
                 )}
