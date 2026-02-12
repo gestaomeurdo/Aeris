@@ -13,7 +13,7 @@ const Breadcrumbs = ({ view }: BreadcrumbsProps) => {
       case 'dashboard': return 'GLOBAL_OVERVIEW';
       case 'missions': return 'TACTICAL_MODULES';
       case 'audio': return 'AURAL_INTELLIGENCE';
-      case 'docs': return 'TECHNICAL_RESOURCES';
+      case 'docs': return 'ENLISTED_FORCE_STRUCTURE';
       default: return 'TERMINAL';
     }
   };

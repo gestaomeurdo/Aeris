@@ -29,7 +29,7 @@ const DocGallery = ({ modules, isMaster, onEdit, onToggleLock, onDelete }: DocGa
     <div className="space-y-10">
       <div className="flex items-center gap-4">
         <Database className="w-6 h-6 text-[#00E5FF]" />
-        <h2 className="text-4xl font-black text-white uppercase tracking-tighter">TECHNICAL <span className="font-light text-white/20">RESOURCES</span></h2>
+        <h2 className="text-4xl font-black text-white uppercase tracking-tighter">THE ENLISTED <span className="font-light text-white/20">FORCE STRUCTURE</span></h2>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
