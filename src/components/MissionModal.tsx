@@ -45,6 +45,8 @@ const MissionModal = ({ isOpen, onClose, module, initialView = 'video' }: Missio
         audioRef.current.src = "";
       }
     }
+  }, [isOpen, module, initialView]);
+
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.playbackRate = playbackRate;
