@@ -19,6 +19,7 @@ const MissionModal = ({ isOpen, onClose, module, initialView = 'video' }: Missio
   const [isPlayingPodcast, setIsPlayingPodcast] = useState(false);
   const [isPlayingAudiobook, setIsPlayingAudiobook] = useState(false);
   const [activeView, setActiveView] = useState<'video' | 'doc' | 'audio'>(initialView);
+  const [playbackRate, setPlaybackRate] = useState(1);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   
   const [currentTime, setCurrentTime] = useState(0);
@@ -44,9 +45,20 @@ const MissionModal = ({ isOpen, onClose, module, initialView = 'video' }: Missio
         audioRef.current.src = "";
       }
     }
-  }, [isOpen, module, initialView]);
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.playbackRate = playbackRate;
+    }
+  }, [playbackRate, isPlayingPodcast, isPlayingAudiobook]);
 
   if (!module) return null;
+
+  const handlePlaybackRateChange = () => {
+    const rates = [1, 1.25, 1.5, 2];
+    const currentIndex = rates.indexOf(playbackRate);
+    const nextIndex = (currentIndex + 1) % rates.length;
+    setPlaybackRate(rates[nextIndex]);
+  };
 
   const toggleAudio = (type: 'podcast' | 'audiobook') => {
     if (audioRef.current) {
@@ -203,12 +215,22 @@ const MissionModal = ({ isOpen, onClose, module, initialView = 'video' }: Missio
                         </div>
                         
                         <div className="flex items-center justify-center gap-6">
-                           <button 
+                           <button
+                            onClick={handlePlaybackRateChange}
+                            className="w-12 h-12 bg-white/5 text-[#00E5FF] rounded-full flex items-center justify-center text-[10px] font-black border border-[#00E5FF]/20 hover:bg-[#00E5FF]/10 transition-colors shadow-lg"
+                            title="Velocidade de Reprodução"
+                           >
+                              {playbackRate}x
+                           </button>
+
+                           <button
                             onClick={() => toggleAudio(hasAudiobook ? 'audiobook' : 'podcast')}
                             className="w-16 h-16 bg-[#00E5FF] text-black rounded-full flex items-center justify-center active:scale-95 transition-transform shadow-xl"
                            >
                               {(isPlayingPodcast || isPlayingAudiobook) ? <Pause size={28} fill="black" /> : <Play size={28} fill="black" className="ml-1" />}
                            </button>
+
+                           <div className="w-12" /> {/* Spacer for symmetry */}
                         </div>
                       </div>
 
