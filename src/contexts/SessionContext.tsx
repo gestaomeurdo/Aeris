@@ -15,7 +15,7 @@ interface SessionContextType {
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
 
-const MASTER_KEY = "@mike2026";
+const MASTER_KEY = "mike123";
 const MASTER_USER = "mike";
 
 export const SessionContextProvider = ({ children }: { children: ReactNode }) => {
